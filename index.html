@@ -374,6 +374,10 @@ img{max-width:100%;display:block;}
     <a class="nav-link" href="#reports">Báo cáo</a>
     <a class="nav-link" href="#about">Về chúng tôi</a>
     <a class="nav-link" href="#services">Dịch vụ</a>
+    <a class="nav-link" href="#" id="nav-watchlist-link" style="display:none;">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      Theo dõi giá
+    </a>
     <a class="nav-cta" href="https://zalo.me/g/sxshix010" target="_blank" rel="noopener">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.26 2 11.5c0 2.83 1.3 5.37 3.36 7.14L4.5 22l3.5-1.75C9.2 20.73 10.57 21 12 21c5.52 0 10-4.26 10-9.5S17.52 2 12 2z"/></svg>
       Chat ngay
@@ -654,9 +658,43 @@ img{max-width:100%;display:block;}
 'use strict';
 
 /* ─── CONFIG ─── */
-const TCBS_BASE   = 'https://apipubaws.tcbs.com.vn/stock-insight/v1';
+// ⚙ Anh nhập GitHub owner/repo của mình vào đây để index.html
+//   tự đọc SSI credentials từ ssi-config.json và lấy link public watchlist
+const SITE_GITHUB_OWNER = '';  // ← điền username GitHub của anh
+const SITE_GITHUB_REPO  = '';  // ← điền tên repo
+const SSI_BASE  = 'https://fc-data.ssi.com.vn/api/v2/Market';
 const TICKER_SYMS = ['VCB','HPG','MWG','FPT','VHM','TCB','BID','STB','VIC','GAS','SSI','VND'];
-const PAGE_SIZE   = 9; // báo cáo hiển thị ban đầu và mỗi lần load more
+const PAGE_SIZE   = 9;
+
+/* ─── SSI token cache ─── */
+let _ssiToken=null, _ssiTokenExp=0, _ssiCid='', _ssiCs='';
+async function ssiGetToken(){
+  if(_ssiToken&&Date.now()<_ssiTokenExp) return _ssiToken;
+  if(!_ssiCid||!_ssiCs) return null;
+  try{
+    const r=await fetch(`${SSI_BASE}/AccessToken`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({consumerID:_ssiCid,consumerSecret:_ssiCs}),signal:AbortSignal.timeout(7000)});
+    if(!r.ok) return null;
+    const d=await r.json();
+    _ssiToken=d?.data?.accessToken||d?.accessToken;
+    _ssiTokenExp=Date.now()+22*60*1000;
+    return _ssiToken;
+  }catch(e){return null;}
+}
+async function ssiH(){ const tk=await ssiGetToken(); return tk?{Authorization:`Bearer ${tk}`,Accept:'application/json'}:null; }
+async function loadSsiConfig(){
+  if(!SITE_GITHUB_OWNER||!SITE_GITHUB_REPO) return;
+  try{
+    const r=await fetch(`https://raw.githubusercontent.com/${SITE_GITHUB_OWNER}/${SITE_GITHUB_REPO}/main/ssi-config.json`);
+    if(!r.ok) return;
+    const d=await r.json();
+    if(d.consumerID&&d.consumerSecret){_ssiCid=d.consumerID;_ssiCs=d.consumerSecret;}
+    // Show watchlist link in nav
+    if(d.consumerID){
+      const link=document.getElementById('nav-watchlist-link');
+      if(link){link.href=`/public-watchlist.html?owner=${SITE_GITHUB_OWNER}&repo=${SITE_GITHUB_REPO}`;link.style.display='';}
+    }
+  }catch(e){}
+}
 
 /* ─── STATE ─── */
 let REPORTS = [], tab = 'all', mon = 'all', page = 1, openId = null;
@@ -668,42 +706,36 @@ const base = () => location.origin + location.pathname;
 const fmtNum = n => n.toLocaleString('vi-VN');
 const fmtPt  = n => (n >= 0 ? '+' : '') + n.toLocaleString('vi-VN',{minimumFractionDigits:2,maximumFractionDigits:2});
 
-/* ─────────────────────────── TCBS API ─────────────────────────── */
+/* ─────────────────────────── SSI API ─────────────────────────── */
 
-/* VN-Index: lấy 30 phiên gần nhất để vẽ mini chart */
 async function fetchVNIndex() {
+  const FALLBACK_CHART = [100,98,102,97,105,108,103,110,107,115,112,118];
   try {
-    const to   = Math.floor(Date.now() / 1000);
-    const from = to - 86400 * 40; // ~40 ngày
-    const url  = `${TCBS_BASE}/index/chart?indexId=VNINDEX&resolution=1D&from=${from}&to=${to}`;
-    const res  = await fetch(url, { signal: AbortSignal.timeout(6000) });
-    if (!res.ok) throw new Error('HTTP ' + res.status);
-    const data = await res.json();
-
-    // TCBS trả về { c:[...], o:[...], t:[...] }
-    const closes = data.c || data.data?.map(d => d.close) || [];
-    const last   = closes[closes.length - 1];
-    const prev   = closes[closes.length - 2] || last;
-    if (!last) throw new Error('empty');
-
-    const change  = last - prev;
-    const changePct = (change / prev * 100);
-    const isUp    = change >= 0;
-
-    // Cập nhật hero card
-    document.getElementById('vni-val').textContent = fmtNum(last);
+    const h = await ssiH();
+    if (!h) throw new Error('no-ssi');
+    const r = await fetch(`${SSI_BASE}/IndexIntraday?index=VNINDEX&pageIndex=1&pageSize=20`,{headers:h,signal:AbortSignal.timeout(7000)});
+    if (!r.ok) throw new Error('HTTP '+r.status);
+    const d = await r.json();
+    const rows = d?.data || [];
+    if (!rows.length) throw new Error('empty');
+    const last = rows[0] || rows[rows.length-1];
+    const val  = last.indexValue || last.IndexValue || last.value;
+    const chg  = last.change     || last.Change     || 0;
+    const pct  = last.changePercent || last.ChangePercent || (val ? chg/val*100 : 0);
+    const isUp = chg >= 0;
+    document.getElementById('vni-val').textContent = fmtNum(Math.round(val*100)/100);
     const chgEl = document.getElementById('vni-chg');
-    chgEl.textContent = `${isUp ? '▲' : '▼'} ${fmtPt(change)} (${fmtPt(changePct)}%)`;
+    chgEl.textContent = `${isUp ? '▲' : '▼'} ${fmtPt(chg)} (${fmtPt(pct)}%)`;
     chgEl.className   = `hc-chg ${isUp ? 'up' : 'dn'}`;
-
-    // Vẽ mini chart
-    if (closes.length > 1) drawMiniChart(closes.slice(-30), isUp);
+    const prices = rows.map(x=>x.indexValue||x.IndexValue||x.value).filter(Boolean).reverse();
+    drawMiniChart(prices.length > 1 ? prices : FALLBACK_CHART, isUp);
   } catch(e) {
-    // Fallback tĩnh nếu API lỗi / ngoài giờ
-    document.getElementById('vni-val').textContent = '1.268,54';
-    document.getElementById('vni-chg').textContent = '▲ +8,23 (+0,65%)';
-    document.getElementById('vni-chg').className = 'hc-chg up';
-    drawMiniChart([100,98,102,97,105,108,103,110,107,115,112,118], true);
+    if (e.message !== 'no-ssi') {
+      document.getElementById('vni-val').textContent = '–';
+      document.getElementById('vni-chg').textContent = 'SSI API chưa cấu hình';
+      document.getElementById('vni-chg').className = 'hc-chg neutral';
+    }
+    drawMiniChart(FALLBACK_CHART, true);
   }
 }
 
@@ -726,50 +758,42 @@ function drawMiniChart(arr, isUp) {
     <polyline points="${pts}" stroke="${color}" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/>`;
 }
 
-/* Individual stock prices for ticker tape */
 async function fetchStockPrices() {
   const FALLBACK = [
-    {s:'VN-Index',v:'1.268,54',c:'+8,23',p:'+0,65%',u:1},
-    {s:'VCB',v:'82.000',c:'-500',p:'-0,61%',u:0},{s:'HPG',v:'26.150',c:'+350',p:'+1,36%',u:1},
-    {s:'MWG',v:'62.400',c:'+1.200',p:'+1,96%',u:1},{s:'FPT',v:'126.500',c:'+2.500',p:'+2,02%',u:1},
-    {s:'VHM',v:'38.700',c:'-200',p:'-0,51%',u:0},{s:'TCB',v:'24.600',c:'+300',p:'+1,23%',u:1},
-    {s:'BID',v:'44.900',c:'-100',p:'-0,22%',u:0},{s:'STB',v:'32.100',c:'+500',p:'+1,58%',u:1},
-    {s:'GAS',v:'71.200',c:'+800',p:'+1,14%',u:1},{s:'SSI',v:'28.500',c:'+600',p:'+2,15%',u:1},
-    {s:'VND',v:'19.300',c:'+200',p:'+1,05%',u:1},
+    {s:'VN-Index',v:'–',c:'–',p:'–',u:1},{s:'VCB',v:'–',c:'–',p:'–',u:0},
+    {s:'HPG',v:'–',c:'–',p:'–',u:1},{s:'FPT',v:'–',c:'–',p:'–',u:1},
+    {s:'MWG',v:'–',c:'–',p:'–',u:1},{s:'TCB',v:'–',c:'–',p:'–',u:1},
+    {s:'VHM',v:'–',c:'–',p:'–',u:0},{s:'SSI',v:'–',c:'–',p:'–',u:1},
   ];
-
   try {
+    const h = await ssiH();
+    if (!h) throw new Error('no-ssi');
     const results = await Promise.allSettled(
       TICKER_SYMS.map(sym =>
-        fetch(`${TCBS_BASE}/stock/intraday?ticker=${sym}&page=0&size=1`, {signal:AbortSignal.timeout(5000)})
+        fetch(`${SSI_BASE}/StockPrice?market=HOSE&symbol=${sym}&pageIndex=1&pageSize=1`,{headers:h,signal:AbortSignal.timeout(6000)})
           .then(r => r.json())
           .then(d => {
-            // TCBS intraday: data[0].p = price
-            const item = d?.data?.[0];
-            if (!item) return null;
-            const price  = item.p || item.price;
-            const change = item.cp || 0; // change in price
-            const pct    = item.rcp || (item.cp && item.p ? (item.cp / (item.p - item.cp) * 100) : 0);
+            const it = d?.data?.[0];
+            if (!it) return null;
+            const price  = it.StockPrice??it.currentPrice??it.matchPrice??it.lastPrice;
+            const ref    = it.RefPrice??it.refPrice??it.referencePrice||price;
+            const change = price - ref;
+            const pct    = ref ? change/ref*100 : 0;
             const isUp   = change >= 0;
             return {
-              s: sym,
-              v: fmtNum(price),
-              c: (isUp ? '+' : '') + fmtNum(change),
-              p: `${isUp ? '+' : ''}${pct.toFixed(2)}%`,
+              s: sym, v: fmtNum(price),
+              c: (isUp?'+':'') + fmtNum(change),
+              p: `${isUp?'+':''}${pct.toFixed(2)}%`,
               u: isUp ? 1 : 0
             };
           })
       )
     );
-
-    const items = results
-      .filter(r => r.status === 'fulfilled' && r.value)
-      .map(r => r.value);
-
-    if (items.length < 3) throw new Error('insufficient data');
+    const items = results.filter(r=>r.status==='fulfilled'&&r.value).map(r=>r.value);
+    if (items.length < 3) throw new Error('insufficient');
     buildTicker(items);
   } catch(e) {
-    buildTicker(FALLBACK);
+    buildTicker(e.message === 'no-ssi' ? FALLBACK : FALLBACK);
   }
 }
 
@@ -1006,6 +1030,7 @@ document.addEventListener('keydown', e => {
   if (rid && REPORTS.find(x => x.id === rid)) openReport(rid);
 
   /* 3. Fetch live market data song song */
+  await loadSsiConfig(); // load SSI config + hiện link watchlist nếu có
   fetchVNIndex();
   fetchStockPrices();
 

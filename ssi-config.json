@@ -1,0 +1,6 @@
+{
+  "accessToken": "",
+  "expiresAt": "",
+  "updatedAt": "",
+  "note": "Token này do admin tạo từ trang watchlist.html > Settings. Không chứa consumerID/consumerSecret."
+}
