@@ -3,564 +3,1014 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Đầu Tư Thông Minh Group – Phân Tích Chứng Khoán</title>
-  <meta name="description" content="Báo cáo phân tích chứng khoán Việt Nam từ chuyên gia 20 năm kinh nghiệm."/>
+  <title>Đầu Tư Thông Minh Group – Phân Tích Chứng Khoán Chuyên Sâu</title>
+  <meta name="description" content="Báo cáo phân tích chứng khoán Việt Nam từ chuyên gia 20 năm kinh nghiệm. Cập nhật hàng ngày."/>
+  <!-- Open Graph cho link chia sẻ đẹp -->
+  <meta property="og:title" content="Đầu Tư Thông Minh Group"/>
+  <meta property="og:description" content="Báo cáo phân tích chứng khoán Việt Nam từ chuyên gia 20 năm kinh nghiệm."/>
+  <meta property="og:type" content="website"/>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=Be+Vietnam+Pro:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
   <style>
+/* ─────────────────────────── RESET & VARS ─────────────────────────── */
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
 :root{
   --navy:#08192E;--navy2:#0D2B52;--navy3:#1B4F8A;
   --gold:#C9A84C;--gold2:#E8C86A;
   --green:#1A7A4A;--cream:#F8F5EE;
-  --white:#fff;--gray1:#F2F4F7;--gray2:#D4D8E1;--gray3:#8A94A6;--text:#1A2438;
+  --white:#FFFFFF;--g1:#F2F4F7;--g2:#D4D8E1;--g3:#8A94A6;
+  --text:#1A2438;--r:8px;
+  --ease:cubic-bezier(.4,0,.2,1);
 }
 html{scroll-behavior:smooth;}
-body{font-family:"Be Vietnam Pro",sans-serif;background:var(--cream);color:var(--text);overflow-x:hidden;-webkit-font-smoothing:antialiased;user-select:none;-webkit-user-select:none;}
+body{font-family:'Be Vietnam Pro',sans-serif;background:var(--cream);color:var(--text);overflow-x:hidden;-webkit-font-smoothing:antialiased;user-select:none;-webkit-user-select:none;}
 a{text-decoration:none;color:inherit;}
 button{cursor:pointer;font-family:inherit;}
-.ticker{background:var(--navy);border-bottom:1px solid rgba(201,168,76,.2);height:32px;overflow:hidden;display:flex;align-items:center;}
-.ticker-track{display:flex;white-space:nowrap;animation:tick 45s linear infinite;}
-.ticker:hover .ticker-track{animation-play-state:paused;}
-@keyframes tick{from{transform:translateX(0)}to{transform:translateX(-50%)}}
-.ti{display:inline-flex;align-items:center;gap:7px;padding:0 24px;font-size:11.5px;font-weight:600;color:rgba(255,255,255,.55);border-right:1px solid rgba(255,255,255,.07);}
-.ti .s{color:var(--gold2);font-weight:700;}
-.up{color:#2ECC71;}.dn{color:#E74C3C;}
-.hdr{position:sticky;top:0;z-index:200;background:rgba(8,25,46,.97);backdrop-filter:blur(12px);border-bottom:1px solid rgba(201,168,76,.18);padding:0 40px;height:62px;display:flex;align-items:center;justify-content:space-between;}
-.hdr.scrolled{box-shadow:0 4px 24px rgba(0,0,0,.3);}
+img{max-width:100%;display:block;}
+
+/* ─── FADE-IN ANIMATION ─── */
+.fade-in{opacity:0;transform:translateY(18px);transition:opacity .5s var(--ease),transform .5s var(--ease);}
+.fade-in.visible{opacity:1;transform:translateY(0);}
+
+/* ─────────────────────────── TICKER ─────────────────────────── */
+.ticker-bar{background:var(--navy);border-bottom:1px solid rgba(201,168,76,.22);overflow:hidden;height:32px;display:flex;align-items:center;position:relative;}
+.ticker-bar::after{content:'';position:absolute;right:0;top:0;height:100%;width:60px;background:linear-gradient(to right,transparent,var(--navy));pointer-events:none;z-index:1;}
+.ticker-track{display:flex;animation:ticker 50s linear infinite;white-space:nowrap;}
+.ticker-bar:hover .ticker-track{animation-play-state:paused;}
+@keyframes ticker{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+.ti{display:inline-flex;align-items:center;gap:6px;padding:0 22px;font-size:11.5px;font-weight:600;color:rgba(255,255,255,.58);border-right:1px solid rgba(255,255,255,.07);}
+.ti .sym{color:var(--gold2);font-weight:700;}
+.ti .up{color:#2ECC71;}.ti .dn{color:#E74C3C;}
+.ti .neutral{color:var(--g3);}
+.ticker-loading{font-size:11.5px;color:rgba(255,255,255,.4);padding:0 20px;}
+
+/* ─────────────────────────── HEADER ─────────────────────────── */
+.site-header{position:sticky;top:0;z-index:200;background:rgba(8,25,46,.96);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid rgba(201,168,76,.18);padding:0 40px;height:62px;display:flex;align-items:center;justify-content:space-between;transition:box-shadow .3s var(--ease);}
+.site-header.scrolled{box-shadow:0 2px 24px rgba(0,0,0,.28);}
 .logo{display:flex;align-items:center;gap:12px;}
 .logo-mark{width:38px;height:38px;background:linear-gradient(135deg,var(--gold),var(--gold2));border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
-.logo-name{font-family:"Playfair Display",serif;font-size:15px;font-weight:700;color:var(--white);}
+.logo-name{font-family:'Playfair Display',serif;font-size:15px;font-weight:700;color:var(--white);}
 .logo-sub{font-size:10px;color:var(--gold2);letter-spacing:.1em;text-transform:uppercase;font-weight:500;}
 .nav{display:flex;align-items:center;gap:4px;}
-.nl{padding:7px 14px;border-radius:6px;font-size:13.5px;font-weight:500;color:rgba(255,255,255,.65);transition:all .18s;}
-.nl:hover{color:var(--white);background:rgba(255,255,255,.07);}
-.ncta{margin-left:8px;padding:8px 20px;border-radius:6px;background:var(--gold);color:var(--navy2);font-size:13.5px;font-weight:700;border:none;display:flex;align-items:center;gap:7px;transition:all .18s;}
-.ncta:hover{background:var(--gold2);transform:translateY(-1px);box-shadow:0 4px 14px rgba(201,168,76,.4);}
-.hero{background:var(--navy);position:relative;overflow:hidden;padding:72px 40px 56px;display:flex;align-items:center;min-height:460px;}
-.hero-bg{position:absolute;inset:0;opacity:.05;pointer-events:none;}
+.nav-link{padding:8px 14px;border-radius:6px;font-size:13.5px;font-weight:500;color:rgba(255,255,255,.68);transition:color .18s,background .18s;}
+.nav-link:hover{color:var(--white);background:rgba(255,255,255,.07);}
+.nav-cta{margin-left:6px;padding:9px 20px;border-radius:6px;background:var(--gold);color:var(--navy2);font-size:13.5px;font-weight:700;border:none;transition:background .18s,transform .18s,box-shadow .18s;display:flex;align-items:center;gap:7px;}
+.nav-cta:hover{background:var(--gold2);transform:translateY(-1px);box-shadow:0 4px 14px rgba(201,168,76,.38);}
+
+/* ─────────────────────────── HERO ─────────────────────────── */
+.hero{background:var(--navy);position:relative;overflow:hidden;padding:64px 40px 56px;display:flex;align-items:center;min-height:480px;}
+.hero-bg{position:absolute;inset:0;overflow:hidden;opacity:.055;pointer-events:none;}
 .hero-bg svg{width:100%;height:100%;}
-.hero::after{content:"";position:absolute;top:0;right:0;width:380px;height:100%;background:radial-gradient(ellipse at right,rgba(27,79,138,.35),transparent 70%);pointer-events:none;}
+.hero::after{content:'';position:absolute;top:0;right:0;width:380px;height:100%;background:radial-gradient(ellipse at right,rgba(27,79,138,.32),transparent 70%);pointer-events:none;}
 .hero-content{position:relative;z-index:2;max-width:620px;}
-.eyebrow{display:inline-flex;align-items:center;gap:9px;background:rgba(201,168,76,.1);border:1px solid rgba(201,168,76,.28);border-radius:20px;padding:5px 16px;margin-bottom:22px;}
-.edot{width:6px;height:6px;border-radius:50%;background:var(--gold2);animation:pulse 2s infinite;}
-@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(1.3)}}
-.etext{font-size:11.5px;font-weight:600;color:var(--gold2);letter-spacing:.1em;text-transform:uppercase;}
-.hero h1{font-family:"Playfair Display",serif;font-size:clamp(30px,4vw,52px);font-weight:900;color:var(--white);line-height:1.2;margin-bottom:18px;}
+.hero-eyebrow{display:inline-flex;align-items:center;gap:9px;background:rgba(201,168,76,.11);border:1px solid rgba(201,168,76,.28);border-radius:20px;padding:5px 16px;margin-bottom:20px;animation:fadeDown .6s var(--ease) .1s both;}
+@keyframes fadeDown{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}
+.eyebrow-dot{width:6px;height:6px;border-radius:50%;background:var(--gold2);animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.45;transform:scale(1.35)}}
+.eyebrow-text{font-size:11.5px;font-weight:600;color:var(--gold2);letter-spacing:.1em;text-transform:uppercase;}
+.hero h1{font-family:'Playfair Display',serif;font-size:clamp(30px,3.8vw,50px);font-weight:900;color:var(--white);line-height:1.2;margin-bottom:16px;animation:fadeDown .65s var(--ease) .2s both;}
 .hero h1 em{font-style:italic;color:var(--gold2);}
-.hero-desc{font-size:16px;color:rgba(255,255,255,.6);line-height:1.7;margin-bottom:32px;max-width:500px;font-weight:300;}
-.hero-acts{display:flex;align-items:center;gap:14px;flex-wrap:wrap;}
-.btn-p{display:inline-flex;align-items:center;gap:9px;background:var(--gold);color:var(--navy2);font-size:14px;font-weight:700;padding:12px 24px;border-radius:7px;border:none;transition:all .2s;}
-.btn-p:hover{background:var(--gold2);transform:translateY(-2px);box-shadow:0 6px 20px rgba(201,168,76,.35);}
-.btn-s{display:inline-flex;align-items:center;gap:9px;background:rgba(255,255,255,.07);color:var(--white);font-size:14px;font-weight:600;padding:12px 24px;border-radius:7px;border:1px solid rgba(255,255,255,.15);transition:all .2s;}
-.btn-s:hover{background:rgba(255,255,255,.12);}
-.hero-cards{position:absolute;right:40px;top:50%;transform:translateY(-50%);width:270px;z-index:2;display:flex;flex-direction:column;gap:10px;}
-.hcard{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.11);border-radius:10px;padding:16px 18px;backdrop-filter:blur(8px);}
-.hcard-label{font-size:10.5px;color:rgba(255,255,255,.4);font-weight:500;text-transform:uppercase;letter-spacing:.08em;margin-bottom:5px;}
-.hcard-val{font-family:"Playfair Display",serif;font-size:26px;font-weight:700;color:var(--white);}
-.hcard-chg{font-size:12.5px;font-weight:600;margin-top:2px;}
-.mini-chart{height:35px;margin-top:8px;}
-.strip{background:var(--navy2);border-top:3px solid var(--gold);border-bottom:3px solid var(--gold);padding:18px 40px;display:flex;align-items:center;justify-content:center;}
+.hero-desc{font-size:15.5px;color:rgba(255,255,255,.6);line-height:1.72;margin-bottom:28px;max-width:520px;font-weight:300;animation:fadeDown .65s var(--ease) .3s both;}
+.hero-actions{display:flex;align-items:center;gap:12px;flex-wrap:wrap;animation:fadeDown .65s var(--ease) .4s both;}
+.btn-p{display:inline-flex;align-items:center;gap:8px;background:var(--gold);color:var(--navy2);font-size:14px;font-weight:700;padding:12px 24px;border-radius:7px;border:none;transition:background .18s,transform .18s,box-shadow .18s;}
+.btn-p:hover{background:var(--gold2);transform:translateY(-1px);box-shadow:0 6px 18px rgba(201,168,76,.35);}
+.btn-s{display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.08);color:var(--white);font-size:14px;font-weight:600;padding:12px 24px;border-radius:7px;border:1px solid rgba(255,255,255,.17);transition:background .18s,border-color .18s;}
+.btn-s:hover{background:rgba(255,255,255,.13);border-color:rgba(255,255,255,.28);}
+/* Hero right – live data cards */
+.hero-visual{position:absolute;right:40px;top:50%;transform:translateY(-50%);width:256px;z-index:2;display:flex;flex-direction:column;gap:10px;animation:fadeDown .65s var(--ease) .5s both;}
+.hero-card{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.11);border-radius:10px;padding:14px 16px;backdrop-filter:blur(8px);}
+.hc-label{font-size:10.5px;color:rgba(255,255,255,.42);font-weight:500;text-transform:uppercase;letter-spacing:.08em;margin-bottom:5px;}
+.hc-val{font-family:'Playfair Display',serif;font-size:24px;font-weight:700;color:var(--white);line-height:1;}
+.hc-chg{font-size:12px;font-weight:600;margin-top:3px;}
+.hc-chg.up{color:#2ECC71;}.hc-chg.dn{color:#E74C3C;}.hc-chg.neutral{color:var(--g3);}
+.mini-chart{height:34px;margin-top:8px;}
+/* Loading skeleton */
+.skeleton{background:rgba(255,255,255,.08);border-radius:4px;animation:shimmer 1.4s infinite;}
+@keyframes shimmer{0%,100%{opacity:.5}50%{opacity:1}}
+
+/* ─────────────────────────── STATS STRIP ─────────────────────────── */
+.stats-strip{background:var(--navy2);border-bottom:3px solid var(--gold);padding:16px 40px;display:flex;align-items:center;justify-content:center;}
 .si{flex:1;text-align:center;padding:0 16px;border-right:1px solid rgba(255,255,255,.1);}
 .si:last-child{border-right:none;}
-.sn{font-family:"Playfair Display",serif;font-size:30px;font-weight:700;color:var(--gold2);line-height:1;}
-.sl{font-size:11.5px;color:rgba(255,255,255,.5);margin-top:3px;}
+.si-num{font-family:'Playfair Display',serif;font-size:28px;font-weight:700;color:var(--gold2);line-height:1;}
+.si-label{font-size:11px;color:rgba(255,255,255,.48);margin-top:3px;}
+
+/* ─────────────────────────── SECTION COMMONS ─────────────────────────── */
 .sec{padding:48px 40px;}
 .sec-inner{max-width:1180px;margin:0 auto;}
-.sec-tag{display:inline-flex;align-items:center;gap:7px;font-size:11.5px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--gold);margin-bottom:12px;}
-.sec-tag::before{content:"";width:20px;height:2px;background:var(--gold);border-radius:2px;}
-.sec-title{font-family:"Playfair Display",serif;font-size:clamp(24px,2.8vw,36px);font-weight:800;color:var(--navy2);line-height:1.25;margin-bottom:12px;}
+.sec-tag{display:inline-flex;align-items:center;gap:8px;font-size:11.5px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--gold);margin-bottom:10px;}
+.sec-tag::before{content:'';width:20px;height:2px;background:var(--gold);border-radius:2px;}
+.sec-title{font-family:'Playfair Display',serif;font-size:clamp(24px,2.8vw,36px);font-weight:800;color:var(--navy2);line-height:1.25;margin-bottom:10px;}
 .sec-title em{font-style:italic;color:var(--navy3);}
-.sec-sub{font-size:15px;color:var(--gray3);line-height:1.7;max-width:560px;}
+.sec-sub{font-size:15px;color:var(--g3);line-height:1.7;max-width:560px;}
+
+/* ─────────────────────────── REPORTS (LAYOUT C) ─────────────────────────── */
 .reports-sec{background:var(--white);}
-.rpt-toolbar{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:14px;flex-wrap:wrap;}
-.tab-bar{display:flex;align-items:center;border-bottom:2px solid var(--gray2);}
-.tab-btn{background:none;border:none;font-family:"Be Vietnam Pro",sans-serif;font-size:13.5px;font-weight:600;color:var(--gray3);padding:9px 18px;border-bottom:3px solid transparent;margin-bottom:-2px;transition:color .18s;cursor:pointer;}
+.rep-toolbar{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-bottom:16px;}
+.rep-tabs{display:flex;align-items:center;border-bottom:2px solid var(--g2);}
+.tab-btn{background:none;border:none;font-family:'Be Vietnam Pro',sans-serif;font-size:13.5px;font-weight:600;color:var(--g3);padding:8px 18px;border-bottom:3px solid transparent;margin-bottom:-2px;transition:color .18s,border-color .18s;min-height:44px;}
 .tab-btn:hover{color:var(--navy2);}
 .tab-btn.active{color:var(--navy2);border-bottom-color:var(--gold);}
-.tab-count{display:inline-flex;align-items:center;justify-content:center;background:var(--gray1);color:var(--gray3);font-size:10.5px;font-weight:700;width:19px;height:19px;border-radius:20px;margin-left:5px;}
+.tab-count{display:inline-flex;align-items:center;justify-content:center;background:var(--g1);color:var(--g3);font-size:10px;font-weight:700;width:18px;height:18px;border-radius:20px;margin-left:5px;transition:background .18s,color .18s;}
 .tab-btn.active .tab-count{background:var(--navy2);color:var(--white);}
-.search-box{display:flex;align-items:center;gap:8px;background:var(--gray1);border:1.5px solid var(--gray2);border-radius:7px;padding:7px 12px;}
-.search-box input{background:none;border:none;outline:none;font-family:"Be Vietnam Pro",sans-serif;font-size:13px;color:var(--text);width:200px;}
-.search-box input::placeholder{color:var(--gray3);}
-.filter-bar{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-bottom:12px;}
-.fl-label{font-size:12px;color:var(--gray3);font-weight:500;}
-.fc{background:var(--gray1);border:1.5px solid var(--gray2);border-radius:20px;padding:3px 12px;font-size:12px;font-weight:500;color:var(--gray3);cursor:pointer;transition:all .15s;}
+.search-wrap{display:flex;align-items:center;gap:8px;background:var(--g1);border:1.5px solid var(--g2);border-radius:7px;padding:7px 12px;min-width:200px;transition:border-color .18s;}
+.search-wrap:focus-within{border-color:var(--navy3);}
+.search-wrap input{border:none;background:none;font-family:'Be Vietnam Pro',sans-serif;font-size:13px;color:var(--text);outline:none;width:100%;}
+.search-wrap input::placeholder{color:var(--g3);}
+.filter-row{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-bottom:16px;}
+.fl{font-size:12px;color:var(--g3);font-weight:500;}
+.fc{background:var(--g1);border:1.5px solid var(--g2);border-radius:20px;padding:4px 12px;font-size:12px;font-weight:500;color:var(--g3);cursor:pointer;transition:background .15s,border-color .15s,color .15s;min-height:32px;}
 .fc:hover,.fc.active{background:var(--navy2);border-color:var(--navy2);color:var(--white);}
-.rpt-list{border:1.5px solid var(--gray2);border-radius:10px;overflow:hidden;}
-.rpt-list-hdr{display:grid;grid-template-columns:88px 100px 1fr 70px 100px;background:var(--gray1);padding:9px 16px;border-bottom:1.5px solid var(--gray2);}
-.rpt-list-hdr span{font-size:11px;font-weight:700;color:var(--gray3);text-transform:uppercase;letter-spacing:.06em;}
-.rpt-row{display:grid;grid-template-columns:88px 100px 1fr 70px 100px;padding:10px 16px;border-bottom:1px solid var(--gray1);align-items:center;transition:background .12s;}
-.rpt-row:last-child{border-bottom:none;}
-.rpt-row:hover{background:#F5F8FC;}
-.rpt-date{font-size:12.5px;color:var(--gray3);font-weight:500;}
-.badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:4px;font-size:10.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;white-space:nowrap;}
-.bm{background:#EBF2FC;color:var(--navy3);}
-.bs{background:#E8F7EF;color:var(--green);}
-.rpt-title-cell{font-size:13.5px;font-weight:600;color:var(--navy2);padding:0 12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer;}
-.rpt-title-cell:hover{color:var(--navy3);}
-.rpt-ticker{font-size:11px;font-weight:700;color:var(--gold);background:#FBF6EA;padding:2px 7px;border-radius:4px;letter-spacing:.05em;}
-.rpt-acts{display:flex;align-items:center;gap:6px;justify-content:flex-end;}
-.btn-view{display:inline-flex;align-items:center;gap:5px;background:var(--navy2);color:var(--white);font-size:11.5px;font-weight:600;padding:5px 11px;border-radius:5px;border:none;cursor:pointer;transition:background .15s;white-space:nowrap;}
-.btn-view:hover{background:var(--navy);}
-.btn-copy{display:inline-flex;align-items:center;justify-content:center;background:var(--gray1);color:var(--gray3);border:1.5px solid var(--gray2);border-radius:5px;width:27px;height:27px;cursor:pointer;transition:all .15s;}
-.btn-copy:hover{background:var(--navy3);border-color:var(--navy3);color:var(--white);}
-.rpt-footer-bar{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;border-top:1.5px solid var(--gray2);background:var(--gray1);border-radius:0 0 10px 10px;}
-.rpt-info-txt{font-size:12px;color:var(--gray3);}
-.pager{display:flex;align-items:center;gap:4px;}
-.pg-btn{background:var(--white);border:1.5px solid var(--gray2);border-radius:5px;width:30px;height:30px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:var(--gray3);cursor:pointer;transition:all .15s;}
-.pg-btn:hover{border-color:var(--navy3);color:var(--navy3);}
-.pg-btn.active{background:var(--navy2);border-color:var(--navy2);color:var(--white);}
-.pg-btn:disabled{opacity:.35;cursor:default;pointer-events:none;}
-.empty{padding:40px;text-align:center;color:var(--gray3);font-size:14px;}
+
+/* ── Featured Card ── */
+.rep-featured{background:var(--white);border:1.5px solid var(--g2);border-radius:14px;overflow:hidden;cursor:pointer;transition:border-color .22s,box-shadow .22s;margin-bottom:16px;display:grid;grid-template-columns:5px 1fr;}
+.rep-featured:hover{border-color:var(--navy2);box-shadow:0 8px 32px rgba(13,43,82,.09);}
+.rep-featured-bar{background:linear-gradient(to bottom,var(--navy2),var(--navy3));}
+.rep-featured-bar.stock{background:linear-gradient(to bottom,var(--green),#2EAD6E);}
+.rep-featured-body{padding:22px 24px;display:grid;grid-template-columns:1fr auto;gap:16px;align-items:start;}
+.rfl{display:flex;flex-direction:column;gap:8px;}
+.rfl-top{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.rfl-badge{font-size:11px;font-weight:700;padding:3px 10px;border-radius:4px;letter-spacing:.04em;text-transform:uppercase;}
+.rfl-badge.market{background:#EBF2FC;color:var(--navy3);}
+.rfl-badge.stock{background:#E8F7EF;color:var(--green);}
+.rfl-new{background:rgba(201,168,76,.15);color:var(--gold);font-size:10.5px;font-weight:700;padding:3px 9px;border-radius:4px;letter-spacing:.05em;text-transform:uppercase;border:1px solid rgba(201,168,76,.3);}
+.rfl-date{font-size:12px;color:var(--g3);}
+.rfl-title{font-family:'Playfair Display',serif;font-size:clamp(17px,2vw,22px);font-weight:700;color:var(--navy2);line-height:1.35;}
+.rfl-desc{font-size:14px;color:var(--g3);line-height:1.65;max-width:680px;}
+.rfl-meta{display:flex;align-items:center;gap:12px;}
+.rfl-ticker{font-size:12px;font-weight:700;color:var(--gold);background:#FBF6EA;padding:3px 10px;border-radius:4px;letter-spacing:.06em;}
+.rfl-read{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:700;color:var(--navy3);}
+.rfl-read svg{transition:transform .2s var(--ease);}
+.rep-featured:hover .rfl-read svg{transform:translateX(4px);}
+/* right side – share + view */
+.rfr{display:flex;flex-direction:column;gap:8px;align-items:flex-end;flex-shrink:0;}
+.btn-share{display:inline-flex;align-items:center;gap:6px;background:var(--g1);border:1px solid var(--g2);border-radius:6px;padding:7px 12px;font-size:12px;font-weight:600;color:var(--g3);cursor:pointer;transition:all .15s;white-space:nowrap;}
+.btn-share:hover{background:var(--g2);color:var(--text);}
+.btn-share.copied{background:#E8F7EF;border-color:#B8E6CC;color:var(--green);}
+.btn-view{display:inline-flex;align-items:center;gap:6px;background:var(--navy2);border:none;border-radius:6px;padding:9px 18px;font-size:13px;font-weight:700;color:var(--white);cursor:pointer;transition:background .18s,transform .18s;white-space:nowrap;}
+.btn-view:hover{background:var(--navy3);transform:translateY(-1px);}
+
+/* ── Mini Grid ── */
+.rep-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.rep-mini{background:var(--white);border:1.5px solid var(--g2);border-radius:10px;overflow:hidden;cursor:pointer;transition:border-color .2s,box-shadow .2s,transform .2s;display:grid;grid-template-columns:4px 1fr;}
+.rep-mini:hover{border-color:var(--navy2);box-shadow:0 6px 20px rgba(13,43,82,.08);transform:translateY(-2px);}
+.rep-mini-bar{background:var(--navy2);}
+.rep-mini-bar.stock{background:var(--green);}
+.rep-mini-body{padding:14px 16px;display:flex;flex-direction:column;gap:7px;}
+.rm-top{display:flex;align-items:center;gap:8px;}
+.rm-badge{font-size:10px;font-weight:700;padding:2px 7px;border-radius:3px;letter-spacing:.04em;text-transform:uppercase;}
+.rm-badge.market{background:#EBF2FC;color:var(--navy3);}
+.rm-badge.stock{background:#E8F7EF;color:var(--green);}
+.rm-date{font-size:11px;color:var(--g3);margin-left:auto;}
+.rm-title{font-size:13.5px;font-weight:600;color:var(--navy2);line-height:1.4;}
+.rm-desc{font-size:12px;color:var(--g3);line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+.rm-footer{display:flex;align-items:center;justify-content:space-between;margin-top:2px;}
+.rm-ticker{font-size:11px;font-weight:700;color:var(--gold);background:#FBF6EA;padding:2px 7px;border-radius:3px;}
+.rm-share{background:none;border:none;padding:4px;color:var(--g3);cursor:pointer;border-radius:4px;transition:color .15s,background .15s;}
+.rm-share:hover{color:var(--navy2);background:var(--g1);}
+.rm-share.copied{color:var(--green);}
+
+/* Load more */
+.load-more-wrap{text-align:center;margin-top:20px;}
+.btn-loadmore{display:inline-flex;align-items:center;gap:8px;background:var(--white);border:1.5px solid var(--g2);border-radius:8px;padding:10px 24px;font-size:13.5px;font-weight:600;color:var(--navy2);cursor:pointer;transition:all .18s;}
+.btn-loadmore:hover{background:var(--g1);border-color:var(--navy2);}
+.list-info{font-size:12px;color:var(--g3);margin-top:10px;}
+
+/* ─────────────────────────── ABOUT ─────────────────────────── */
 .about-sec{background:var(--cream);}
-.about-grid{display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center;margin-top:36px;}
-.about-chart-box{background:linear-gradient(135deg,var(--navy2),#2255a0);border-radius:14px;padding:26px;position:relative;overflow:hidden;}
-.about-chart-box::before{content:"";position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23C9A84C' fill-opacity='0.06'%3E%3Cpath d='M0 20L20 0l20 20-20 20z'/%3E%3C/g%3E%3C/svg%3E");}
-.achart-inner{position:relative;z-index:1;}
-.achart-lbl{font-size:11.5px;color:rgba(255,255,255,.45);text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px;}
-.achart-perf{font-family:"Playfair Display",serif;font-size:34px;font-weight:700;color:#2ECC71;margin-bottom:14px;}
-.about-badges-row{display:flex;gap:8px;margin-top:14px;}
-.abi{background:rgba(201,168,76,.13);border:1px solid rgba(201,168,76,.28);border-radius:8px;padding:10px 14px;flex:1;text-align:center;}
-.abi-num{font-family:"Playfair Display",serif;font-size:20px;font-weight:700;color:var(--gold2);line-height:1;}
-.abi-lbl{font-size:9.5px;color:rgba(255,255,255,.45);text-transform:uppercase;letter-spacing:.05em;margin-top:2px;}
-.about-points{list-style:none;margin:22px 0 26px;display:flex;flex-direction:column;gap:14px;}
-.ap{display:flex;gap:13px;align-items:flex-start;}
-.ap-icon{width:36px;height:36px;border-radius:9px;background:linear-gradient(135deg,var(--navy2),var(--navy3));display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;}
-.ap-title{font-size:14px;font-weight:700;color:var(--navy2);margin-bottom:2px;}
-.ap-desc{font-size:13px;color:var(--gray3);line-height:1.6;}
-.team-row{display:flex;gap:10px;}
-.tc{flex:1;background:var(--white);border-radius:9px;padding:14px;border:1.5px solid var(--gray2);text-align:center;transition:all .18s;}
-.tc:hover{border-color:var(--navy3);transform:translateY(-2px);}
-.ta{width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,var(--navy2),var(--navy3));margin:0 auto 8px;display:flex;align-items:center;justify-content:center;font-family:"Playfair Display",serif;font-size:18px;font-weight:700;color:var(--gold2);}
-.tn{font-size:12.5px;font-weight:700;color:var(--navy2);margin-bottom:2px;}
-.tr-role{font-size:11px;color:var(--gray3);line-height:1.5;}
-.texp{display:inline-block;margin-top:5px;background:#EBF2FC;color:var(--navy3);font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px;}
-.srv-sec{background:var(--white);}
-.srv-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:32px;}
-.sc{background:var(--cream);border-radius:12px;border:1.5px solid var(--gray2);padding:26px 22px;transition:all .22s;position:relative;overflow:hidden;}
-.sc::before{content:"";position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--navy2),var(--navy3));transform:scaleX(0);transform-origin:left;transition:transform .28s;}
-.sc:hover{transform:translateY(-4px);box-shadow:0 12px 36px rgba(13,43,82,.09);border-color:var(--navy3);}
-.sc:hover::before{transform:scaleX(1);}
-.sc.gold{background:#FDFAF3;}
-.sc.green{background:#F2FAF6;}
-.sc-icon{width:48px;height:48px;border-radius:11px;background:linear-gradient(135deg,var(--navy2),var(--navy3));display:flex;align-items:center;justify-content:center;margin-bottom:16px;}
-.sc.gold .sc-icon{background:linear-gradient(135deg,#8A6820,var(--gold));}
-.sc.green .sc-icon{background:linear-gradient(135deg,#0D5C36,var(--green));}
-.sc-title{font-family:"Playfair Display",serif;font-size:18px;font-weight:700;color:var(--navy2);margin-bottom:9px;}
-.sc-desc{font-size:13.5px;color:var(--gray3);line-height:1.7;margin-bottom:16px;}
-.sc-feats{list-style:none;display:flex;flex-direction:column;gap:6px;margin-bottom:20px;}
-.sc-feats li{display:flex;align-items:flex-start;gap:8px;font-size:13px;color:var(--text);}
-.sc-feats li::before{content:"";width:5px;height:5px;border-radius:50%;background:var(--gold);flex-shrink:0;margin-top:7px;}
-.sc-link{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:700;color:var(--navy3);transition:gap .18s;}
-.sc:hover .sc-link{gap:10px;}
-.why-sec{background:var(--navy);position:relative;overflow:hidden;}
-.why-sec::before{content:"";position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23C9A84C' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4z'/%3E%3C/g%3E%3C/svg%3E");}
-.why-sec .sec-title{color:var(--white);}
-.why-sec .sec-sub{color:rgba(255,255,255,.5);}
-.why-sec .sec-tag{color:var(--gold2);}
-.why-sec .sec-tag::before{background:var(--gold2);}
-.why-grid{display:grid;grid-template-columns:repeat(4,1fr);border:1px solid rgba(255,255,255,.09);border-radius:12px;overflow:hidden;margin-top:32px;}
-.wi{background:rgba(255,255,255,.04);padding:26px 18px;text-align:center;border-right:1px solid rgba(255,255,255,.07);transition:background .18s;}
+.about-grid{display:grid;grid-template-columns:1fr 1fr;gap:64px;align-items:center;margin-top:40px;}
+.about-chart-box{background:linear-gradient(135deg,var(--navy2),#2255a0);border-radius:14px;overflow:hidden;padding:22px;position:relative;}
+.about-chart-box::before{content:'';position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23C9A84C' fill-opacity='0.06'%3E%3Cpath d='M0 20L20 0l20 20-20 20z'/%3E%3C/g%3E%3C/svg%3E");}
+.about-chart-box svg{position:relative;z-index:1;display:block;}
+.about-chart-footer{position:relative;z-index:1;display:flex;justify-content:space-between;align-items:center;margin-top:12px;}
+.about-chart-label{font-size:12px;color:rgba(255,255,255,.42);}
+.about-chart-perf{font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:#2ECC71;}
+.about-badge-row{display:flex;gap:10px;margin-top:12px;}
+.about-badge{background:var(--gold);border-radius:10px;padding:14px 18px;text-align:center;flex:1;}
+.about-badge-num{font-family:'Playfair Display',serif;font-size:26px;font-weight:900;color:var(--navy2);line-height:1;}
+.about-badge-text{font-size:10px;font-weight:700;color:var(--navy2);text-transform:uppercase;letter-spacing:.05em;margin-top:2px;}
+.about-badge.alt{background:var(--navy2);}
+.about-badge.alt .about-badge-num{color:var(--gold2);}
+.about-badge.alt .about-badge-text{color:rgba(255,255,255,.55);}
+.about-points{list-style:none;margin:20px 0 24px;display:flex;flex-direction:column;gap:14px;}
+.about-point{display:flex;gap:13px;align-items:flex-start;}
+.point-icon{width:38px;height:38px;border-radius:9px;background:linear-gradient(135deg,var(--navy2),var(--navy3));display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;}
+.point-title{font-size:14px;font-weight:700;color:var(--navy2);margin-bottom:2px;}
+.point-desc{font-size:13px;color:var(--g3);line-height:1.55;}
+.team-row{display:flex;gap:10px;margin-top:24px;}
+.team-card{flex:1;background:var(--white);border-radius:9px;padding:14px;border:1.5px solid var(--g2);text-align:center;transition:border-color .2s,transform .2s;}
+.team-card:hover{border-color:var(--navy3);transform:translateY(-2px);}
+.team-avatar{width:46px;height:46px;border-radius:50%;background:linear-gradient(135deg,var(--navy2),var(--navy3));margin:0 auto 8px;display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-size:18px;font-weight:700;color:var(--gold2);}
+.team-name{font-size:12.5px;font-weight:700;color:var(--navy2);margin-bottom:2px;}
+.team-role{font-size:11px;color:var(--g3);line-height:1.4;}
+.team-exp{display:inline-block;margin-top:5px;background:#EBF2FC;color:var(--navy3);font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px;}
+
+/* ─────────────────────────── SERVICES ─────────────────────────── */
+.services-sec{background:var(--white);border-top:1px solid var(--g2);}
+.svc-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:32px;}
+.svc-card{background:var(--g1);border-radius:12px;border:1.5px solid var(--g2);padding:26px 22px;transition:transform .22s,box-shadow .22s,border-color .22s,background .22s;position:relative;overflow:hidden;}
+.svc-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--navy2),var(--navy3));transform:scaleX(0);transform-origin:left;transition:transform .3s var(--ease);}
+.svc-card:hover{transform:translateY(-4px);box-shadow:0 10px 32px rgba(13,43,82,.09);border-color:var(--navy3);background:var(--white);}
+.svc-card:hover::before{transform:scaleX(1);}
+.svc-card.gold .svc-icon{background:linear-gradient(135deg,#8A6820,var(--gold));}
+.svc-card.green .svc-icon{background:linear-gradient(135deg,#0D5C36,var(--green));}
+.svc-icon{width:48px;height:48px;border-radius:11px;background:linear-gradient(135deg,var(--navy2),var(--navy3));display:flex;align-items:center;justify-content:center;margin-bottom:16px;}
+.svc-title{font-family:'Playfair Display',serif;font-size:18px;font-weight:700;color:var(--navy2);margin-bottom:8px;}
+.svc-desc{font-size:13px;color:var(--g3);line-height:1.7;margin-bottom:14px;}
+.svc-features{list-style:none;display:flex;flex-direction:column;gap:6px;margin-bottom:18px;}
+.svc-features li{display:flex;align-items:flex-start;gap:8px;font-size:13px;color:var(--text);}
+.svc-features li::before{content:'';width:5px;height:5px;border-radius:50%;background:var(--gold);flex-shrink:0;margin-top:6px;}
+.svc-link{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:700;color:var(--navy3);transition:gap .2s;}
+.svc-card:hover .svc-link{gap:10px;}
+
+/* ─────────────────────────── WHY US ─────────────────────────── */
+.whyus-sec{background:var(--navy);position:relative;overflow:hidden;}
+.whyus-sec::before{content:'';position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23C9A84C' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4z'/%3E%3C/g%3E%3C/svg%3E");}
+.whyus-sec .sec-title{color:var(--white);}
+.whyus-sec .sec-sub{color:rgba(255,255,255,.5);}
+.whyus-sec .sec-tag{color:var(--gold2);}
+.whyus-sec .sec-tag::before{background:var(--gold2);}
+.wi-grid{display:grid;grid-template-columns:repeat(4,1fr);border:1px solid rgba(255,255,255,.1);border-radius:12px;overflow:hidden;margin-top:32px;}
+.wi{background:rgba(255,255,255,.04);padding:28px 20px;text-align:center;border-right:1px solid rgba(255,255,255,.07);transition:background .2s;}
 .wi:last-child{border-right:none;}
 .wi:hover{background:rgba(255,255,255,.07);}
-.wn{font-family:"Playfair Display",serif;font-size:38px;font-weight:900;color:var(--gold2);line-height:1;margin-bottom:6px;}
-.wn sup{font-size:18px;vertical-align:super;}
-.wl{font-size:13px;color:rgba(255,255,255,.6);line-height:1.5;}
-.trow{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:28px;}
-.tcard{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.09);border-radius:10px;padding:22px;}
-.tq{font-family:"Playfair Display",serif;font-style:italic;font-size:15px;color:rgba(255,255,255,.75);line-height:1.7;margin-bottom:14px;}
-.tq::before{content:"\201C";color:var(--gold2);font-size:30px;line-height:0;vertical-align:-10px;margin-right:3px;}
-.tau{display:flex;align-items:center;gap:10px;}
-.tav{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold2));display:flex;align-items:center;justify-content:center;font-family:"Playfair Display",serif;font-weight:700;color:var(--navy2);font-size:14px;}
-.tan{font-size:13px;font-weight:700;color:var(--white);}
-.tat{font-size:11.5px;color:rgba(255,255,255,.4);}
-.cta-sec{background:linear-gradient(135deg,var(--navy2),#1a3a6e 50%,var(--navy3));padding:56px 40px;text-align:center;position:relative;overflow:hidden;}
-.cta-sec::before{content:"";position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23C9A84C' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4z'/%3E%3C/g%3E%3C/svg%3E");}
-.cta-in{position:relative;z-index:1;max-width:620px;margin:0 auto;}
-.cta-title{font-family:"Playfair Display",serif;font-size:clamp(22px,3vw,36px);font-weight:800;color:var(--white);line-height:1.25;margin-bottom:11px;}
+.wi-num{font-family:'Playfair Display',serif;font-size:38px;font-weight:900;color:var(--gold2);line-height:1;margin-bottom:6px;}
+.wi-num sup{font-size:18px;vertical-align:super;}
+.wi-label{font-size:13px;color:rgba(255,255,255,.58);line-height:1.4;}
+.testimonial-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:24px;}
+.tcard{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:22px;}
+.tquote{font-family:'Playfair Display',serif;font-style:italic;font-size:14.5px;color:rgba(255,255,255,.78);line-height:1.65;margin-bottom:14px;}
+.tquote::before{content:'\201C';color:var(--gold2);font-size:30px;line-height:0;vertical-align:-10px;margin-right:3px;}
+.tauthor{display:flex;align-items:center;gap:10px;}
+.tavatar{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold2));display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-weight:700;color:var(--navy2);font-size:14px;flex-shrink:0;}
+.tname{font-size:13.5px;font-weight:700;color:var(--white);}
+.ttitle{font-size:11.5px;color:rgba(255,255,255,.38);}
+
+/* ─────────────────────────── CTA ─────────────────────────── */
+.cta-sec{background:linear-gradient(135deg,var(--navy2),#1a3a6e 50%,var(--navy3));padding:52px 40px;text-align:center;position:relative;overflow:hidden;}
+.cta-sec::before{content:'';position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23C9A84C' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4z'/%3E%3C/g%3E%3C/svg%3E");}
+.cta-inner{position:relative;z-index:1;max-width:600px;margin:0 auto;}
+.cta-title{font-family:'Playfair Display',serif;font-size:clamp(24px,3vw,36px);font-weight:800;color:var(--white);line-height:1.25;margin-bottom:10px;}
 .cta-title em{font-style:italic;color:var(--gold2);}
 .cta-sub{font-size:15px;color:rgba(255,255,255,.6);margin-bottom:28px;line-height:1.65;}
 .cta-btns{display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap;}
-.cbp{display:inline-flex;align-items:center;gap:8px;background:var(--gold);color:var(--navy2);font-size:15px;font-weight:700;padding:12px 26px;border-radius:7px;border:none;transition:all .2s;}
-.cbp:hover{background:var(--gold2);transform:translateY(-2px);box-shadow:0 6px 22px rgba(201,168,76,.4);}
-.cbs{display:inline-flex;align-items:center;gap:8px;background:transparent;color:var(--white);font-size:14px;font-weight:600;padding:12px 26px;border-radius:7px;border:1.5px solid rgba(255,255,255,.28);transition:all .2s;}
-.cbs:hover{background:rgba(255,255,255,.09);}
-.modal-ov{position:fixed;inset:0;z-index:1000;background:rgba(8,25,46,.88);backdrop-filter:blur(8px);display:none;align-items:center;justify-content:center;padding:20px;}
-.modal-ov.open{display:flex;}
-.modal-box{background:var(--white);border-radius:12px;width:100%;max-width:980px;height:90vh;max-height:900px;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 40px 100px rgba(0,0,0,.5);animation:su .22s ease;}
-@keyframes su{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
-.modal-hdr{background:var(--navy);padding:13px 20px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;border-bottom:2px solid var(--gold);}
-.modal-title{font-family:"Playfair Display",serif;font-size:15px;font-weight:700;color:var(--white);max-width:78%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.modal-close{background:rgba(255,255,255,.1);border:none;cursor:pointer;width:32px;height:32px;border-radius:7px;display:flex;align-items:center;justify-content:center;color:var(--white);transition:background .15s;}
+.btn-cta-p{display:inline-flex;align-items:center;gap:9px;background:var(--gold);color:var(--navy2);font-size:15px;font-weight:700;padding:13px 28px;border-radius:7px;border:none;transition:background .18s,transform .18s,box-shadow .18s;}
+.btn-cta-p:hover{background:var(--gold2);transform:translateY(-2px);box-shadow:0 6px 22px rgba(201,168,76,.38);}
+.btn-cta-s{display:inline-flex;align-items:center;gap:9px;background:transparent;color:var(--white);font-size:14px;font-weight:600;padding:13px 28px;border-radius:7px;border:1.5px solid rgba(255,255,255,.28);transition:background .18s,border-color .18s;}
+.btn-cta-s:hover{background:rgba(255,255,255,.09);border-color:rgba(255,255,255,.45);}
+
+/* ─────────────────────────── MODAL ─────────────────────────── */
+.modal-overlay{position:fixed;inset:0;z-index:1000;background:rgba(8,25,46,.88);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);display:none;align-items:center;justify-content:center;padding:16px;}
+.modal-overlay.open{display:flex;animation:fadeInM .2s var(--ease);}
+@keyframes fadeInM{from{opacity:0}to{opacity:1}}
+.modal-box{background:var(--white);border-radius:12px;width:100%;max-width:960px;height:90vh;max-height:880px;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 32px 80px rgba(0,0,0,.48);animation:slideUp .22s var(--ease);}
+@keyframes slideUp{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:translateY(0)}}
+.modal-header{background:var(--navy);padding:13px 18px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;border-bottom:2px solid var(--gold);}
+.modal-title{font-family:'Playfair Display',serif;font-size:15px;font-weight:700;color:var(--white);max-width:70%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.modal-actions-row{display:flex;align-items:center;gap:8px;}
+.modal-share{display:inline-flex;align-items:center;gap:5px;background:rgba(255,255,255,.1);border:none;color:rgba(255,255,255,.78);font-size:12px;font-weight:600;padding:6px 12px;border-radius:6px;cursor:pointer;transition:all .15s;font-family:inherit;white-space:nowrap;}
+.modal-share:hover{background:rgba(255,255,255,.18);}
+.modal-share.copied{background:rgba(46,204,113,.2);color:#2ECC71;}
+.modal-close{background:rgba(255,255,255,.1);border:none;cursor:pointer;width:32px;height:32px;border-radius:6px;display:flex;align-items:center;justify-content:center;color:var(--white);transition:background .15s;flex-shrink:0;}
 .modal-close:hover{background:rgba(255,255,255,.2);}
-.modal-notice{background:#FBF6EA;border-bottom:1px solid #F0E8CF;padding:6px 20px;font-size:11px;color:#8A7040;flex-shrink:0;display:flex;align-items:center;gap:7px;}
-.modal-viewer{flex:1;background:#e0e0e0;}
+.modal-notice{background:#FBF6EA;border-bottom:1px solid #F0E8CF;padding:7px 18px;font-size:11.5px;color:#8A7040;flex-shrink:0;display:flex;align-items:center;gap:7px;}
+.modal-viewer{flex:1;background:#ddd;}
 .modal-viewer iframe{width:100%;height:100%;border:none;display:block;}
-.float{position:fixed;bottom:22px;right:22px;z-index:500;display:flex;flex-direction:column;align-items:flex-end;gap:8px;}
-.float-tip{background:var(--navy2);color:var(--white);font-size:12.5px;font-weight:500;padding:7px 12px;border-radius:7px;white-space:nowrap;box-shadow:0 4px 14px rgba(0,0,0,.2);animation:fi .5s ease .8s both;position:relative;}
-.float-tip::after{content:"";position:absolute;bottom:-5px;right:22px;border:5px solid transparent;border-bottom:none;border-top-color:var(--navy2);}
-.float-btn{display:flex;align-items:center;gap:9px;background:var(--gold);color:var(--navy2);font-size:13.5px;font-weight:700;padding:11px 20px;border-radius:40px;border:none;box-shadow:0 5px 20px rgba(201,168,76,.4);transition:all .18s;cursor:pointer;animation:fi .5s ease .5s both;position:relative;}
-.float-btn:hover{background:var(--gold2);transform:translateY(-2px);box-shadow:0 8px 28px rgba(201,168,76,.5);}
-@keyframes fi{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
-.fpulse{position:absolute;top:-2px;right:-2px;width:11px;height:11px;border-radius:50%;background:#E74C3C;border:2px solid var(--white);animation:p2 1.5s infinite;}
-@keyframes p2{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.4);opacity:.7}}
-.toast{position:fixed;bottom:76px;left:50%;transform:translateX(-50%);background:var(--navy2);color:var(--white);padding:9px 18px;border-radius:7px;font-size:13px;font-weight:500;z-index:2000;opacity:0;transition:opacity .25s;pointer-events:none;white-space:nowrap;}
-.toast.show{opacity:1;}
-.footer{background:var(--navy);border-top:3px solid var(--gold);padding:40px 40px 26px;}
-.footer-in{max-width:1180px;margin:0 auto;}
-.footer-top{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:36px;margin-bottom:30px;}
-.fbdesc{font-size:13px;color:rgba(255,255,255,.4);line-height:1.7;margin-top:13px;max-width:260px;}
-.fh{font-size:11px;font-weight:700;color:var(--gold2);letter-spacing:.1em;text-transform:uppercase;margin-bottom:13px;}
-.flinks{list-style:none;display:flex;flex-direction:column;gap:8px;}
-.flinks a{font-size:13px;color:rgba(255,255,255,.5);transition:color .15s;}
-.flinks a:hover{color:var(--gold2);}
-.fsoc{display:flex;flex-direction:column;gap:8px;}
-.fsb{display:flex;align-items:center;gap:9px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:7px;padding:9px 13px;color:rgba(255,255,255,.65);font-size:12.5px;font-weight:500;transition:all .15s;}
-.fsb:hover{background:rgba(201,168,76,.12);border-color:var(--gold);color:var(--gold2);}
-.footer-bot{border-top:1px solid rgba(255,255,255,.07);padding-top:20px;display:flex;align-items:flex-start;justify-content:space-between;gap:18px;flex-wrap:wrap;}
-.fcopy{font-size:11.5px;color:rgba(255,255,255,.28);}
-.fdis{font-size:10.5px;color:rgba(255,255,255,.22);max-width:620px;line-height:1.6;}
+
+/* ─────────────────────────── FLOAT CHAT ─────────────────────────── */
+.float-chat{position:fixed;bottom:22px;right:22px;z-index:500;display:flex;flex-direction:column;align-items:flex-end;gap:8px;}
+.float-tooltip{background:var(--navy2);color:var(--white);font-size:12.5px;font-weight:500;padding:7px 12px;border-radius:7px;white-space:nowrap;box-shadow:0 3px 12px rgba(0,0,0,.18);animation:floatIn .5s var(--ease) .8s both;position:relative;}
+.float-tooltip::after{content:'';position:absolute;bottom:-5px;right:22px;border:5px solid transparent;border-bottom:none;border-top-color:var(--navy2);}
+.float-chat-btn{display:flex;align-items:center;gap:9px;background:var(--gold);color:var(--navy2);font-size:13.5px;font-weight:700;padding:11px 20px;border-radius:50px;border:none;box-shadow:0 5px 18px rgba(201,168,76,.42);transition:background .18s,transform .18s,box-shadow .18s;cursor:pointer;animation:floatIn .5s var(--ease) .5s both;position:relative;}
+.float-chat-btn:hover{background:var(--gold2);transform:translateY(-2px);box-shadow:0 8px 24px rgba(201,168,76,.5);}
+@keyframes floatIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+.float-pulse{position:absolute;top:-2px;right:-2px;width:11px;height:11px;border-radius:50%;background:#E74C3C;border:2px solid var(--white);animation:pulse2 1.5s infinite;}
+@keyframes pulse2{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.5);opacity:.65}}
+
+/* ─────────────────────────── FOOTER ─────────────────────────── */
+.site-footer{background:var(--navy);border-top:3px solid var(--gold);padding:40px 40px 28px;}
+.footer-inner{max-width:1180px;margin:0 auto;}
+.footer-top{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:40px;margin-bottom:32px;}
+.footer-brand-desc{font-size:13px;color:rgba(255,255,255,.4);line-height:1.7;margin-top:14px;max-width:260px;}
+.fh{font-size:11px;font-weight:700;color:var(--gold2);letter-spacing:.1em;text-transform:uppercase;margin-bottom:12px;}
+.footer-links{list-style:none;display:flex;flex-direction:column;gap:8px;}
+.footer-links a{font-size:13px;color:rgba(255,255,255,.5);transition:color .18s;}
+.footer-links a:hover{color:var(--gold2);}
+.footer-social{display:flex;flex-direction:column;gap:8px;}
+.social-btn{display:flex;align-items:center;gap:9px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:7px;padding:9px 12px;color:rgba(255,255,255,.65);font-size:13px;font-weight:500;transition:background .18s,border-color .18s,color .18s;}
+.social-btn:hover{background:rgba(201,168,76,.13);border-color:var(--gold);color:var(--gold2);}
+.footer-bottom{border-top:1px solid rgba(255,255,255,.08);padding-top:22px;display:flex;align-items:flex-start;justify-content:space-between;gap:20px;flex-wrap:wrap;}
+.footer-copy{font-size:11.5px;color:rgba(255,255,255,.28);}
+.footer-disc{font-size:11px;color:rgba(255,255,255,.22);max-width:620px;line-height:1.55;}
+
+/* ─────────────────────────── RESPONSIVE ─────────────────────────── */
 @media(max-width:1024px){
   .about-grid{grid-template-columns:1fr;gap:36px;}
-  .about-chart-box{display:none;}
-  .srv-grid{grid-template-columns:1fr 1fr;}
-  .why-grid{grid-template-columns:1fr 1fr;}
-  .footer-top{grid-template-columns:1fr 1fr;gap:24px;}
-  .hero-cards{display:none;}
-  .trow{grid-template-columns:1fr;}
+  .about-vis{display:none;}
+  .svc-grid{grid-template-columns:1fr 1fr;}
+  .wi-grid{grid-template-columns:1fr 1fr;}
+  .footer-top{grid-template-columns:1fr 1fr;gap:28px;}
+  .hero-visual{display:none;}
+  .testimonial-row{grid-template-columns:1fr;}
 }
 @media(max-width:768px){
-  .sec{padding:32px 18px;}
-  .hdr{padding:0 18px;}
-  .strip{padding:14px 18px;flex-wrap:wrap;}
-  .si{min-width:45%;border-right:none;padding:6px;}
-  .srv-grid{grid-template-columns:1fr;}
-  .why-grid{grid-template-columns:1fr 1fr;}
+  .sec{padding:36px 20px;}
+  .site-header{padding:0 16px;}
+  .stats-strip{padding:14px 16px;gap:0;}
+  .si-num{font-size:22px;}
+  .si-label{font-size:10px;}
+  .svc-grid{grid-template-columns:1fr;}
+  .wi-grid{grid-template-columns:1fr 1fr;}
   .nav{display:none;}
-  .hero{padding:52px 18px 40px;}
-  .cta-sec{padding:44px 18px;}
-  .footer{padding:30px 18px 20px;}
-  .footer-top{grid-template-columns:1fr;gap:20px;}
-  .footer-bot{flex-direction:column;}
-  .modal-box{height:95vh;}
-  .float-tip{display:none;}
+  .hero{padding:52px 20px 44px;min-height:auto;}
+  .cta-sec{padding:44px 20px;}
+  .site-footer{padding:32px 20px 22px;}
+  .footer-top{grid-template-columns:1fr;gap:22px;}
+  .footer-bottom{flex-direction:column;}
+  .float-tooltip{display:none;}
   .team-row{flex-direction:column;}
-  .rpt-list-hdr,.rpt-row{grid-template-columns:80px 90px 1fr 60px;}
-  .rpt-acts{display:none;}
+  /* Report layout mobile */
+  .rep-featured-body{grid-template-columns:1fr;gap:12px;}
+  .rfr{flex-direction:row;align-items:center;}
+  .rfl-title{font-size:16px;}
+  .rep-grid{grid-template-columns:1fr;}
+  .modal-box{height:92vh;border-radius:10px;}
+  .modal-title{font-size:13px;max-width:55%;}
+  .modal-share span{display:none;}
+}
+@media(max-width:480px){
+  .hero h1{font-size:26px;}
+  .hero-desc{font-size:14.5px;}
+  .stats-strip{flex-wrap:wrap;}
+  .si{min-width:45%;border-right:none;border-bottom:1px solid rgba(255,255,255,.1);padding:10px 12px;}
+  .si:nth-child(odd){border-right:1px solid rgba(255,255,255,.1);}
 }
   </style>
 </head>
 <body>
 
-<div class="ticker"><div class="ticker-track" id="ticker-track"></div></div>
+<!-- TICKER -->
+<div class="ticker-bar">
+  <div class="ticker-track" id="ticker-track">
+    <span class="ticker-loading">Đang tải dữ liệu thị trường...</span>
+  </div>
+</div>
 
-<header class="hdr" id="hdr">
+<!-- HEADER -->
+<header class="site-header" id="site-header">
   <a href="/" class="logo">
-    <div class="logo-mark"><svg width="20" height="20" viewBox="0 0 22 22" fill="none"><polyline points="2,16 7,9 12,12 17,5 20,8" stroke="#08192E" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-    <div><div class="logo-name">Đầu Tư Thông Minh</div><div class="logo-sub">Research &amp; Analysis Group</div></div>
+    <div class="logo-mark">
+      <svg width="20" height="20" viewBox="0 0 22 22" fill="none">
+        <polyline points="2,16 7,9 12,12 17,5 20,8" stroke="#08192E" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+    <div>
+      <div class="logo-name">Đầu Tư Thông Minh</div>
+      <div class="logo-sub">Research &amp; Analysis Group</div>
+    </div>
   </a>
   <nav class="nav">
-    <a class="nl" href="#reports">Báo cáo</a>
-    <a class="nl" href="#about">Về chúng tôi</a>
-    <a class="nl" href="#services">Dịch vụ</a>
-    <a class="ncta" href="https://zalo.me/g/sxshix010" target="_blank" rel="noopener">
+    <a class="nav-link" href="#reports">Báo cáo</a>
+    <a class="nav-link" href="#about">Về chúng tôi</a>
+    <a class="nav-link" href="#services">Dịch vụ</a>
+    <a class="nav-cta" href="https://zalo.me/g/sxshix010" target="_blank" rel="noopener">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.26 2 11.5c0 2.83 1.3 5.37 3.36 7.14L4.5 22l3.5-1.75C9.2 20.73 10.57 21 12 21c5.52 0 10-4.26 10-9.5S17.52 2 12 2z"/></svg>
       Chat ngay
     </a>
   </nav>
 </header>
 
+<!-- HERO -->
 <section class="hero">
-  <div class="hero-bg"><svg viewBox="0 0 1200 460" preserveAspectRatio="xMidYMid slice"><polyline points="50,360 120,295 200,325 280,242 360,264 440,184 520,210 600,152 680,172 760,120 840,143 920,92 1000,112 1080,68 1160,48" stroke="#C9A84C" stroke-width="1.5" fill="none"/><g fill="#C9A84C" opacity=".3"><rect x="55" y="335" width="13" height="30"/><rect x="105" y="280" width="13" height="46"/><rect x="155" y="305" width="13" height="38"/><rect x="205" y="258" width="13" height="54"/><rect x="255" y="234" width="13" height="60"/><rect x="305" y="206" width="13" height="70"/></g></svg></div>
+  <div class="hero-bg">
+    <svg viewBox="0 0 1200 420" preserveAspectRatio="xMidYMid slice">
+      <polyline points="50,350 120,290 200,315 280,245 360,265 440,190 520,215 600,158 680,175 760,125 840,148 920,95 1000,115 1080,72 1160,52" stroke="#C9A84C" stroke-width="1.5" fill="none"/>
+      <g fill="#C9A84C" opacity=".3">
+        <rect x="58" y="326" width="13" height="30"/><rect x="108" y="274" width="13" height="44"/><rect x="158" y="296" width="13" height="38"/>
+        <rect x="208" y="256" width="13" height="52"/><rect x="258" y="232" width="13" height="60"/><rect x="308" y="204" width="13" height="70"/>
+        <rect x="358" y="222" width="13" height="48"/><rect x="408" y="178" width="13" height="80"/>
+      </g>
+    </svg>
+  </div>
   <div class="hero-content">
-    <div class="eyebrow"><span class="edot"></span><span class="etext">Cập nhật mỗi phiên · HOSE · HNX · UPCOM</span></div>
+    <div class="hero-eyebrow"><span class="eyebrow-dot"></span><span class="eyebrow-text">Cập nhật mỗi phiên · HOSE · HNX · UPCOM</span></div>
     <h1>Nghiên cứu thị trường<br/><em>chứng khoán Việt Nam</em><br/>bởi chuyên gia 20 năm</h1>
-    <p class="hero-desc">Báo cáo phân tích cổ phiếu và thị trường từ đội ngũ chuyên gia thực chiến — minh bạch, độc lập, không xung đột lợi ích.</p>
-    <div class="hero-acts">
-      <a href="#reports" class="btn-p"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Xem báo cáo mới nhất</a>
-      <a href="https://zalo.me/g/sxshix010" target="_blank" rel="noopener" class="btn-s"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.26 2 11.5c0 2.83 1.3 5.37 3.36 7.14L4.5 22l3.5-1.75C9.2 20.73 10.57 21 12 21c5.52 0 10-4.26 10-9.5S17.52 2 12 2z"/></svg>Tham gia nhóm Zalo</a>
+    <p class="hero-desc">Báo cáo phân tích cổ phiếu và thị trường từ đội ngũ chuyên gia thực chiến — minh bạch, độc lập, cập nhật hàng ngày sau đóng cửa phiên.</p>
+    <div class="hero-actions">
+      <a href="#reports" class="btn-p">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        Xem báo cáo mới nhất
+      </a>
+      <a href="https://zalo.me/g/sxshix010" target="_blank" rel="noopener" class="btn-s">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.26 2 11.5c0 2.83 1.3 5.37 3.36 7.14L4.5 22l3.5-1.75C9.2 20.73 10.57 21 12 21c5.52 0 10-4.26 10-9.5S17.52 2 12 2z"/></svg>
+        Tham gia nhóm Zalo
+      </a>
     </div>
   </div>
-  <div class="hero-cards">
-    <div class="hcard"><div class="hcard-label">VN-Index hôm nay</div><div class="hcard-val">1.268,54</div><div class="hcard-chg up">▲ +8,23 pts (+0,65%)</div><div class="mini-chart"><svg viewBox="0 0 260 35" fill="none"><defs><linearGradient id="g1" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#2ECC71" stop-opacity=".35"/><stop offset="100%" stop-color="#2ECC71" stop-opacity="0"/></linearGradient></defs><polyline points="0,32 30,26 60,28 95,17 130,20 165,11 200,14 230,7 260,4" stroke="#2ECC71" stroke-width="1.8" fill="none" stroke-linecap="round"/><path d="M0,32 30,26 60,28 95,17 130,20 165,11 200,14 230,7 260,4 260,35 0,35Z" fill="url(#g1)"/></svg></div></div>
-    <div class="hcard"><div class="hcard-label">Tổng báo cáo</div><div class="hcard-val" id="rpt-hero">–</div><div class="hcard-chg up">đã xuất bản</div></div>
-  </div>
-</section>
-
-<!-- REPORTS – right below hero -->
-<section class="sec reports-sec" id="reports">
-  <div class="sec-inner">
-    <div class="sec-tag">Báo cáo phân tích</div>
-    <h2 class="sec-title" style="margin-bottom:20px">Nghiên cứu mới nhất</h2>
-    <div class="rpt-toolbar">
-      <div class="tab-bar">
-        <button class="tab-btn active" data-tab="all">Tất cả <span class="tab-count" id="cnt-all">0</span></button>
-        <button class="tab-btn" data-tab="market">Thị trường <span class="tab-count" id="cnt-market">0</span></button>
-        <button class="tab-btn" data-tab="stock">Cổ phiếu <span class="tab-count" id="cnt-stock">0</span></button>
-      </div>
-      <div class="search-box">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8A94A6" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-        <input type="text" id="search-inp" placeholder="Tìm mã, tiêu đề báo cáo..." oninput="renderAll()"/>
+  <!-- Live data cards -->
+  <div class="hero-visual">
+    <div class="hero-card">
+      <div class="hc-label">VN-Index</div>
+      <div class="hc-val" id="vni-val"><span class="skeleton" style="display:inline-block;width:110px;height:24px;border-radius:4px;"></span></div>
+      <div class="hc-chg neutral" id="vni-chg">đang tải...</div>
+      <div class="mini-chart">
+        <svg id="vni-chart" viewBox="0 0 260 34" fill="none" preserveAspectRatio="none">
+          <line x1="0" y1="17" x2="260" y2="17" stroke="rgba(255,255,255,.15)" stroke-width="1"/>
+        </svg>
       </div>
     </div>
-    <div class="filter-bar" id="filter-bar"><span class="fl-label">Tháng:</span><button class="fc active" data-month="all">Tất cả</button></div>
-    <div class="rpt-list">
-      <div class="rpt-list-hdr">
-        <span>Ngày</span><span>Loại</span><span style="padding-left:12px">Tiêu đề</span><span>Mã CK</span><span style="text-align:right">Thao tác</span>
-      </div>
-      <div id="rpt-body"><div class="empty">Đang tải...</div></div>
-    </div>
-    <div class="rpt-footer-bar" id="rpt-footer" style="display:none">
-      <div class="rpt-info-txt" id="rpt-info"></div>
-      <div class="pager" id="pager"></div>
+    <div class="hero-card">
+      <div class="hc-label">Báo cáo đã xuất bản</div>
+      <div class="hc-val" id="rpt-hero">–</div>
+      <div class="hc-chg up">báo cáo trong hệ thống</div>
     </div>
   </div>
 </section>
 
-<div class="strip">
-  <div class="si"><div class="sn" id="s-total">0</div><div class="sl">Báo cáo đã xuất bản</div></div>
-  <div class="si"><div class="sn">20<span style="font-size:14px;color:var(--gold)">+</span></div><div class="sl">Năm kinh nghiệm</div></div>
-  <div class="si"><div class="sn" id="s-stocks">0</div><div class="sl">Mã cổ phiếu phân tích</div></div>
-  <div class="si"><div class="sn">1.200<span style="font-size:14px;color:var(--gold)">+</span></div><div class="sl">Thành viên cộng đồng</div></div>
+<!-- STATS -->
+<div class="stats-strip">
+  <div class="si"><div class="si-num" id="s-total">0</div><div class="si-label">Báo cáo đã xuất bản</div></div>
+  <div class="si"><div class="si-num">20<span style="font-size:16px;color:var(--gold)">+</span></div><div class="si-label">Năm kinh nghiệm</div></div>
+  <div class="si"><div class="si-num" id="s-stocks">0</div><div class="si-label">Mã cổ phiếu phân tích</div></div>
+  <div class="si"><div class="si-num">1.200<span style="font-size:16px;color:var(--gold)">+</span></div><div class="si-label">Thành viên cộng đồng</div></div>
 </div>
 
-<section class="sec about-sec" id="about">
+<!-- ════════════ REPORTS ════════════ -->
+<section class="sec reports-sec" id="reports">
+  <div class="sec-inner">
+    <div class="rep-toolbar">
+      <div>
+        <div class="sec-tag">Báo cáo phân tích</div>
+        <h2 class="sec-title" style="margin-bottom:0">Nghiên cứu mới nhất</h2>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+        <div class="search-wrap">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--g3)" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="text" id="search-input" placeholder="Tìm kiếm báo cáo, mã CK..." oninput="renderReports()"/>
+        </div>
+        <div class="rep-tabs">
+          <button class="tab-btn active" data-tab="all">Tất cả <span class="tab-count" id="cnt-all">0</span></button>
+          <button class="tab-btn" data-tab="market">Thị trường <span class="tab-count" id="cnt-market">0</span></button>
+          <button class="tab-btn" data-tab="stock">Cổ phiếu <span class="tab-count" id="cnt-stock">0</span></button>
+        </div>
+      </div>
+    </div>
+    <div class="filter-row" id="filter-row">
+      <span class="fl">Tháng:</span>
+      <button class="fc active" data-month="all">Tất cả</button>
+    </div>
+
+    <!-- Layout C: featured + grid -->
+    <div id="rep-featured-wrap"></div>
+    <div class="rep-grid" id="rep-grid"></div>
+    <div class="load-more-wrap" id="load-more-wrap" style="display:none;">
+      <button class="btn-loadmore" id="btn-loadmore" onclick="loadMore()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+        Xem thêm báo cáo
+      </button>
+    </div>
+    <div class="list-info" id="list-info"></div>
+  </div>
+</section>
+
+<!-- ABOUT -->
+<section class="sec about-sec fade-in" id="about">
   <div class="sec-inner">
     <div class="about-grid">
-      <div class="about-chart-box">
-        <div class="achart-inner">
-          <div class="achart-lbl">Hiệu suất khuyến nghị 2024</div>
-          <div class="achart-perf">+34,7%</div>
-          <svg width="100%" height="130" viewBox="0 0 340 130" fill="none">
-            <defs><linearGradient id="ag" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#C9A84C" stop-opacity=".35"/><stop offset="100%" stop-color="#C9A84C" stop-opacity="0"/></linearGradient></defs>
-            <path d="M10,110 L50,92 L90,97 L130,66 L170,75 L210,42 L250,54 L295,24 L330,14 L330,125 L10,125Z" fill="url(#ag)"/>
-            <polyline points="10,110 50,92 90,97 130,66 170,75 210,42 250,54 295,24 330,14" stroke="#C9A84C" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-            <rect x="18" y="93" width="10" height="21" rx="1" fill="#E74C3C" opacity=".8"/><rect x="55" y="80" width="10" height="19" rx="1" fill="#2ECC71" opacity=".8"/>
-            <rect x="95" y="84" width="10" height="17" rx="1" fill="#E74C3C" opacity=".8"/><rect x="135" y="52" width="10" height="23" rx="1" fill="#2ECC71" opacity=".8"/>
-            <rect x="175" y="60" width="10" height="20" rx="1" fill="#E74C3C" opacity=".8"/><rect x="215" y="28" width="10" height="23" rx="1" fill="#2ECC71" opacity=".8"/>
-            <rect x="255" y="40" width="10" height="21" rx="1" fill="#2ECC71" opacity=".8"/>
-            <g stroke="rgba(255,255,255,.08)" stroke-width="1"><line x1="10" y1="25" x2="330" y2="25"/><line x1="10" y1="60" x2="330" y2="60"/><line x1="10" y1="95" x2="330" y2="95"/></g>
+      <div class="about-vis">
+        <div class="about-chart-box">
+          <svg width="100%" viewBox="0 0 320 185" fill="none">
+            <defs><linearGradient id="ag" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#C9A84C" stop-opacity=".38"/><stop offset="100%" stop-color="#C9A84C" stop-opacity="0"/></linearGradient></defs>
+            <path d="M16,165 L56,145 L96,150 L136,115 L176,125 L216,80 L256,95 L296,52 L316,62 L316,182 L16,182Z" fill="url(#ag)"/>
+            <polyline points="16,165 56,145 96,150 136,115 176,125 216,80 256,95 296,52 316,62" stroke="#C9A84C" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+            <rect x="24" y="151" width="11" height="21" rx="1" fill="#E74C3C" opacity=".8"/>
+            <rect x="64" y="131" width="11" height="21" rx="1" fill="#2ECC71" opacity=".8"/>
+            <rect x="104" y="137" width="11" height="19" rx="1" fill="#E74C3C" opacity=".8"/>
+            <rect x="144" y="100" width="11" height="23" rx="1" fill="#2ECC71" opacity=".8"/>
+            <rect x="184" y="110" width="11" height="21" rx="1" fill="#E74C3C" opacity=".8"/>
+            <rect x="224" y="65" width="11" height="24" rx="1" fill="#2ECC71" opacity=".8"/>
+            <rect x="264" y="80" width="11" height="21" rx="1" fill="#2ECC71" opacity=".8"/>
+            <g stroke="rgba(255,255,255,.08)" stroke-width="1">
+              <line x1="16" y1="58" x2="316" y2="58"/><line x1="16" y1="98" x2="316" y2="98"/>
+              <line x1="16" y1="140" x2="316" y2="140"/><line x1="16" y1="182" x2="316" y2="182"/>
+            </g>
           </svg>
-          <div class="about-badges-row">
-            <div class="abi"><div class="abi-num">20<span style="font-size:12px">+</span></div><div class="abi-lbl">Năm kinh nghiệm</div></div>
-            <div class="abi"><div class="abi-num">78%</div><div class="abi-lbl">Tỷ lệ sinh lời</div></div>
-            <div class="abi"><div class="abi-num">500<span style="font-size:12px">+</span></div><div class="abi-lbl">Báo cáo</div></div>
+          <div class="about-chart-footer">
+            <span class="about-chart-label">Hiệu suất khuyến nghị 2024</span>
+            <span class="about-chart-perf">+34,7%</span>
           </div>
+        </div>
+        <div class="about-badge-row">
+          <div class="about-badge"><div class="about-badge-num">20<span style="font-size:14px">+</span></div><div class="about-badge-text">Năm kinh nghiệm</div></div>
+          <div class="about-badge alt"><div class="about-badge-num">78<span style="font-size:14px">%</span></div><div class="about-badge-text">Tỷ lệ sinh lời</div></div>
+          <div class="about-badge alt"><div class="about-badge-num">500<span style="font-size:14px">+</span></div><div class="about-badge-text">Báo cáo</div></div>
         </div>
       </div>
       <div>
         <div class="sec-tag">Về chúng tôi</div>
         <h2 class="sec-title">Đội ngũ chuyên gia<br/><em>dày dạn thực chiến</em></h2>
-        <p class="sec-sub">Đầu Tư Thông Minh Group được thành lập bởi các nhà đầu tư chuyên nghiệp, chuyên viên phân tích và quản lý quỹ đã trải qua nhiều chu kỳ của thị trường từ những năm 2000.</p>
+        <p class="sec-sub">Đầu Tư Thông Minh Group được thành lập bởi các nhà đầu tư chuyên nghiệp, chuyên viên phân tích và quản lý quỹ đã trải qua nhiều chu kỳ thị trường Việt Nam từ những năm 2000.</p>
         <ul class="about-points">
-          <li class="ap"><div class="ap-icon"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div><div><div class="ap-title">Độc lập &amp; Minh bạch</div><div class="ap-desc">Không nhận phí từ doanh nghiệp niêm yết. Toàn bộ phân tích dựa trên dữ liệu thực và phương pháp công khai.</div></div></li>
-          <li class="ap"><div class="ap-icon"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div><div><div class="ap-title">Cập nhật mỗi phiên giao dịch</div><div class="ap-desc">Báo cáo thị trường phát hành trong vòng 2 giờ sau đóng cửa phiên giao dịch.</div></div></li>
-          <li class="ap"><div class="ap-icon"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></div><div><div class="ap-title">Kỹ thuật &amp; Cơ bản kết hợp</div><div class="ap-desc">Mỗi khuyến nghị có định giá DCF/P/E, phân tích kỹ thuật, dòng tiền và bối cảnh vĩ mô.</div></div></li>
+          <li class="about-point"><div class="point-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div><div><div class="point-title">Độc lập &amp; Minh bạch</div><div class="point-desc">Không nhận phí từ doanh nghiệp niêm yết. Phân tích dựa hoàn toàn trên dữ liệu thực và phương pháp luận công khai.</div></div></li>
+          <li class="about-point"><div class="point-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div><div><div class="point-title">Cập nhật mỗi phiên giao dịch</div><div class="point-desc">Báo cáo thị trường phát hành trong vòng 2 giờ sau đóng cửa. Phân tích cổ phiếu theo sự kiện và KQKD mới nhất.</div></div></li>
+          <li class="about-point"><div class="point-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></div><div><div class="point-title">Phân tích kỹ thuật &amp; cơ bản kết hợp</div><div class="point-desc">Mỗi khuyến nghị có đầy đủ định giá DCF/P/E, phân tích kỹ thuật, dòng tiền ngoại và bối cảnh vĩ mô.</div></div></li>
         </ul>
         <div class="team-row">
-          <div class="tc"><div class="ta">T</div><div class="tn">Chuyên gia Phân tích</div><div class="tr-role">Phân tích cơ bản &amp; định giá</div><span class="texp">20+ năm</span></div>
-          <div class="tc"><div class="ta">K</div><div class="tn">Chuyên gia Kỹ thuật</div><div class="tr-role">Kỹ thuật &amp; dòng tiền</div><span class="texp">15+ năm</span></div>
-          <div class="tc"><div class="ta">V</div><div class="tn">Chuyên gia Vĩ mô</div><div class="tr-role">Ngành &amp; danh mục</div><span class="texp">18+ năm</span></div>
+          <div class="team-card"><div class="team-avatar">T</div><div class="team-name">Chuyên gia Phân tích</div><div class="team-role">Phân tích cơ bản &amp; định giá</div><span class="team-exp">20+ năm</span></div>
+          <div class="team-card"><div class="team-avatar">K</div><div class="team-name">Chuyên gia Kỹ thuật</div><div class="team-role">Phân tích kỹ thuật &amp; dòng tiền</div><span class="team-exp">15+ năm</span></div>
+          <div class="team-card"><div class="team-avatar">V</div><div class="team-name">Chuyên gia Vĩ mô</div><div class="team-role">Phân tích ngành &amp; danh mục</div><span class="team-exp">18+ năm</span></div>
         </div>
       </div>
     </div>
   </div>
 </section>
 
-<section class="sec srv-sec" id="services">
+<!-- SERVICES -->
+<section class="sec services-sec fade-in" id="services">
   <div class="sec-inner">
-    <div style="text-align:center"><div class="sec-tag" style="justify-content:center">Dịch vụ</div><h2 class="sec-title" style="text-align:center">Giải pháp đầu tư<br/><em>cho từng nhu cầu</em></h2></div>
-    <div class="srv-grid">
-      <div class="sc"><div class="sc-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="1.8"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg></div><div class="sc-title">Báo cáo Phân tích</div><div class="sc-desc">Báo cáo thị trường hằng ngày và phân tích chuyên sâu cổ phiếu với định giá và khuyến nghị cụ thể.</div><ul class="sc-feats"><li>Báo cáo thị trường mỗi phiên</li><li>Phân tích cổ phiếu theo sự kiện &amp; KQKD</li><li>Báo cáo ngành &amp; vĩ mô hàng tuần</li><li>Theo dõi danh mục khuyến nghị</li></ul><a href="#reports" class="sc-link">Xem báo cáo <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a></div>
-      <div class="sc gold"><div class="sc-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.8"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg></div><div class="sc-title">Tư vấn Đầu tư</div><div class="sc-desc">Tư vấn 1-1 với chuyên gia về chiến lược xây dựng danh mục phù hợp khẩu vị rủi ro và mục tiêu tài chính.</div><ul class="sc-feats"><li>Xây dựng danh mục cá nhân hoá</li><li>Đánh giá &amp; tối ưu danh mục hiện tại</li><li>Cảnh báo rủi ro và điều chỉnh cơ cấu</li><li>Tư vấn qua Zalo hoặc gặp trực tiếp</li></ul><a href="https://zalo.me/g/sxshix010" target="_blank" rel="noopener" class="sc-link">Liên hệ tư vấn <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a></div>
-      <div class="sc green"><div class="sc-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.8"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div><div class="sc-title">Quản lý Tài khoản</div><div class="sc-desc">Uỷ quyền quản lý tài khoản với báo cáo hiệu suất minh bạch hàng tuần và giới hạn rủi ro được cam kết.</div><ul class="sc-feats"><li>Quản lý theo chiến lược thoả thuận</li><li>Báo cáo hiệu suất &amp; giao dịch hàng tuần</li><li>Giới hạn drawdown tối đa cam kết</li><li>Phí quản lý theo kết quả thực tế</li></ul><a href="https://zalo.me/g/sxshix010" target="_blank" rel="noopener" class="sc-link">Tìm hiểu thêm <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a></div>
+    <div style="text-align:center;"><div class="sec-tag" style="justify-content:center;">Dịch vụ</div><h2 class="sec-title" style="text-align:center;">Giải pháp đầu tư<br/><em>cho từng nhu cầu</em></h2></div>
+    <div class="svc-grid">
+      <div class="svc-card">
+        <div class="svc-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="1.8"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg></div>
+        <div class="svc-title">Báo cáo Phân tích</div>
+        <div class="svc-desc">Báo cáo thị trường hằng ngày và phân tích cổ phiếu chuyên sâu với luận điểm đầu tư, định giá và khuyến nghị cụ thể.</div>
+        <ul class="svc-features"><li>Báo cáo thị trường mỗi phiên</li><li>Phân tích cổ phiếu theo sự kiện</li><li>Báo cáo ngành &amp; vĩ mô hàng tuần</li><li>Theo dõi danh mục khuyến nghị</li></ul>
+        <a href="#reports" class="svc-link">Xem báo cáo <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+      </div>
+      <div class="svc-card gold">
+        <div class="svc-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.8"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+        <div class="svc-title">Tư vấn Đầu tư</div>
+        <div class="svc-desc">Tư vấn 1-1 với chuyên gia về chiến lược danh mục, lựa chọn cổ phiếu phù hợp khẩu vị rủi ro và kế hoạch dài hạn.</div>
+        <ul class="svc-features"><li>Xây dựng danh mục cá nhân hoá</li><li>Đánh giá &amp; tối ưu danh mục hiện tại</li><li>Cảnh báo rủi ro và điều chỉnh cơ cấu</li><li>Tư vấn qua Zalo hoặc gặp trực tiếp</li></ul>
+        <a href="https://zalo.me/g/sxshix010" target="_blank" rel="noopener" class="svc-link">Liên hệ tư vấn <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+      </div>
+      <div class="svc-card green">
+        <div class="svc-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.8"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
+        <div class="svc-title">Quản lý Tài khoản</div>
+        <div class="svc-desc">Uỷ quyền quản lý tài khoản cho chuyên gia. Giao dịch theo chiến lược thoả thuận, báo cáo hiệu suất minh bạch hàng tuần.</div>
+        <ul class="svc-features"><li>Quản lý tài khoản theo chiến lược riêng</li><li>Báo cáo hiệu suất &amp; giao dịch hàng tuần</li><li>Giới hạn drawdown tối đa cam kết</li><li>Phí quản lý theo kết quả thực tế</li></ul>
+        <a href="https://zalo.me/g/sxshix010" target="_blank" rel="noopener" class="svc-link">Tìm hiểu thêm <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+      </div>
     </div>
   </div>
 </section>
 
-<section class="sec why-sec">
+<!-- WHY US -->
+<section class="sec whyus-sec fade-in">
   <div class="sec-inner">
     <div class="sec-tag">Tại sao chọn chúng tôi</div>
     <h2 class="sec-title">Con số nói lên tất cả</h2>
-    <p class="sec-sub">Hơn hai thập kỷ tích luỹ kinh nghiệm, đồng hành cùng hàng nghìn nhà đầu tư qua nhiều chu kỳ thị trường.</p>
-    <div class="why-grid">
-      <div class="wi"><div class="wn">20<sup>+</sup></div><div class="wl">Năm kinh nghiệm thực chiến</div></div>
-      <div class="wi"><div class="wn">500<sup>+</sup></div><div class="wl">Báo cáo phân tích đã xuất bản</div></div>
-      <div class="wi"><div class="wn">1.200<sup>+</sup></div><div class="wl">Thành viên Zalo &amp; Facebook</div></div>
-      <div class="wi"><div class="wn">78<sup>%</sup></div><div class="wl">Tỷ lệ khuyến nghị sinh lời dương</div></div>
+    <p class="sec-sub">Hơn hai thập kỷ tích luỹ kinh nghiệm, đội ngũ đã đồng hành cùng hàng nghìn nhà đầu tư qua nhiều chu kỳ thị trường.</p>
+    <div class="wi-grid">
+      <div class="wi"><div class="wi-num">20<sup>+</sup></div><div class="wi-label">Năm kinh nghiệm thực chiến</div></div>
+      <div class="wi"><div class="wi-num">500<sup>+</sup></div><div class="wi-label">Báo cáo phân tích xuất bản</div></div>
+      <div class="wi"><div class="wi-num">1.200<sup>+</sup></div><div class="wi-label">Thành viên Zalo &amp; Facebook</div></div>
+      <div class="wi"><div class="wi-num">78<sup>%</sup></div><div class="wi-label">Tỷ lệ khuyến nghị sinh lời</div></div>
     </div>
-    <div class="trow">
-      <div class="tcard"><div class="tq">Báo cáo phân tích rất chi tiết, có đầy đủ định giá và luận điểm. Tôi đã theo dõi 3 năm và thực sự cải thiện được kết quả đầu tư của mình.</div><div class="tau"><div class="tav">H</div><div><div class="tan">Nguyễn Văn H.</div><div class="tat">Nhà đầu tư cá nhân · Hà Nội</div></div></div></div>
-      <div class="tcard"><div class="tq">Dịch vụ quản lý tài khoản rất minh bạch. Hàng tuần nhận báo cáo đầy đủ. Thực sự yên tâm khi giao phó cho đội ngũ chuyên nghiệp.</div><div class="tau"><div class="tav">L</div><div><div class="tan">Trần Thị L.</div><div class="tat">Giám đốc doanh nghiệp · TP.HCM</div></div></div></div>
+    <div class="testimonial-row">
+      <div class="tcard"><div class="tquote">Báo cáo phân tích rất chi tiết, có đầy đủ định giá và luận điểm. Theo dõi 3 năm và thực sự cải thiện được kết quả đầu tư của mình.</div><div class="tauthor"><div class="tavatar">H</div><div><div class="tname">Nguyễn Văn H.</div><div class="ttitle">Nhà đầu tư cá nhân · Hà Nội</div></div></div></div>
+      <div class="tcard"><div class="tquote">Dịch vụ quản lý tài khoản minh bạch. Hàng tuần nhận báo cáo đầy đủ hiệu suất và giao dịch. Rất yên tâm khi giao phó cho đội ngũ chuyên nghiệp.</div><div class="tauthor"><div class="tavatar">L</div><div><div class="tname">Trần Thị L.</div><div class="ttitle">Giám đốc doanh nghiệp · TP.HCM</div></div></div></div>
     </div>
   </div>
 </section>
 
-<section class="cta-sec">
-  <div class="cta-in">
-    <div class="sec-tag" style="justify-content:center;color:var(--gold2)">Tham gia cộng đồng</div>
-    <h2 class="cta-title">Bắt đầu đầu tư <em>thông minh</em><br/>từ hôm nay</h2>
-    <p class="cta-sub">Tham gia nhóm Zalo và Facebook để nhận báo cáo miễn phí mỗi ngày giao dịch. Cộng đồng hơn 1.200 nhà đầu tư đang chờ anh/chị.</p>
+<!-- CTA -->
+<section class="cta-sec fade-in">
+  <div class="cta-inner">
+    <div class="sec-tag" style="justify-content:center;color:var(--gold2);">Tham gia cộng đồng</div>
+    <h2 class="cta-title">Bắt đầu đầu tư <em>thông minh</em> từ hôm nay</h2>
+    <p class="cta-sub">Tham gia nhóm Zalo và Facebook để nhận báo cáo miễn phí mỗi ngày giao dịch.</p>
     <div class="cta-btns">
-      <a href="https://zalo.me/g/sxshix010" target="_blank" rel="noopener" class="cbp"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.26 2 11.5c0 2.83 1.3 5.37 3.36 7.14L4.5 22l3.5-1.75C9.2 20.73 10.57 21 12 21c5.52 0 10-4.26 10-9.5S17.52 2 12 2z"/></svg>Chat ngay trên Zalo</a>
-      <a href="https://www.facebook.com/Smart.Investing.VN" target="_blank" rel="noopener" class="cbs"><svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>Theo dõi Facebook</a>
+      <a href="https://zalo.me/g/sxshix010" target="_blank" rel="noopener" class="btn-cta-p">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.26 2 11.5c0 2.83 1.3 5.37 3.36 7.14L4.5 22l3.5-1.75C9.2 20.73 10.57 21 12 21c5.52 0 10-4.26 10-9.5S17.52 2 12 2z"/></svg>
+        Chat ngay trên Zalo
+      </a>
+      <a href="https://www.facebook.com/Smart.Investing.VN" target="_blank" rel="noopener" class="btn-cta-s">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
+        Theo dõi Facebook
+      </a>
     </div>
   </div>
 </section>
 
-<div class="modal-ov" id="modal">
+<!-- MODAL -->
+<div class="modal-overlay" id="modal">
   <div class="modal-box">
-    <div class="modal-hdr"><span class="modal-title" id="modal-title"></span><button class="modal-close" id="modal-close"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg></button></div>
-    <div class="modal-notice"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4m0 4h.01"/></svg>Tài liệu được bảo vệ bản quyền. Vui lòng không sao chép hoặc phát tán.</div>
+    <div class="modal-header">
+      <span class="modal-title" id="modal-title"></span>
+      <div class="modal-actions-row">
+        <button class="modal-share" id="modal-share" onclick="copyModalLink()">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+          <span>Sao chép link</span>
+        </button>
+        <button class="modal-close" id="modal-close"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
+      </div>
+    </div>
+    <div class="modal-notice"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4m0 4h.01"/></svg> Tài liệu được bảo vệ bản quyền. Vui lòng không sao chép hoặc phát tán.</div>
     <div class="modal-viewer"><iframe id="modal-iframe" allowfullscreen title="Xem báo cáo" sandbox="allow-same-origin allow-scripts allow-popups"></iframe></div>
   </div>
 </div>
 
-<div class="float">
-  <div class="float-tip">💬 Chat ngay với chúng tôi!</div>
-  <a href="https://zalo.me/g/sxshix010" target="_blank" rel="noopener" class="float-btn">
-    <span class="fpulse"></span>
+<!-- FLOAT CHAT -->
+<div class="float-chat">
+  <div class="float-tooltip">💬 Chat ngay với chúng tôi!</div>
+  <a href="https://zalo.me/g/sxshix010" target="_blank" rel="noopener" class="float-chat-btn">
+    <span class="float-pulse"></span>
     <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.26 2 11.5c0 2.83 1.3 5.37 3.36 7.14L4.5 22l3.5-1.75C9.2 20.73 10.57 21 12 21c5.52 0 10-4.26 10-9.5S17.52 2 12 2z"/></svg>
     Chat ngay qua Zalo
   </a>
 </div>
 
-<div class="toast" id="toast">✅ Đã sao chép link báo cáo!</div>
-
-<footer class="footer">
-  <div class="footer-in">
+<!-- FOOTER -->
+<footer class="site-footer">
+  <div class="footer-inner">
     <div class="footer-top">
-      <div><div class="logo"><div class="logo-mark"><svg width="20" height="20" viewBox="0 0 22 22" fill="none"><polyline points="2,16 7,9 12,12 17,5 20,8" stroke="#08192E" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div><div class="logo-name">Đầu Tư Thông Minh</div><div class="logo-sub">Research &amp; Analysis Group</div></div></div><p class="fbdesc">Nhóm nghiên cứu độc lập chuyên phân tích thị trường chứng khoán Việt Nam. Kinh nghiệm 20+ năm tại HOSE, HNX và UPCOM.</p></div>
-      <div><div class="fh">Trang</div><ul class="flinks"><li><a href="#about">Về chúng tôi</a></li><li><a href="#services">Dịch vụ</a></li><li><a href="#reports">Báo cáo thị trường</a></li><li><a href="#reports">Phân tích cổ phiếu</a></li></ul></div>
-      <div><div class="fh">Dịch vụ</div><ul class="flinks"><li><a href="#services">Báo cáo phân tích</a></li><li><a href="#services">Tư vấn đầu tư</a></li><li><a href="#services">Quản lý tài khoản</a></li></ul></div>
-      <div><div class="fh">Kết nối</div><div class="fsoc"><a href="https://zalo.me/g/sxshix010" target="_blank" rel="noopener" class="fsb"><svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.26 2 11.5c0 2.83 1.3 5.37 3.36 7.14L4.5 22l3.5-1.75C9.2 20.73 10.57 21 12 21c5.52 0 10-4.26 10-9.5S17.52 2 12 2z"/></svg>Nhóm Zalo</a><a href="https://www.facebook.com/Smart.Investing.VN" target="_blank" rel="noopener" class="fsb"><svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>Facebook</a></div></div>
+      <div>
+        <div class="logo">
+          <div class="logo-mark"><svg width="20" height="20" viewBox="0 0 22 22" fill="none"><polyline points="2,16 7,9 12,12 17,5 20,8" stroke="#08192E" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div><div class="logo-name">Đầu Tư Thông Minh</div><div class="logo-sub">Research &amp; Analysis Group</div></div>
+        </div>
+        <p class="footer-brand-desc">Nhóm nghiên cứu độc lập chuyên phân tích thị trường chứng khoán Việt Nam. Đội ngũ hơn 20 năm kinh nghiệm tại HOSE, HNX và UPCOM.</p>
+      </div>
+      <div><div class="fh">Trang</div><ul class="footer-links"><li><a href="#reports">Báo cáo phân tích</a></li><li><a href="#about">Về chúng tôi</a></li><li><a href="#services">Dịch vụ</a></li></ul></div>
+      <div><div class="fh">Dịch vụ</div><ul class="footer-links"><li><a href="#services">Báo cáo phân tích</a></li><li><a href="#services">Tư vấn đầu tư</a></li><li><a href="#services">Quản lý tài khoản</a></li></ul></div>
+      <div><div class="fh">Kết nối</div><div class="footer-social">
+        <a href="https://zalo.me/g/sxshix010" target="_blank" rel="noopener" class="social-btn"><svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.26 2 11.5c0 2.83 1.3 5.37 3.36 7.14L4.5 22l3.5-1.75C9.2 20.73 10.57 21 12 21c5.52 0 10-4.26 10-9.5S17.52 2 12 2z"/></svg> Nhóm Zalo</a>
+        <a href="https://www.facebook.com/Smart.Investing.VN" target="_blank" rel="noopener" class="social-btn"><svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg> Facebook</a>
+      </div></div>
     </div>
-    <div class="footer-bot"><div class="fcopy">© 2025 Đầu Tư Thông Minh Group. Tất cả quyền được bảo lưu.</div><div class="fdis">Nội dung trên website chỉ mang tính chất tham khảo, không phải khuyến nghị đầu tư chính thức. Nhà đầu tư tự chịu trách nhiệm với quyết định của mình.</div></div>
+    <div class="footer-bottom">
+      <div class="footer-copy">© 2025 Đầu Tư Thông Minh Group. Tất cả quyền được bảo lưu.</div>
+      <div class="footer-disc">Nội dung trên website chỉ mang tính chất tham khảo, không phải khuyến nghị đầu tư chính thức. Nhà đầu tư tự chịu trách nhiệm với mọi quyết định của mình.</div>
+    </div>
   </div>
 </footer>
 
+<!-- ════════════════════════════════════════
+     JAVASCRIPT
+════════════════════════════════════════ -->
 <script>
-const TK=[{s:"VN-Index",v:"1.268,54",c:"+8,23",p:"+0,65%",u:1},{s:"HNX-Index",v:"234,18",c:"+1,45",p:"+0,62%",u:1},{s:"VN30",v:"1.312,40",c:"+9,10",p:"+0,70%",u:1},{s:"VCB",v:"82.000",c:"-500",p:"-0,61%",u:0},{s:"HPG",v:"26.150",c:"+350",p:"+1,36%",u:1},{s:"MWG",v:"62.400",c:"+1.200",p:"+1,96%",u:1},{s:"FPT",v:"126.500",c:"+2.500",p:"+2,02%",u:1},{s:"VHM",v:"38.700",c:"-200",p:"-0,51%",u:0},{s:"TCB",v:"24.600",c:"+300",p:"+1,23%",u:1},{s:"BID",v:"44.900",c:"-100",p:"-0,22%",u:0}];
-document.getElementById("ticker-track").innerHTML=[...TK,...TK].map(t=>`<div class="ti"><span class="s">${t.s}</span><span>${t.v}</span><span class="${t.u?"up":"dn"}">${t.c} (${t.p})</span></div>`).join("");
-window.addEventListener("scroll",()=>document.getElementById("hdr").classList.toggle("scrolled",scrollY>40));
+'use strict';
 
-let REPORTS=[],TAB="all",MON="all",PAGE=1;
-const PER=20;
-const fmt=s=>{const[y,m,d]=s.split("-");return`${d}/${m}/${y}`;};
-const gm=s=>s.slice(0,7);
+/* ─── CONFIG ─── */
+const TCBS_BASE   = 'https://apipubaws.tcbs.com.vn/stock-insight/v1';
+const TICKER_SYMS = ['VCB','HPG','MWG','FPT','VHM','TCB','BID','STB','VIC','GAS','SSI','VND'];
+const PAGE_SIZE   = 9; // báo cáo hiển thị ban đầu và mỗi lần load more
 
-function getFiltered(){
-  const q=(document.getElementById("search-inp")||{}).value?.toLowerCase()||"";
-  return REPORTS.filter(r=>{
-    const tOk=TAB==="all"||r.type===TAB;
-    const mOk=MON==="all"||gm(r.date)===MON;
-    const qOk=!q||r.title.toLowerCase().includes(q)||(r.ticker||"").toLowerCase().includes(q)||(r.desc||"").toLowerCase().includes(q);
-    return tOk&&mOk&&qOk;
-  }).sort((a,b)=>b.date.localeCompare(a.date));
+/* ─── STATE ─── */
+let REPORTS = [], tab = 'all', mon = 'all', page = 1, openId = null;
+
+/* ─── UTILS ─── */
+const fmt  = s => { const [y,m,d] = s.split('-'); return `${d}/${m}/${y}`; };
+const gm   = s => s.slice(0,7);
+const base = () => location.origin + location.pathname;
+const fmtNum = n => n.toLocaleString('vi-VN');
+const fmtPt  = n => (n >= 0 ? '+' : '') + n.toLocaleString('vi-VN',{minimumFractionDigits:2,maximumFractionDigits:2});
+
+/* ─────────────────────────── TCBS API ─────────────────────────── */
+
+/* VN-Index: lấy 30 phiên gần nhất để vẽ mini chart */
+async function fetchVNIndex() {
+  try {
+    const to   = Math.floor(Date.now() / 1000);
+    const from = to - 86400 * 40; // ~40 ngày
+    const url  = `${TCBS_BASE}/index/chart?indexId=VNINDEX&resolution=1D&from=${from}&to=${to}`;
+    const res  = await fetch(url, { signal: AbortSignal.timeout(6000) });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const data = await res.json();
+
+    // TCBS trả về { c:[...], o:[...], t:[...] }
+    const closes = data.c || data.data?.map(d => d.close) || [];
+    const last   = closes[closes.length - 1];
+    const prev   = closes[closes.length - 2] || last;
+    if (!last) throw new Error('empty');
+
+    const change  = last - prev;
+    const changePct = (change / prev * 100);
+    const isUp    = change >= 0;
+
+    // Cập nhật hero card
+    document.getElementById('vni-val').textContent = fmtNum(last);
+    const chgEl = document.getElementById('vni-chg');
+    chgEl.textContent = `${isUp ? '▲' : '▼'} ${fmtPt(change)} (${fmtPt(changePct)}%)`;
+    chgEl.className   = `hc-chg ${isUp ? 'up' : 'dn'}`;
+
+    // Vẽ mini chart
+    if (closes.length > 1) drawMiniChart(closes.slice(-30), isUp);
+  } catch(e) {
+    // Fallback tĩnh nếu API lỗi / ngoài giờ
+    document.getElementById('vni-val').textContent = '1.268,54';
+    document.getElementById('vni-chg').textContent = '▲ +8,23 (+0,65%)';
+    document.getElementById('vni-chg').className = 'hc-chg up';
+    drawMiniChart([100,98,102,97,105,108,103,110,107,115,112,118], true);
+  }
 }
 
-function renderChips(){
-  const ms=[...new Set(REPORTS.map(r=>gm(r.date)))].sort().reverse();
-  const bar=document.getElementById("filter-bar");
-  bar.innerHTML=`<span class="fl-label">Tháng:</span><button class="fc ${MON==="all"?"active":""}" data-month="all">Tất cả</button>`+ms.map(m=>`<button class="fc ${MON===m?"active":""}" data-month="${m}">T.${parseInt(m.split("-")[1])}/${m.split("-")[0]}</button>`).join("");
-  bar.querySelectorAll(".fc").forEach(b=>b.addEventListener("click",()=>{MON=b.dataset.month;PAGE=1;renderAll();}));
+function drawMiniChart(arr, isUp) {
+  const min = Math.min(...arr), max = Math.max(...arr), range = max - min || 1;
+  const W = 260, H = 34;
+  const pts = arr.map((v,i) => {
+    const x = (i / (arr.length - 1)) * W;
+    const y = H - ((v - min) / range) * (H - 4) - 2;
+    return `${x.toFixed(1)},${y.toFixed(1)}`;
+  }).join(' ');
+  const color = isUp ? '#2ECC71' : '#E74C3C';
+  const svg   = document.getElementById('vni-chart');
+  svg.innerHTML = `
+    <defs><linearGradient id="cg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="${color}" stop-opacity=".3"/>
+      <stop offset="100%" stop-color="${color}" stop-opacity="0"/>
+    </linearGradient></defs>
+    <path d="M${pts.split(' ').join(' L')} L260,${H} L0,${H} Z" fill="url(#cg)"/>
+    <polyline points="${pts}" stroke="${color}" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/>`;
 }
 
-function renderList(){
-  const list=getFiltered(),total=list.length,pages=Math.max(1,Math.ceil(total/PER));
-  if(PAGE>pages)PAGE=pages;
-  const slice=list.slice((PAGE-1)*PER,PAGE*PER);
-  const body=document.getElementById("rpt-body");
-  const footer=document.getElementById("rpt-footer");
-  if(!slice.length){body.innerHTML="<div class=\"empty\">Không có báo cáo nào phù hợp.</div>";footer.style.display="none";return;}
-  body.innerHTML=slice.map(r=>{
-    const idx=REPORTS.indexOf(r);
-    const shareUrl=`${location.origin}${location.pathname}?id=${r.id}`;
-    return`<div class="rpt-row" onclick="openR(${idx})">
-      <span class="rpt-date">${fmt(r.date)}</span>
-      <span><span class="badge ${r.type==="market"?"bm":"bs"}">${r.type==="market"?"📈 TT":"🔍 CP"}</span></span>
-      <span class="rpt-title-cell" title="${r.title}">${r.title}</span>
-      <span>${r.ticker?`<span class="rpt-ticker">${r.ticker}</span>`:""}</span>
-      <span class="rpt-acts">
-        <button class="btn-view" onclick="event.stopPropagation();openR(${idx})">Xem</button>
-        <button class="btn-copy" title="Sao chép link" onclick="event.stopPropagation();copyLink('${shareUrl}')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg></button>
-      </span>
+/* Individual stock prices for ticker tape */
+async function fetchStockPrices() {
+  const FALLBACK = [
+    {s:'VN-Index',v:'1.268,54',c:'+8,23',p:'+0,65%',u:1},
+    {s:'VCB',v:'82.000',c:'-500',p:'-0,61%',u:0},{s:'HPG',v:'26.150',c:'+350',p:'+1,36%',u:1},
+    {s:'MWG',v:'62.400',c:'+1.200',p:'+1,96%',u:1},{s:'FPT',v:'126.500',c:'+2.500',p:'+2,02%',u:1},
+    {s:'VHM',v:'38.700',c:'-200',p:'-0,51%',u:0},{s:'TCB',v:'24.600',c:'+300',p:'+1,23%',u:1},
+    {s:'BID',v:'44.900',c:'-100',p:'-0,22%',u:0},{s:'STB',v:'32.100',c:'+500',p:'+1,58%',u:1},
+    {s:'GAS',v:'71.200',c:'+800',p:'+1,14%',u:1},{s:'SSI',v:'28.500',c:'+600',p:'+2,15%',u:1},
+    {s:'VND',v:'19.300',c:'+200',p:'+1,05%',u:1},
+  ];
+
+  try {
+    const results = await Promise.allSettled(
+      TICKER_SYMS.map(sym =>
+        fetch(`${TCBS_BASE}/stock/intraday?ticker=${sym}&page=0&size=1`, {signal:AbortSignal.timeout(5000)})
+          .then(r => r.json())
+          .then(d => {
+            // TCBS intraday: data[0].p = price
+            const item = d?.data?.[0];
+            if (!item) return null;
+            const price  = item.p || item.price;
+            const change = item.cp || 0; // change in price
+            const pct    = item.rcp || (item.cp && item.p ? (item.cp / (item.p - item.cp) * 100) : 0);
+            const isUp   = change >= 0;
+            return {
+              s: sym,
+              v: fmtNum(price),
+              c: (isUp ? '+' : '') + fmtNum(change),
+              p: `${isUp ? '+' : ''}${pct.toFixed(2)}%`,
+              u: isUp ? 1 : 0
+            };
+          })
+      )
+    );
+
+    const items = results
+      .filter(r => r.status === 'fulfilled' && r.value)
+      .map(r => r.value);
+
+    if (items.length < 3) throw new Error('insufficient data');
+    buildTicker(items);
+  } catch(e) {
+    buildTicker(FALLBACK);
+  }
+}
+
+function buildTicker(items) {
+  const doubled = [...items, ...items];
+  const html = doubled.map(t =>
+    `<div class="ti"><span class="sym">${t.s}</span><span>${t.v}</span><span class="${t.u ? 'up' : 'dn'}">${t.c} (${t.p})</span></div>`
+  ).join('');
+  document.getElementById('ticker-track').innerHTML = html;
+}
+
+/* ─────────────────────────── REPORTS ─────────────────────────── */
+
+function filtered() {
+  const q = (document.getElementById('search-input')?.value || '').toLowerCase().trim();
+  return REPORTS
+    .filter(r => {
+      const tOk = tab === 'all' || r.type === tab;
+      const mOk = mon === 'all' || gm(r.date) === mon;
+      const qOk = !q || r.title.toLowerCase().includes(q) || (r.ticker||'').toLowerCase().includes(q) || (r.desc||'').toLowerCase().includes(q);
+      return tOk && mOk && qOk;
+    })
+    .sort((a,b) => b.date.localeCompare(a.date));
+}
+
+function renderChips() {
+  const months = [...new Set(REPORTS.map(r => gm(r.date)))].sort().reverse();
+  const bar = document.getElementById('filter-row');
+  bar.innerHTML = '<span class="fl">Tháng:</span>' +
+    `<button class="fc ${mon==='all'?'active':''}" data-month="all">Tất cả</button>` +
+    months.map(m =>
+      `<button class="fc ${mon===m?'active':''}" data-month="${m}">T.${parseInt(m.split('-')[1])}/${m.split('-')[0]}</button>`
+    ).join('');
+  bar.querySelectorAll('.fc').forEach(b =>
+    b.addEventListener('click', () => { mon = b.dataset.month; page = 1; renderReports(); })
+  );
+}
+
+/* Shareable link helpers */
+function copyLink(id, btnEl) {
+  navigator.clipboard.writeText(`${base()}?r=${id}`).then(() => {
+    const orig = btnEl.innerHTML;
+    btnEl.classList.add('copied');
+    btnEl.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>';
+    setTimeout(() => { btnEl.classList.remove('copied'); btnEl.innerHTML = orig; }, 2200);
+  });
+}
+
+function copyModalLink() {
+  if (!openId) return;
+  navigator.clipboard.writeText(`${base()}?r=${openId}`).then(() => {
+    const btn = document.getElementById('modal-share');
+    btn.classList.add('copied');
+    btn.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> <span>Đã sao chép!</span>';
+    setTimeout(() => {
+      btn.classList.remove('copied');
+      btn.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg> <span>Sao chép link</span>';
+    }, 2500);
+  });
+}
+
+/* Layout C render */
+function renderReports() {
+  const items   = filtered();
+  const total   = items.length;
+  const shown   = items.slice(0, page * PAGE_SIZE);
+  const feat    = shown[0];
+  const minis   = shown.slice(1);
+
+  /* Featured */
+  const featWrap = document.getElementById('rep-featured-wrap');
+  if (!feat) {
+    featWrap.innerHTML = '<div style="padding:40px;text-align:center;color:var(--g3);font-size:14px;">Không tìm thấy báo cáo phù hợp.</div>';
+    document.getElementById('rep-grid').innerHTML = '';
+    document.getElementById('list-info').textContent = '';
+    document.getElementById('load-more-wrap').style.display = 'none';
+    return;
+  }
+  featWrap.innerHTML = `
+    <div class="rep-featured fade-in visible" onclick="openReport('${feat.id}')">
+      <div class="rep-featured-bar ${feat.type}"></div>
+      <div class="rep-featured-body">
+        <div class="rfl">
+          <div class="rfl-top">
+            <span class="rfl-badge ${feat.type}">${feat.type === 'market' ? '📈 Thị trường' : '🔍 Cổ phiếu'}</span>
+            <span class="rfl-new">✦ Mới nhất</span>
+            <span class="rfl-date">${fmt(feat.date)}</span>
+          </div>
+          <div class="rfl-title">${feat.title}</div>
+          <div class="rfl-desc">${feat.desc || ''}</div>
+          <div class="rfl-meta">
+            ${feat.ticker ? `<span class="rfl-ticker">${feat.ticker}</span>` : ''}
+            <span class="rfl-read">Đọc báo cáo <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
+          </div>
+        </div>
+        <div class="rfr">
+          <button class="btn-share" onclick="event.stopPropagation();copyLink('${feat.id}',this)" title="Sao chép link gửi nhà đầu tư">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+            Sao chép link
+          </button>
+          <button class="btn-view" onclick="event.stopPropagation();openReport('${feat.id}')">
+            Xem báo cáo
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </button>
+        </div>
+      </div>
     </div>`;
-  }).join("");
-  footer.style.display="flex";
-  const from=(PAGE-1)*PER+1,to=Math.min(PAGE*PER,total);
-  document.getElementById("rpt-info").textContent=`Hiển thị ${from}–${to} / ${total} báo cáo`;
-  let pg=`<button class="pg-btn" onclick="goPage(${PAGE-1})" ${PAGE<=1?"disabled":""}>&#8249;</button>`;
-  const s=Math.max(1,PAGE-2),e=Math.min(pages,PAGE+2);
-  if(s>1)pg+=`<button class="pg-btn" onclick="goPage(1)">1</button>${s>2?"<span style='padding:0 3px;color:var(--gray3);font-size:12px'>…</span>":""}`;
-  for(let i=s;i<=e;i++)pg+=`<button class="pg-btn ${i===PAGE?"active":""}" onclick="goPage(${i})">${i}</button>`;
-  if(e<pages)pg+=`${e<pages-1?"<span style='padding:0 3px;color:var(--gray3);font-size:12px'>…</span>":""}<button class="pg-btn" onclick="goPage(${pages})">${pages}</button>`;
-  pg+=`<button class="pg-btn" onclick="goPage(${PAGE+1})" ${PAGE>=pages?"disabled":""}>&#8250;</button>`;
-  document.getElementById("pager").innerHTML=pg;
+
+  /* Mini grid */
+  document.getElementById('rep-grid').innerHTML = minis.map((r,i) => `
+    <div class="rep-mini fade-in" style="animation-delay:${(i%PAGE_SIZE)*0.05}s" onclick="openReport('${r.id}')">
+      <div class="rep-mini-bar ${r.type}"></div>
+      <div class="rep-mini-body">
+        <div class="rm-top">
+          <span class="rm-badge ${r.type}">${r.type === 'market' ? '📈 TT' : '🔍 CP'}</span>
+          <span class="rm-date">${fmt(r.date)}</span>
+        </div>
+        <div class="rm-title">${r.title}</div>
+        <div class="rm-desc">${r.desc || ''}</div>
+        <div class="rm-footer">
+          ${r.ticker ? `<span class="rm-ticker">${r.ticker}</span>` : '<span></span>'}
+          <button class="rm-share" onclick="event.stopPropagation();copyLink('${r.id}',this)" title="Sao chép link">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>`).join('');
+
+  /* Load more */
+  const hasMore = total > page * PAGE_SIZE;
+  document.getElementById('load-more-wrap').style.display = hasMore ? 'block' : 'none';
+  if (hasMore) document.getElementById('btn-loadmore').textContent = `Xem thêm (còn ${total - page * PAGE_SIZE} báo cáo)`;
+  document.getElementById('list-info').textContent = `Hiển thị ${shown.length} / ${total} báo cáo`;
+
+  /* Trigger fade-in for new cards via IntersectionObserver */
+  observeFadeIn();
 }
 
-function goPage(p){PAGE=p;renderList();document.getElementById("reports").scrollIntoView({behavior:"smooth",block:"start"});}
-
-function updateCounts(){
-  const t=REPORTS.length,m=REPORTS.filter(r=>r.type==="market").length,s=REPORTS.filter(r=>r.type==="stock").length;
-  document.getElementById("cnt-all").textContent=t;
-  document.getElementById("cnt-market").textContent=m;
-  document.getElementById("cnt-stock").textContent=s;
-  cnt("s-total",t);cnt("s-stocks",s);
-  const e=document.getElementById("rpt-hero");if(e)e.textContent=t;
-}
-function cnt(id,n){let v=0;const e=document.getElementById(id);const f=()=>{v+=Math.ceil((n-v)/5);e.textContent=v;if(v<n)requestAnimationFrame(f);else e.textContent=n;};requestAnimationFrame(f);}
-
-function setTab(t){TAB=t;PAGE=1;document.querySelectorAll(".tab-btn").forEach(b=>b.classList.toggle("active",b.dataset.tab===t));renderAll();}
-function renderAll(){renderChips();renderList();}
-document.querySelectorAll(".tab-btn").forEach(b=>b.addEventListener("click",()=>setTab(b.dataset.tab)));
-
-function openR(idx){
-  const r=REPORTS[idx];if(!r)return;
-  document.getElementById("modal-title").textContent=r.title;
-  document.getElementById("modal-iframe").src=`https://drive.google.com/file/d/${r.driveId}/preview`;
-  document.getElementById("modal").classList.add("open");
-  document.body.style.overflow="hidden";
-  history.replaceState(null,"",`?id=${r.id}`);
-}
-function closeM(){
-  document.getElementById("modal").classList.remove("open");
-  document.getElementById("modal-iframe").src="";
-  document.body.style.overflow="";
-  history.replaceState(null,"",location.pathname);
-}
-document.getElementById("modal-close").addEventListener("click",closeM);
-document.getElementById("modal").addEventListener("click",e=>{if(e.target===document.getElementById("modal"))closeM();});
-document.addEventListener("keydown",e=>{if(e.key==="Escape")closeM();});
-
-function copyLink(url){
-  navigator.clipboard.writeText(url).catch(()=>{const t=document.createElement("textarea");t.value=url;document.body.appendChild(t);t.select();document.execCommand("copy");document.body.removeChild(t);});
-  const toast=document.getElementById("toast");toast.classList.add("show");setTimeout(()=>toast.classList.remove("show"),2200);
+function loadMore() {
+  page++;
+  renderReports();
+  // Scroll xuống để thấy báo cáo mới
+  setTimeout(() => {
+    const grid = document.getElementById('rep-grid');
+    const newCards = grid.querySelectorAll('.rep-mini:not(.visible)');
+    if (newCards[0]) newCards[0].scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }, 100);
 }
 
-document.addEventListener("contextmenu",e=>e.preventDefault());
-document.addEventListener("keydown",e=>{
-  if((e.ctrlKey||e.metaKey)&&["s","u","p"].includes(e.key.toLowerCase()))e.preventDefault();
-  if(e.key==="F12")e.preventDefault();
-  if(e.ctrlKey&&e.shiftKey&&["i","j","c"].includes(e.key.toLowerCase()))e.preventDefault();
+/* ─────────────────────────── COUNTS ─────────────────────────── */
+function updateCounts() {
+  const t = REPORTS.length;
+  const m = REPORTS.filter(r => r.type === 'market').length;
+  const s = REPORTS.filter(r => r.type === 'stock').length;
+  document.getElementById('cnt-all').textContent    = t;
+  document.getElementById('cnt-market').textContent = m;
+  document.getElementById('cnt-stock').textContent  = s;
+  animCount('s-total', t);
+  animCount('s-stocks', s);
+  document.getElementById('rpt-hero').textContent = t;
+}
+function animCount(id, target) {
+  let v = 0; const el = document.getElementById(id);
+  const step = () => { v += Math.ceil((target - v) / 5); el.textContent = v; if (v < target) requestAnimationFrame(step); else el.textContent = target; };
+  requestAnimationFrame(step);
+}
+
+/* ─────────────────────────── TABS ─────────────────────────── */
+function setTab(t) {
+  tab = t; page = 1;
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === t));
+  renderReports();
+}
+document.querySelectorAll('.tab-btn').forEach(b => b.addEventListener('click', () => setTab(b.dataset.tab)));
+
+/* ─────────────────────────── MODAL ─────────────────────────── */
+function openReport(id) {
+  const r = REPORTS.find(x => x.id === id);
+  if (!r) return;
+  openId = id;
+  history.replaceState(null, '', `${location.pathname}?r=${id}`);
+  document.getElementById('modal-title').textContent = r.title;
+  document.getElementById('modal-iframe').src = `https://drive.google.com/file/d/${r.driveId}/preview`;
+  document.getElementById('modal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeModal() {
+  document.getElementById('modal').classList.remove('open');
+  document.getElementById('modal-iframe').src = '';
+  document.body.style.overflow = '';
+  openId = null;
+  history.replaceState(null, '', location.pathname);
+}
+document.getElementById('modal-close').addEventListener('click', closeModal);
+document.getElementById('modal').addEventListener('click', e => { if (e.target === document.getElementById('modal')) closeModal(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+/* ─────────────────────────── INTERSECTION OBSERVER ─────────────────────────── */
+let fadeObserver;
+function observeFadeIn() {
+  if (fadeObserver) fadeObserver.disconnect();
+  fadeObserver = new IntersectionObserver((entries) => {
+    entries.forEach(el => { if (el.isIntersecting) { el.target.classList.add('visible'); fadeObserver.unobserve(el.target); } });
+  }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+  document.querySelectorAll('.fade-in:not(.visible)').forEach(el => fadeObserver.observe(el));
+}
+
+/* ─────────────────────────── SCROLL HEADER ─────────────────────────── */
+window.addEventListener('scroll', () => {
+  document.getElementById('site-header').classList.toggle('scrolled', scrollY > 40);
+}, { passive: true });
+
+/* ─────────────────────────── ANTI-DOWNLOAD ─────────────────────────── */
+document.addEventListener('contextmenu', e => e.preventDefault());
+document.addEventListener('keydown', e => {
+  if ((e.ctrlKey || e.metaKey) && ['s','u','p'].includes(e.key.toLowerCase())) e.preventDefault();
+  if (e.key === 'F12') e.preventDefault();
+  if (e.ctrlKey && e.shiftKey && ['i','j','c'].includes(e.key.toLowerCase())) e.preventDefault();
 });
 
-(async()=>{
-  try{const r=await fetch("./reports.json?v="+Date.now());REPORTS=await r.json();}catch(e){REPORTS=[];}
-  updateCounts();renderAll();
-  const urlId=new URLSearchParams(location.search).get("id");
-  if(urlId){
-    const idx=REPORTS.findIndex(r=>r.id===urlId);
-    if(idx>=0){
-      const list=getFiltered();
-      const pos=list.findIndex(r=>r.id===urlId);
-      if(pos>=0)PAGE=Math.floor(pos/PER)+1;
-      renderList();
-      setTimeout(()=>openR(idx),400);
-    }
-  }
+/* ─────────────────────────── INIT ─────────────────────────── */
+(async () => {
+  /* 1. Load reports.json */
+  try {
+    const res = await fetch('./reports.json?v=' + Date.now());
+    REPORTS = await res.json();
+  } catch(e) { REPORTS = []; }
+  updateCounts();
+  renderChips();
+  renderReports();
+
+  /* 2. Auto-open nếu URL có ?r=ID */
+  const rid = new URLSearchParams(location.search).get('r');
+  if (rid && REPORTS.find(x => x.id === rid)) openReport(rid);
+
+  /* 3. Fetch live market data song song */
+  fetchVNIndex();
+  fetchStockPrices();
+
+  /* 4. Kích hoạt scroll fade-in cho các section */
+  observeFadeIn();
 })();
 </script>
 </body>
