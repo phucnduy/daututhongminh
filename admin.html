@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Quản trị Báo cáo – Đầu Tư Thông Minh</title>
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --navy:  #0D2B52; --navy2: #1B4F8A; --gold: #C9A84C; --gold2: #E8C86A;
+      --green: #1A7A4A; --red: #C0392B; --cream: #F9F6EF;
+      --gray1: #F2F4F7; --gray2: #D4D8E1; --gray3: #8A94A6;
+      --text:  #1A2438; --white: #FFFFFF; --radius: 8px;
+    }
+    body { font-family: 'Be Vietnam Pro', sans-serif; background: var(--gray1); color: var(--text); min-height: 100vh; }
+
+    /* ===== LOGIN SCREEN ===== */
+    .login-screen {
+      min-height: 100vh; display: flex; align-items: center; justify-content: center;
+      background: linear-gradient(135deg, var(--navy), #1a3a6e);
+      padding: 24px;
+    }
+    .login-box {
+      background: var(--white); border-radius: 16px; padding: 48px 40px;
+      width: 100%; max-width: 460px;
+      box-shadow: 0 24px 60px rgba(0,0,0,0.25);
+    }
+    .login-logo {
+      display: flex; align-items: center; gap: 12px; margin-bottom: 32px;
+    }
+    .login-icon {
+      width: 44px; height: 44px; background: var(--navy); border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Playfair Display', serif; font-weight: 700; font-size: 22px; color: var(--gold);
+    }
+    .login-logo-text span:first-child {
+      display: block; font-family: 'Playfair Display', serif; font-weight: 700; font-size: 16px; color: var(--navy);
+    }
+    .login-logo-text span:last-child {
+      font-size: 12px; color: var(--gray3); text-transform: uppercase; letter-spacing: 0.06em;
+    }
+    .login-title { font-size: 22px; font-weight: 700; color: var(--navy); margin-bottom: 6px; }
+    .login-sub { font-size: 13.5px; color: var(--gray3); margin-bottom: 32px; line-height: 1.6; }
+    .login-sub a { color: var(--navy2); text-decoration: none; font-weight: 500; }
+    .login-sub a:hover { text-decoration: underline; }
+
+    /* ===== FORM ELEMENTS ===== */
+    .field { margin-bottom: 18px; }
+    label { display: block; font-size: 13px; font-weight: 600; color: var(--navy); margin-bottom: 6px; }
+    label span { font-weight: 400; color: var(--gray3); }
+    input, select, textarea {
+      width: 100%; padding: 10px 14px; border: 1.5px solid var(--gray2);
+      border-radius: var(--radius); font-family: inherit; font-size: 14px; color: var(--text);
+      background: var(--white); transition: border-color 0.18s, box-shadow 0.18s;
+      outline: none;
+    }
+    input:focus, select:focus, textarea:focus {
+      border-color: var(--navy2); box-shadow: 0 0 0 3px rgba(27,79,138,0.1);
+    }
+    input.error { border-color: var(--red); }
+    textarea { resize: vertical; min-height: 72px; }
+    .field-hint { font-size: 11.5px; color: var(--gray3); margin-top: 5px; line-height: 1.5; }
+    .field-hint code { background: var(--gray1); padding: 1px 5px; border-radius: 3px; font-size: 11px; }
+
+    /* ===== BUTTONS ===== */
+    .btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 10px 22px; border-radius: var(--radius);
+      font-family: inherit; font-size: 14px; font-weight: 600;
+      cursor: pointer; border: none; transition: all 0.18s;
+    }
+    .btn-primary { background: var(--navy2); color: var(--white); }
+    .btn-primary:hover { background: var(--navy); }
+    .btn-primary:disabled { background: var(--gray2); cursor: not-allowed; }
+    .btn-gold { background: var(--gold); color: var(--navy); }
+    .btn-gold:hover { background: var(--gold2); }
+    .btn-danger { background: #FDECEA; color: var(--red); }
+    .btn-danger:hover { background: #FACAC6; }
+    .btn-ghost { background: var(--gray1); color: var(--gray3); }
+    .btn-ghost:hover { background: var(--gray2); color: var(--text); }
+    .btn-sm { padding: 6px 14px; font-size: 12px; }
+    .btn-full { width: 100%; justify-content: center; padding: 12px; font-size: 15px; }
+
+    /* ===== ADMIN LAYOUT ===== */
+    .admin-header {
+      background: var(--navy); border-bottom: 3px solid var(--gold);
+      padding: 0 32px; height: 62px;
+      display: flex; align-items: center; justify-content: space-between;
+      position: sticky; top: 0; z-index: 50;
+    }
+    .admin-header-left { display: flex; align-items: center; gap: 12px; }
+    .admin-logo-icon {
+      width: 36px; height: 36px; background: var(--gold); border-radius: 6px;
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Playfair Display', serif; font-weight: 700; font-size: 18px; color: var(--navy);
+    }
+    .admin-logo-text { font-size: 14px; font-weight: 600; color: var(--white); }
+    .admin-logo-text span { color: var(--gold2); font-weight: 400; font-size: 12px; margin-left: 8px; }
+    .admin-header-right { display: flex; align-items: center; gap: 12px; }
+    .repo-badge {
+      background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 6px; padding: 5px 12px;
+      font-size: 12px; color: rgba(255,255,255,0.7);
+      display: flex; align-items: center; gap: 6px;
+    }
+    .status-dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: #2EAD6E; flex-shrink: 0;
+      box-shadow: 0 0 0 2px rgba(46,173,110,0.3);
+    }
+    .btn-logout {
+      background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 6px; padding: 6px 14px;
+      font-family: inherit; font-size: 13px; font-weight: 500; color: rgba(255,255,255,0.7);
+      cursor: pointer; transition: all 0.18s;
+    }
+    .btn-logout:hover { background: rgba(255,255,255,0.15); color: var(--white); }
+
+    .admin-body { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+    /* ===== STATS ===== */
+    .stats-row { display: flex; gap: 16px; margin-bottom: 32px; flex-wrap: wrap; }
+    .stat-card {
+      background: var(--white); border-radius: 10px; padding: 18px 24px;
+      flex: 1; min-width: 160px; border: 1.5px solid var(--gray2);
+    }
+    .stat-card-num { font-family: 'Playfair Display', serif; font-size: 30px; font-weight: 700; color: var(--navy); }
+    .stat-card-label { font-size: 12.5px; color: var(--gray3); margin-top: 2px; }
+
+    /* ===== PANELS ===== */
+    .panel {
+      background: var(--white); border-radius: 12px;
+      border: 1.5px solid var(--gray2); margin-bottom: 24px; overflow: hidden;
+    }
+    .panel-header {
+      padding: 18px 24px; border-bottom: 1.5px solid var(--gray2);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .panel-title { font-size: 16px; font-weight: 700; color: var(--navy); }
+    .panel-body { padding: 24px; }
+
+    /* ===== ADD FORM ===== */
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .form-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+    @media (max-width: 640px) {
+      .form-row, .form-row-3 { grid-template-columns: 1fr; }
+    }
+    .drive-preview {
+      margin-top: 12px; padding: 10px 14px;
+      background: var(--gray1); border-radius: 6px;
+      font-size: 12.5px; color: var(--gray3);
+      display: none; align-items: center; gap: 8px;
+    }
+    .drive-preview.show { display: flex; }
+    .drive-preview a { color: var(--navy2); word-break: break-all; }
+
+    /* ===== REPORT TABLE ===== */
+    .report-table { width: 100%; border-collapse: collapse; }
+    .report-table th {
+      background: var(--gray1); text-align: left; padding: 10px 14px;
+      font-size: 12px; font-weight: 700; color: var(--gray3); text-transform: uppercase; letter-spacing: 0.06em;
+    }
+    .report-table th:first-child { border-radius: 6px 0 0 6px; }
+    .report-table th:last-child { border-radius: 0 6px 6px 0; }
+    .report-table td { padding: 12px 14px; border-bottom: 1px solid var(--gray1); font-size: 13.5px; vertical-align: middle; }
+    .report-table tr:last-child td { border-bottom: none; }
+    .report-table tr:hover td { background: #FAFBFC; }
+    .badge {
+      display: inline-flex; align-items: center; padding: 3px 10px;
+      border-radius: 4px; font-size: 11px; font-weight: 700; letter-spacing: 0.04em;
+    }
+    .badge-market { background: #EBF2FC; color: var(--navy2); }
+    .badge-stock  { background: #E8F7EF; color: var(--green); }
+    .ticker-tag {
+      background: #FBF6EA; color: var(--gold); font-size: 11.5px; font-weight: 700;
+      padding: 2px 8px; border-radius: 4px; letter-spacing: 0.06em;
+    }
+    .actions { display: flex; gap: 8px; align-items: center; }
+
+    /* ===== TOAST ===== */
+    .toast-container { position: fixed; bottom: 28px; right: 28px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; }
+    .toast {
+      background: var(--white); border-radius: 10px; padding: 14px 18px;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.12); border-left: 4px solid var(--green);
+      font-size: 14px; font-weight: 500; color: var(--text);
+      display: flex; align-items: center; gap: 10px; min-width: 260px; max-width: 360px;
+      animation: slideInRight 0.25s ease;
+    }
+    .toast.error { border-left-color: var(--red); }
+    .toast.loading { border-left-color: var(--gold); }
+    @keyframes slideInRight {
+      from { opacity: 0; transform: translateX(24px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+    @keyframes fadeOut {
+      to { opacity: 0; transform: translateX(24px); }
+    }
+
+    /* ===== MODAL ===== */
+    .confirm-overlay {
+      position: fixed; inset: 0; z-index: 200;
+      background: rgba(10,20,40,0.6); backdrop-filter: blur(4px);
+      display: none; align-items: center; justify-content: center;
+    }
+    .confirm-overlay.open { display: flex; }
+    .confirm-box {
+      background: var(--white); border-radius: 14px; padding: 32px;
+      max-width: 400px; width: 90%;
+      box-shadow: 0 24px 60px rgba(0,0,0,0.2);
+    }
+    .confirm-title { font-size: 18px; font-weight: 700; color: var(--navy); margin-bottom: 10px; }
+    .confirm-desc { font-size: 14px; color: var(--gray3); line-height: 1.6; margin-bottom: 24px; }
+    .confirm-actions { display: flex; gap: 10px; justify-content: flex-end; }
+
+    /* SPINNER */
+    .spinner {
+      width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: var(--white); border-radius: 50%; animation: spin 0.7s linear infinite; flex-shrink: 0;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .spinner-dark {
+      border-color: rgba(0,0,0,0.1); border-top-color: var(--gold);
+    }
+
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+
+<!-- ============================================================
+     LOGIN SCREEN
+============================================================ -->
+<div id="screen-login" class="login-screen">
+  <div class="login-box">
+    <div class="login-logo">
+      <div class="login-icon">Đ</div>
+      <div class="login-logo-text">
+        <span>Đầu Tư Thông Minh</span>
+        <span>Trang quản trị báo cáo</span>
+      </div>
+    </div>
+
+    <h2 class="login-title">Đăng nhập quản trị</h2>
+    <p class="login-sub">
+      Cần <strong>GitHub Personal Access Token</strong> để ghi dữ liệu vào repository.<br>
+      <a href="https://github.com/settings/tokens/new?description=DTDM+Admin&scopes=repo" target="_blank" rel="noopener">→ Tạo token tại đây</a>
+      (chỉ cần tích quyền <code>repo</code>)
+    </p>
+
+    <div class="field">
+      <label>GitHub Username <span>*</span></label>
+      <input type="text" id="inp-owner" placeholder="Ví dụ: nguyenduyphuc" autocomplete="off" />
+    </div>
+    <div class="field">
+      <label>Tên Repository <span>*</span></label>
+      <input type="text" id="inp-repo" placeholder="Ví dụ: dtdm-reports" autocomplete="off" />
+    </div>
+    <div class="field">
+      <label>Personal Access Token <span>*</span></label>
+      <input type="password" id="inp-token" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx" autocomplete="off" />
+      <div class="field-hint">Token lưu trong bộ nhớ trình duyệt của anh, không gửi đi đâu khác ngoài GitHub API.</div>
+    </div>
+
+    <button class="btn btn-primary btn-full" id="btn-login" onclick="doLogin()">
+      Đăng nhập
+    </button>
+  </div>
+</div>
+
+<!-- ============================================================
+     ADMIN SCREEN
+============================================================ -->
+<div id="screen-admin" class="hidden">
+
+  <!-- Header -->
+  <header class="admin-header">
+    <div class="admin-header-left">
+      <div class="admin-logo-icon">Đ</div>
+      <div class="admin-logo-text">
+        Đầu Tư Thông Minh
+        <span>Quản trị báo cáo</span>
+      </div>
+    </div>
+    <div class="admin-header-right">
+      <div class="repo-badge">
+        <span class="status-dot"></span>
+        <span id="lbl-repo">...</span>
+      </div>
+      <button class="btn-logout" onclick="doLogout()">Đăng xuất</button>
+    </div>
+  </header>
+
+  <div class="admin-body">
+
+    <!-- Stats -->
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-card-num" id="s-total">–</div>
+        <div class="stat-card-label">Tổng báo cáo</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card-num" id="s-market">–</div>
+        <div class="stat-card-label">Báo cáo thị trường</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card-num" id="s-stock">–</div>
+        <div class="stat-card-label">Phân tích cổ phiếu</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card-num" id="s-latest">–</div>
+        <div class="stat-card-label">Báo cáo gần nhất</div>
+      </div>
+    </div>
+
+    <!-- ===== THÊM BÁO CÁO ===== -->
+    <div class="panel">
+      <div class="panel-header">
+        <span class="panel-title">➕ Thêm báo cáo mới</span>
+      </div>
+      <div class="panel-body">
+        <div class="form-row" style="margin-bottom:16px">
+          <div class="field" style="margin-bottom:0">
+            <label>Loại báo cáo</label>
+            <select id="f-type" onchange="onTypeChange()">
+              <option value="market">📈 Báo cáo Thị trường</option>
+              <option value="stock">🔍 Phân tích Cổ phiếu</option>
+            </select>
+          </div>
+          <div class="field" style="margin-bottom:0">
+            <label>Ngày phát hành</label>
+            <input type="date" id="f-date" />
+          </div>
+        </div>
+
+        <div class="form-row" style="margin-bottom:16px">
+          <div class="field" style="margin-bottom:0; grid-column: span 2;">
+            <label>Tiêu đề báo cáo</label>
+            <input type="text" id="f-title" placeholder="Ví dụ: Báo cáo Thị trường – Phiên 25/03/2025" />
+          </div>
+        </div>
+
+        <div class="form-row" style="margin-bottom:16px" id="row-ticker">
+          <div class="field" style="margin-bottom:0">
+            <label>Mã cổ phiếu <span>(chỉ với loại Cổ phiếu)</span></label>
+            <input type="text" id="f-ticker" placeholder="VD: MWG, FPT, VCB..." style="text-transform:uppercase" />
+          </div>
+          <div class="field" style="margin-bottom:0">
+            <label>Khuyến nghị</label>
+            <select id="f-rec">
+              <option value="MUA">MUA</option>
+              <option value="THEO DÕI">THEO DÕI</option>
+              <option value="BÁN">BÁN</option>
+              <option value="">Không có</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Mô tả ngắn</label>
+          <textarea id="f-desc" rows="2" placeholder="Tóm tắt nội dung chính của báo cáo (1–2 câu)"></textarea>
+        </div>
+
+        <div class="field">
+          <label>Google Drive File ID</label>
+          <input type="text" id="f-drive" placeholder="Dán ID tại đây..." oninput="onDriveInput()" />
+          <div class="field-hint">
+            Lấy ID từ link Google Drive:<br>
+            <code>https://drive.google.com/file/d/<strong>ĐÂY_LÀ_ID</strong>/view</code><br>
+            Nhớ đặt quyền file là <strong>"Anyone with the link – Viewer"</strong>
+          </div>
+          <div class="drive-preview" id="drive-preview">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+            Xem trước: <a id="drive-preview-link" href="#" target="_blank" rel="noopener">Mở file trong Drive</a>
+          </div>
+        </div>
+
+        <div style="display:flex; gap:12px; align-items:center; flex-wrap:wrap;">
+          <button class="btn btn-gold" id="btn-add" onclick="addReport()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+            Thêm & Lưu lên GitHub
+          </button>
+          <button class="btn btn-ghost" onclick="resetForm()">Xóa form</button>
+          <span style="font-size:12px; color:var(--gray3);" id="save-status"></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== DANH SÁCH BÁO CÁO ===== -->
+    <div class="panel">
+      <div class="panel-header">
+        <span class="panel-title">📋 Danh sách báo cáo</span>
+        <button class="btn btn-ghost btn-sm" onclick="loadReports()">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.51"/></svg>
+          Tải lại
+        </button>
+      </div>
+      <div class="panel-body" style="padding:0;">
+        <div id="table-loading" style="padding:40px; text-align:center; color:var(--gray3);">
+          <div class="spinner spinner-dark" style="margin:0 auto 12px;"></div>
+          Đang tải dữ liệu...
+        </div>
+        <div id="table-wrap" class="hidden" style="overflow-x:auto;">
+          <table class="report-table">
+            <thead>
+              <tr>
+                <th>Tiêu đề</th>
+                <th>Loại</th>
+                <th>Mã CK</th>
+                <th>Ngày</th>
+                <th>Drive</th>
+                <th>Thao tác</th>
+              </tr>
+            </thead>
+            <tbody id="report-tbody"></tbody>
+          </table>
+        </div>
+        <div id="table-empty" class="hidden" style="padding:40px; text-align:center; color:var(--gray3); font-size:14px;">
+          Chưa có báo cáo nào. Thêm báo cáo đầu tiên ở trên.
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /admin-body -->
+</div><!-- /screen-admin -->
+
+<!-- Confirm Modal -->
+<div class="confirm-overlay" id="confirm-overlay">
+  <div class="confirm-box">
+    <div class="confirm-title" id="confirm-title">Xác nhận</div>
+    <div class="confirm-desc" id="confirm-desc"></div>
+    <div class="confirm-actions">
+      <button class="btn btn-ghost" onclick="closeConfirm()">Hủy</button>
+      <button class="btn btn-danger" id="confirm-ok">Xóa</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast container -->
+<div class="toast-container" id="toast-container"></div>
+
+<!-- ============================================================
+     JAVASCRIPT
+============================================================ -->
+<script>
+/* ===== STATE ===== */
+let cfg = null;        // { owner, repo, token }
+let reports = [];      // array hiện tại
+let fileSha = null;    // SHA của reports.json trên GitHub (cần để update)
+
+/* ===== INIT ===== */
+window.addEventListener('DOMContentLoaded', () => {
+  // Set ngày mặc định = hôm nay
+  document.getElementById('f-date').value = new Date().toISOString().slice(0, 10);
+  onTypeChange();
+
+  // Kiểm tra token đã lưu
+  const saved = localStorage.getItem('dtdm_cfg');
+  if (saved) {
+    try {
+      cfg = JSON.parse(saved);
+      showAdmin();
+    } catch(e) { localStorage.removeItem('dtdm_cfg'); }
+  }
+});
+
+/* ===== AUTH ===== */
+async function doLogin() {
+  const owner = document.getElementById('inp-owner').value.trim();
+  const repo  = document.getElementById('inp-repo').value.trim();
+  const token = document.getElementById('inp-token').value.trim();
+  if (!owner || !repo || !token) { showToast('Vui lòng điền đầy đủ thông tin.', 'error'); return; }
+
+  const btn = document.getElementById('btn-login');
+  btn.disabled = true;
+  btn.innerHTML = '<div class="spinner"></div> Đang xác thực...';
+
+  try {
+    // Test quyền truy cập repo
+    const res = await ghGet(`/repos/${owner}/${repo}`);
+    if (!res.ok) throw new Error('Không thể truy cập repository. Kiểm tra lại username, repo, và token.');
+    cfg = { owner, repo, token };
+    localStorage.setItem('dtdm_cfg', JSON.stringify(cfg));
+    showAdmin();
+  } catch(e) {
+    showToast(e.message, 'error');
+    btn.disabled = false;
+    btn.innerHTML = 'Đăng nhập';
+  }
+}
+
+function doLogout() {
+  localStorage.removeItem('dtdm_cfg');
+  cfg = null; reports = []; fileSha = null;
+  document.getElementById('screen-admin').classList.add('hidden');
+  document.getElementById('screen-login').style.display = '';
+  document.getElementById('inp-token').value = '';
+}
+
+function showAdmin() {
+  document.getElementById('screen-login').style.display = 'none';
+  document.getElementById('screen-admin').classList.remove('hidden');
+  document.getElementById('lbl-repo').textContent = `${cfg.owner}/${cfg.repo}`;
+  loadReports();
+}
+
+/* ===== GITHUB API ===== */
+function ghGet(path) {
+  return fetch(`https://api.github.com${path}`, {
+    headers: { Authorization: `Bearer ${cfg.token}`, Accept: 'application/vnd.github+json' }
+  });
+}
+
+async function ghPutJson(content, message) {
+  const body = { message, content: btoa(unescape(encodeURIComponent(JSON.stringify(content, null, 2)))), sha: fileSha };
+  const res = await fetch(`https://api.github.com/repos/${cfg.owner}/${cfg.repo}/contents/reports.json`, {
+    method: 'PUT',
+    headers: {
+      Authorization: `Bearer ${cfg.token}`,
+      Accept: 'application/vnd.github+json',
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(body)
+  });
+  if (!res.ok) {
+    const err = await res.json();
+    throw new Error(err.message || 'Lỗi khi lưu lên GitHub');
+  }
+  const data = await res.json();
+  fileSha = data.content.sha;
+  return data;
+}
+
+/* ===== LOAD REPORTS ===== */
+async function loadReports() {
+  document.getElementById('table-loading').classList.remove('hidden');
+  document.getElementById('table-wrap').classList.add('hidden');
+  document.getElementById('table-empty').classList.add('hidden');
+
+  try {
+    const res = await ghGet(`/repos/${cfg.owner}/${cfg.repo}/contents/reports.json`);
+    if (res.status === 404) {
+      // File chưa có, khởi tạo rỗng
+      reports = []; fileSha = null;
+    } else if (!res.ok) {
+      throw new Error('Không thể tải danh sách báo cáo');
+    } else {
+      const data = await res.json();
+      fileSha = data.sha;
+      reports = JSON.parse(decodeURIComponent(escape(atob(data.content.replace(/\n/g, '')))));
+    }
+    renderTable();
+    updateStats();
+  } catch(e) {
+    showToast(e.message, 'error');
+  } finally {
+    document.getElementById('table-loading').classList.add('hidden');
+  }
+}
+
+/* ===== RENDER TABLE ===== */
+function renderTable() {
+  const tbody = document.getElementById('report-tbody');
+  if (!reports.length) {
+    document.getElementById('table-wrap').classList.add('hidden');
+    document.getElementById('table-empty').classList.remove('hidden');
+    return;
+  }
+  document.getElementById('table-wrap').classList.remove('hidden');
+  document.getElementById('table-empty').classList.add('hidden');
+
+  const sorted = [...reports].sort((a,b) => b.date.localeCompare(a.date));
+  tbody.innerHTML = sorted.map(r => `
+    <tr>
+      <td style="max-width:280px; font-weight:500; font-size:13px;">${r.title}</td>
+      <td><span class="badge badge-${r.type}">${r.type==='market'?'Thị trường':'Cổ phiếu'}</span></td>
+      <td>${r.ticker ? `<span class="ticker-tag">${r.ticker}</span>` : '–'}</td>
+      <td style="white-space:nowrap; color:var(--gray3); font-size:13px;">${formatDate(r.date)}</td>
+      <td>
+        ${r.driveId && r.driveId !== 'NHAP_ID_GOOGLE_DRIVE_VAO_DAY'
+          ? `<a href="https://drive.google.com/file/d/${r.driveId}/view" target="_blank" rel="noopener"
+              style="color:var(--navy2); font-size:12px; text-decoration:none;">🔗 Mở</a>`
+          : '<span style="color:var(--red); font-size:12px;">⚠ Chưa có</span>'}
+      </td>
+      <td>
+        <div class="actions">
+          <button class="btn btn-danger btn-sm" onclick="confirmDelete('${r.id}', \`${r.title.replace(/`/g,'')}\`)">Xóa</button>
+        </div>
+      </td>
+    </tr>
+  `).join('');
+}
+
+/* ===== STATS ===== */
+function updateStats() {
+  document.getElementById('s-total').textContent = reports.length;
+  document.getElementById('s-market').textContent = reports.filter(r=>r.type==='market').length;
+  document.getElementById('s-stock').textContent = reports.filter(r=>r.type==='stock').length;
+  if (reports.length) {
+    const latest = [...reports].sort((a,b)=>b.date.localeCompare(a.date))[0];
+    document.getElementById('s-latest').textContent = formatDate(latest.date);
+  } else {
+    document.getElementById('s-latest').textContent = '–';
+  }
+}
+
+/* ===== ADD REPORT ===== */
+async function addReport() {
+  const type   = document.getElementById('f-type').value;
+  const date   = document.getElementById('f-date').value;
+  const title  = document.getElementById('f-title').value.trim();
+  const ticker = document.getElementById('f-ticker').value.trim().toUpperCase();
+  const rec    = document.getElementById('f-rec').value;
+  const desc   = document.getElementById('f-desc').value.trim();
+  const drive  = document.getElementById('f-drive').value.trim();
+
+  if (!title) { showToast('Vui lòng nhập tiêu đề báo cáo.', 'error'); return; }
+  if (!date)  { showToast('Vui lòng chọn ngày.', 'error'); return; }
+  if (!drive) { showToast('Vui lòng nhập Google Drive ID.', 'error'); return; }
+
+  // Tự động tạo tiêu đề nếu người dùng chưa sửa
+  let finalTitle = title;
+  if (type === 'stock' && ticker && rec && !title.includes(ticker)) {
+    finalTitle = `Phân tích Cổ phiếu ${ticker}${rec ? ' – Khuyến nghị ' + rec : ''}`;
+  }
+
+  const newReport = {
+    id: 'rpt-' + Date.now(),
+    title: finalTitle,
+    type, date, desc,
+    ticker: type === 'stock' ? ticker : '',
+    driveId: drive
+  };
+
+  const btn = document.getElementById('btn-add');
+  const status = document.getElementById('save-status');
+  btn.disabled = true;
+  btn.innerHTML = '<div class="spinner"></div> Đang lưu...';
+  status.textContent = '';
+
+  try {
+    const newReports = [newReport, ...reports];
+    await ghPutJson(newReports, `[Admin] Thêm báo cáo: ${finalTitle}`);
+    reports = newReports;
+    renderTable();
+    updateStats();
+    resetForm();
+    showToast('✅ Đã thêm báo cáo và lưu lên GitHub. Cloudflare sẽ deploy trong ~30 giây.', 'success');
+  } catch(e) {
+    showToast(e.message, 'error');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg> Thêm & Lưu lên GitHub';
+  }
+}
+
+/* ===== DELETE ===== */
+let pendingDeleteId = null;
+function confirmDelete(id, title) {
+  pendingDeleteId = id;
+  document.getElementById('confirm-title').textContent = 'Xóa báo cáo?';
+  document.getElementById('confirm-desc').textContent = `Sẽ xóa: "${title}". Hành động này không thể hoàn tác.`;
+  document.getElementById('confirm-overlay').classList.add('open');
+  document.getElementById('confirm-ok').onclick = doDelete;
+}
+function closeConfirm() {
+  document.getElementById('confirm-overlay').classList.remove('open');
+  pendingDeleteId = null;
+}
+async function doDelete() {
+  if (!pendingDeleteId) return;
+  closeConfirm();
+  try {
+    const newReports = reports.filter(r => r.id !== pendingDeleteId);
+    await ghPutJson(newReports, `[Admin] Xóa báo cáo ID: ${pendingDeleteId}`);
+    reports = newReports;
+    renderTable();
+    updateStats();
+    showToast('Đã xóa báo cáo.', 'success');
+  } catch(e) {
+    showToast(e.message, 'error');
+  }
+}
+
+/* ===== FORM HELPERS ===== */
+function onTypeChange() {
+  const isStock = document.getElementById('f-type').value === 'stock';
+  document.getElementById('row-ticker').style.display = isStock ? '' : 'none';
+  // Gợi ý tiêu đề
+  if (!document.getElementById('f-title').value) {
+    const dateVal = document.getElementById('f-date').value;
+    const d = dateVal ? new Date(dateVal) : new Date();
+    const dd = String(d.getDate()).padStart(2,'0');
+    const mm = String(d.getMonth()+1).padStart(2,'0');
+    const yy = d.getFullYear();
+    if (!isStock) document.getElementById('f-title').value = `Báo cáo Thị trường – Phiên ${dd}/${mm}/${yy}`;
+    else document.getElementById('f-title').value = '';
+  }
+}
+function onDriveInput() {
+  let val = document.getElementById('f-drive').value.trim();
+  // Tự động tách ID nếu user dán link đầy đủ
+  const m = val.match(/\/d\/([^\/\?]+)/);
+  if (m) { val = m[1]; document.getElementById('f-drive').value = val; }
+  const prev = document.getElementById('drive-preview');
+  const link = document.getElementById('drive-preview-link');
+  if (val.length > 10) {
+    prev.classList.add('show');
+    link.href = `https://drive.google.com/file/d/${val}/view`;
+  } else {
+    prev.classList.remove('show');
+  }
+}
+function resetForm() {
+  document.getElementById('f-title').value = '';
+  document.getElementById('f-ticker').value = '';
+  document.getElementById('f-desc').value = '';
+  document.getElementById('f-drive').value = '';
+  document.getElementById('drive-preview').classList.remove('show');
+  document.getElementById('f-date').value = new Date().toISOString().slice(0,10);
+  document.getElementById('f-type').value = 'market';
+  onTypeChange();
+}
+
+/* ===== UTILS ===== */
+function formatDate(dateStr) {
+  const [y,m,d] = dateStr.split('-');
+  return `${d}/${m}/${y}`;
+}
+function showToast(msg, type='success') {
+  const c = document.getElementById('toast-container');
+  const t = document.createElement('div');
+  t.className = `toast ${type === 'error' ? 'error' : type === 'loading' ? 'loading' : ''}`;
+  t.innerHTML = msg;
+  c.appendChild(t);
+  setTimeout(() => { t.style.animation = 'fadeOut 0.3s ease forwards'; setTimeout(() => t.remove(), 300); }, 4000);
+}
+</script>
+</body>
+</html>
