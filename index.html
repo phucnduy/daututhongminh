@@ -3,663 +3,686 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Đầu Tư Thông Minh Group – Báo Cáo Phân Tích</title>
-  <meta name="description" content="Báo cáo phân tích cổ phiếu và thị trường chứng khoán Việt Nam từ Đầu Tư Thông Minh Group" />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700;900&family=Be+Vietnam+Pro:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <title>Đầu Tư Thông Minh Group – Phân Tích Chứng Khoán Chuyên Sâu</title>
+  <meta name="description" content="Nhóm nghiên cứu phân tích chứng khoán Việt Nam từ các chuyên gia có kinh nghiệm trên 20 năm. Báo cáo thị trường, phân tích cổ phiếu, tư vấn đầu tư."/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,900;1,400;1,700&family=Be+Vietnam+Pro:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
   <style>
-    /* ===== RESET & BASE ===== */
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    :root {
-      --navy:    #0D2B52;
-      --navy2:   #1B4F8A;
-      --gold:    #C9A84C;
-      --gold2:   #E8C86A;
-      --cream:   #F9F6EF;
-      --white:   #FFFFFF;
-      --gray1:   #F2F4F7;
-      --gray2:   #D4D8E1;
-      --gray3:   #8A94A6;
-      --text:    #1A2438;
-      --radius:  8px;
-    }
-    html { scroll-behavior: smooth; }
-    body {
-      font-family: 'Be Vietnam Pro', sans-serif;
-      background: var(--cream);
-      color: var(--text);
-      min-height: 100vh;
-      -webkit-font-smoothing: antialiased;
-    }
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --navy:#08192E; --navy2:#0D2B52; --navy3:#1B4F8A;
+  --gold:#C9A84C; --gold2:#E8C86A; --gold3:#F5DFA0;
+  --green:#1A7A4A; --red:#C0392B;
+  --cream:#F8F5EE; --white:#FFFFFF;
+  --gray1:#F2F4F7; --gray2:#D4D8E1; --gray3:#8A94A6;
+  --text:#1A2438; --r:8px;
+}
+html { scroll-behavior: smooth; }
+body { font-family:'Be Vietnam Pro',sans-serif; background:var(--cream); color:var(--text); overflow-x:hidden; -webkit-font-smoothing:antialiased; user-select:none; -webkit-user-select:none; }
+a { text-decoration:none; color:inherit; }
+button { cursor:pointer; font-family:inherit; }
 
-    /* ===== ANTI-DOWNLOAD ===== */
-    /* Chặn chuột phải toàn trang */
-    body { user-select: none; -webkit-user-select: none; }
+/* TICKER */
+.ticker-bar { background:var(--navy); border-bottom:1px solid rgba(201,168,76,.25); overflow:hidden; height:34px; display:flex; align-items:center; }
+.ticker-track { display:flex; animation:ticker 45s linear infinite; white-space:nowrap; }
+.ticker-bar:hover .ticker-track { animation-play-state:paused; }
+@keyframes ticker { from{transform:translateX(0)} to{transform:translateX(-50%)} }
+.ticker-item { display:inline-flex; align-items:center; gap:8px; padding:0 28px; font-size:12px; font-weight:600; letter-spacing:.03em; color:rgba(255,255,255,.6); border-right:1px solid rgba(255,255,255,.08); }
+.ticker-item .sym { color:var(--gold2); font-weight:700; }
+.up { color:#2ECC71; } .dn { color:#E74C3C; }
 
-    /* ===== HEADER ===== */
-    .site-header {
-      position: sticky; top: 0; z-index: 100;
-      background: var(--navy);
-      border-bottom: 3px solid var(--gold);
-      padding: 0 40px;
-      display: flex; align-items: center; justify-content: space-between;
-      height: 68px;
-      box-shadow: 0 4px 24px rgba(13,43,82,0.18);
-    }
-    .logo-wrap {
-      display: flex; align-items: center; gap: 14px; text-decoration: none;
-    }
-    .logo-icon {
-      width: 40px; height: 40px;
-      background: var(--gold);
-      border-radius: 6px;
-      display: flex; align-items: center; justify-content: center;
-      font-family: 'Playfair Display', serif;
-      font-weight: 900; font-size: 20px; color: var(--navy);
-      flex-shrink: 0;
-    }
-    .logo-text { display: flex; flex-direction: column; line-height: 1.15; }
-    .logo-text span:first-child {
-      font-family: 'Playfair Display', serif;
-      font-weight: 700; font-size: 15px; color: var(--white);
-      letter-spacing: 0.02em;
-    }
-    .logo-text span:last-child {
-      font-size: 11px; color: var(--gold2); font-weight: 500; letter-spacing: 0.06em;
-      text-transform: uppercase;
-    }
-    .header-links {
-      display: flex; align-items: center; gap: 28px;
-    }
-    .header-links a {
-      color: rgba(255,255,255,0.75); font-size: 14px; font-weight: 500;
-      text-decoration: none; letter-spacing: 0.03em;
-      transition: color 0.2s;
-    }
-    .header-links a:hover { color: var(--gold2); }
-    .header-cta {
-      background: var(--gold); color: var(--navy) !important;
-      font-weight: 700 !important; padding: 8px 20px; border-radius: 6px;
-      transition: background 0.2s !important;
-    }
-    .header-cta:hover { background: var(--gold2) !important; }
+/* HEADER */
+.site-header { position:sticky; top:0; z-index:200; background:rgba(8,25,46,.97); backdrop-filter:blur(12px); border-bottom:1px solid rgba(201,168,76,.2); padding:0 48px; height:68px; display:flex; align-items:center; justify-content:space-between; transition:box-shadow .3s; }
+.site-header.scrolled { box-shadow:0 4px 32px rgba(0,0,0,.3); }
+.logo { display:flex; align-items:center; gap:14px; }
+.logo-mark { width:42px; height:42px; background:linear-gradient(135deg,var(--gold),var(--gold2)); border-radius:8px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.logo-name { font-family:'Playfair Display',serif; font-size:16px; font-weight:700; color:var(--white); }
+.logo-sub { font-size:10.5px; color:var(--gold2); letter-spacing:.1em; text-transform:uppercase; font-weight:500; }
+.nav { display:flex; align-items:center; gap:6px; }
+.nav-link { padding:8px 16px; border-radius:6px; font-size:14px; font-weight:500; color:rgba(255,255,255,.7); transition:all .18s; }
+.nav-link:hover { color:var(--white); background:rgba(255,255,255,.07); }
+.nav-cta { margin-left:8px; padding:9px 22px; border-radius:6px; background:var(--gold); color:var(--navy2); font-size:14px; font-weight:700; border:none; transition:all .18s; display:flex; align-items:center; gap:8px; }
+.nav-cta:hover { background:var(--gold2); transform:translateY(-1px); box-shadow:0 4px 16px rgba(201,168,76,.4); }
 
-    /* ===== HERO ===== */
-    .hero {
-      background: linear-gradient(135deg, var(--navy) 0%, #1a3a6e 60%, #2555a0 100%);
-      padding: 72px 40px 64px;
-      text-align: center;
-      position: relative; overflow: hidden;
-    }
-    .hero::before {
-      content: '';
-      position: absolute; inset: 0;
-      background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23C9A84C' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
-      opacity: 1;
-    }
-    .hero-tag {
-      display: inline-block;
-      background: rgba(201,168,76,0.15); border: 1px solid rgba(201,168,76,0.4);
-      color: var(--gold2); font-size: 12px; font-weight: 600;
-      letter-spacing: 0.12em; text-transform: uppercase;
-      padding: 5px 16px; border-radius: 20px; margin-bottom: 20px;
-    }
-    .hero h1 {
-      font-family: 'Playfair Display', serif;
-      font-size: clamp(28px, 4vw, 46px); font-weight: 900;
-      color: var(--white); line-height: 1.2;
-      margin-bottom: 16px; position: relative;
-    }
-    .hero h1 em {
-      font-style: normal; color: var(--gold2);
-    }
-    .hero p {
-      font-size: 16px; color: rgba(255,255,255,0.7);
-      max-width: 560px; margin: 0 auto 32px; line-height: 1.7;
-    }
-    .hero-stats {
-      display: flex; align-items: center; justify-content: center; gap: 48px;
-      position: relative;
-    }
-    .stat-item { text-align: center; }
-    .stat-num {
-      font-family: 'Playfair Display', serif;
-      font-size: 32px; font-weight: 700; color: var(--gold2);
-      line-height: 1;
-    }
-    .stat-label { font-size: 12px; color: rgba(255,255,255,0.55); margin-top: 4px; }
-    .stat-divider { width: 1px; height: 40px; background: rgba(255,255,255,0.15); }
+/* HERO */
+.hero { background:var(--navy); position:relative; overflow:hidden; padding:100px 48px 80px; min-height:580px; display:flex; align-items:center; }
+.hero-bg { position:absolute; inset:0; overflow:hidden; opacity:.06; pointer-events:none; }
+.hero-bg svg { width:100%; height:100%; }
+.hero::after { content:''; position:absolute; top:0; right:0; width:420px; height:100%; background:radial-gradient(ellipse at right,rgba(27,79,138,.35),transparent 70%); pointer-events:none; }
+.hero-content { position:relative; z-index:2; max-width:660px; }
+.hero-eyebrow { display:inline-flex; align-items:center; gap:10px; background:rgba(201,168,76,.12); border:1px solid rgba(201,168,76,.3); border-radius:20px; padding:6px 18px; margin-bottom:28px; }
+.eyebrow-dot { width:7px; height:7px; border-radius:50%; background:var(--gold2); animation:pulse 2s infinite; }
+@keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.5;transform:scale(1.3)} }
+.eyebrow-text { font-size:12px; font-weight:600; color:var(--gold2); letter-spacing:.1em; text-transform:uppercase; }
+.hero h1 { font-family:'Playfair Display',serif; font-size:clamp(34px,4.5vw,56px); font-weight:900; color:var(--white); line-height:1.18; margin-bottom:22px; }
+.hero h1 em { font-style:italic; color:var(--gold2); }
+.hero-desc { font-size:17px; color:rgba(255,255,255,.65); line-height:1.75; margin-bottom:40px; max-width:540px; font-weight:300; }
+.hero-actions { display:flex; align-items:center; gap:16px; flex-wrap:wrap; }
+.btn-primary { display:inline-flex; align-items:center; gap:10px; background:var(--gold); color:var(--navy2); font-size:15px; font-weight:700; padding:14px 28px; border-radius:8px; border:none; transition:all .2s; }
+.btn-primary:hover { background:var(--gold2); transform:translateY(-2px); box-shadow:0 8px 24px rgba(201,168,76,.35); }
+.btn-secondary { display:inline-flex; align-items:center; gap:10px; background:rgba(255,255,255,.08); color:var(--white); font-size:15px; font-weight:600; padding:14px 28px; border-radius:8px; border:1px solid rgba(255,255,255,.18); transition:all .2s; }
+.btn-secondary:hover { background:rgba(255,255,255,.13); border-color:rgba(255,255,255,.3); }
+/* Hero right cards */
+.hero-visual { position:absolute; right:48px; top:50%; transform:translateY(-50%); width:300px; z-index:2; display:flex; flex-direction:column; gap:12px; }
+.hero-card { background:rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.12); border-radius:12px; padding:18px 20px; backdrop-filter:blur(8px); }
+.hero-card-label { font-size:11px; color:rgba(255,255,255,.45); font-weight:500; text-transform:uppercase; letter-spacing:.08em; margin-bottom:6px; }
+.hero-card-val { font-family:'Playfair Display',serif; font-size:28px; font-weight:700; color:var(--white); }
+.hero-card-chg { font-size:13px; font-weight:600; margin-top:3px; }
+.mini-chart { height:38px; margin-top:10px; }
 
-    /* ===== MAIN CONTENT ===== */
-    .main { max-width: 1140px; margin: 0 auto; padding: 56px 24px 80px; }
+/* STATS STRIP */
+.stats-strip { background:var(--navy2); border-bottom:3px solid var(--gold); padding:22px 48px; display:flex; align-items:center; justify-content:center; }
+.strip-item { flex:1; text-align:center; padding:0 20px; border-right:1px solid rgba(255,255,255,.12); }
+.strip-item:last-child { border-right:none; }
+.strip-num { font-family:'Playfair Display',serif; font-size:34px; font-weight:700; color:var(--gold2); line-height:1; }
+.strip-label { font-size:12px; color:rgba(255,255,255,.5); margin-top:4px; }
 
-    /* ===== TABS ===== */
-    .tab-bar {
-      display: flex; align-items: center; gap: 0;
-      border-bottom: 2px solid var(--gray2);
-      margin-bottom: 40px;
-    }
-    .tab-btn {
-      background: none; border: none; cursor: pointer;
-      font-family: 'Be Vietnam Pro', sans-serif;
-      font-size: 15px; font-weight: 600; color: var(--gray3);
-      padding: 12px 28px; position: relative;
-      transition: color 0.2s;
-      border-bottom: 3px solid transparent; margin-bottom: -2px;
-    }
-    .tab-btn:hover { color: var(--navy2); }
-    .tab-btn.active {
-      color: var(--navy2); border-bottom-color: var(--gold);
-    }
-    .tab-count {
-      display: inline-flex; align-items: center; justify-content: center;
-      background: var(--gray1); color: var(--gray3);
-      font-size: 11px; font-weight: 700;
-      width: 22px; height: 22px; border-radius: 20px; margin-left: 8px;
-    }
-    .tab-btn.active .tab-count {
-      background: var(--navy2); color: var(--white);
-    }
+/* SECTION COMMONS */
+.section { padding:96px 48px; }
+.section-inner { max-width:1180px; margin:0 auto; }
+.section-tag { display:inline-flex; align-items:center; gap:8px; font-size:12px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:var(--gold); margin-bottom:14px; }
+.section-tag::before { content:''; width:24px; height:2px; background:var(--gold); border-radius:2px; }
+.section-title { font-family:'Playfair Display',serif; font-size:clamp(28px,3vw,42px); font-weight:800; color:var(--navy2); line-height:1.25; margin-bottom:16px; }
+.section-title em { font-style:italic; color:var(--navy3); }
+.section-subtitle { font-size:16px; color:var(--gray3); line-height:1.75; max-width:580px; }
 
-    /* ===== FILTER BAR ===== */
-    .filter-bar {
-      display: flex; align-items: center; gap: 12px;
-      margin-bottom: 28px; flex-wrap: wrap;
-    }
-    .filter-label { font-size: 13px; color: var(--gray3); font-weight: 500; }
-    .filter-chip {
-      background: var(--white); border: 1.5px solid var(--gray2);
-      border-radius: 20px; padding: 5px 16px;
-      font-size: 13px; font-weight: 500; color: var(--gray3);
-      cursor: pointer; transition: all 0.18s;
-    }
-    .filter-chip:hover, .filter-chip.active {
-      background: var(--navy2); border-color: var(--navy2);
-      color: var(--white);
-    }
+/* ABOUT */
+.about-section { background:var(--white); }
+.about-grid { display:grid; grid-template-columns:1fr 1fr; gap:80px; align-items:center; margin-top:60px; }
+.about-img-placeholder { width:100%; height:400px; background:linear-gradient(135deg,var(--navy2),#2255a0); border-radius:16px; display:flex; flex-direction:column; align-items:center; justify-content:center; position:relative; overflow:hidden; }
+.about-img-placeholder::before { content:''; position:absolute; inset:0; background:url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23C9A84C' fill-opacity='0.06'%3E%3Cpath d='M0 20L20 0l20 20-20 20z'/%3E%3C/g%3E%3C/svg%3E"); }
+.about-badge { position:absolute; bottom:-16px; right:-16px; background:var(--gold); border-radius:12px; padding:18px 22px; text-align:center; box-shadow:0 8px 32px rgba(201,168,76,.35); }
+.about-badge-num { font-family:'Playfair Display',serif; font-size:36px; font-weight:900; color:var(--navy2); line-height:1; }
+.about-badge-text { font-size:10px; font-weight:700; color:var(--navy2); text-transform:uppercase; letter-spacing:.06em; margin-top:3px; }
+.about-img-wrap { position:relative; }
+.about-points { list-style:none; margin:28px 0 36px; display:flex; flex-direction:column; gap:18px; }
+.about-point { display:flex; gap:16px; align-items:flex-start; }
+.point-icon { width:42px; height:42px; border-radius:10px; background:linear-gradient(135deg,var(--navy2),var(--navy3)); display:flex; align-items:center; justify-content:center; flex-shrink:0; margin-top:1px; }
+.point-title { font-size:15px; font-weight:700; color:var(--navy2); margin-bottom:3px; }
+.point-desc { font-size:13.5px; color:var(--gray3); line-height:1.6; }
+.team-row { display:flex; gap:14px; margin-top:36px; }
+.team-card { flex:1; background:var(--gray1); border-radius:10px; padding:16px; border:1.5px solid var(--gray2); text-align:center; transition:all .2s; }
+.team-card:hover { border-color:var(--navy3); transform:translateY(-2px); }
+.team-avatar { width:52px; height:52px; border-radius:50%; background:linear-gradient(135deg,var(--navy2),var(--navy3)); margin:0 auto 10px; display:flex; align-items:center; justify-content:center; font-family:'Playfair Display',serif; font-size:20px; font-weight:700; color:var(--gold2); }
+.team-name { font-size:13px; font-weight:700; color:var(--navy2); margin-bottom:3px; }
+.team-role { font-size:11.5px; color:var(--gray3); line-height:1.5; }
+.team-exp { display:inline-block; margin-top:6px; background:#EBF2FC; color:var(--navy3); font-size:10.5px; font-weight:700; padding:2px 8px; border-radius:20px; }
 
-    /* ===== REPORT GRID ===== */
-    .report-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-      gap: 24px;
-    }
+/* SERVICES */
+.services-section { background:var(--cream); }
+.services-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:24px; margin-top:56px; }
+.service-card { background:var(--white); border-radius:14px; border:1.5px solid var(--gray2); padding:36px 28px; transition:all .25s; position:relative; overflow:hidden; }
+.service-card::before { content:''; position:absolute; top:0; left:0; right:0; height:3px; background:linear-gradient(90deg,var(--navy2),var(--navy3)); transform:scaleX(0); transform-origin:left; transition:transform .3s; }
+.service-card:hover { transform:translateY(-5px); box-shadow:0 16px 48px rgba(13,43,82,.1); border-color:var(--navy3); }
+.service-card:hover::before { transform:scaleX(1); }
+.service-icon { width:56px; height:56px; border-radius:14px; background:linear-gradient(135deg,var(--navy2),var(--navy3)); display:flex; align-items:center; justify-content:center; margin-bottom:22px; }
+.service-card.gold .service-icon { background:linear-gradient(135deg,#8A6820,var(--gold)); }
+.service-card.green .service-icon { background:linear-gradient(135deg,#0D5C36,var(--green)); }
+.service-title { font-family:'Playfair Display',serif; font-size:20px; font-weight:700; color:var(--navy2); margin-bottom:12px; }
+.service-desc { font-size:14px; color:var(--gray3); line-height:1.75; margin-bottom:22px; }
+.service-features { list-style:none; display:flex; flex-direction:column; gap:8px; margin-bottom:28px; }
+.service-features li { display:flex; align-items:flex-start; gap:9px; font-size:13.5px; color:var(--text); }
+.service-features li::before { content:''; width:6px; height:6px; border-radius:50%; background:var(--gold); flex-shrink:0; margin-top:6px; }
+.service-link { display:inline-flex; align-items:center; gap:7px; font-size:13.5px; font-weight:700; color:var(--navy3); transition:gap .2s; }
+.service-card:hover .service-link { gap:12px; }
 
-    /* ===== REPORT CARD ===== */
-    .report-card {
-      background: var(--white);
-      border-radius: 12px;
-      border: 1.5px solid var(--gray2);
-      overflow: hidden;
-      cursor: pointer;
-      transition: transform 0.22s, box-shadow 0.22s, border-color 0.22s;
-      animation: fadeUp 0.4s ease both;
-    }
-    .report-card:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 12px 40px rgba(13,43,82,0.12);
-      border-color: var(--navy2);
-    }
-    @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(16px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-    .card-thumb {
-      height: 8px;
-      background: linear-gradient(90deg, var(--navy2), var(--gold));
-    }
-    .card-thumb.type-market { background: linear-gradient(90deg, #0D2B52, #1B4F8A); }
-    .card-thumb.type-stock { background: linear-gradient(90deg, #1A7A4A, #2EAD6E); }
-    .card-body { padding: 20px 22px 22px; }
-    .card-meta {
-      display: flex; align-items: center; gap: 8px; margin-bottom: 12px;
-    }
-    .badge {
-      display: inline-flex; align-items: center; gap: 5px;
-      padding: 3px 10px; border-radius: 4px;
-      font-size: 11px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase;
-    }
-    .badge-market { background: #EBF2FC; color: var(--navy2); }
-    .badge-stock  { background: #E8F7EF; color: #1A7A4A; }
-    .card-date { font-size: 12px; color: var(--gray3); margin-left: auto; }
-    .card-title {
-      font-family: 'Playfair Display', serif;
-      font-size: 17px; font-weight: 700; color: var(--navy);
-      line-height: 1.4; margin-bottom: 10px;
-    }
-    .card-desc { font-size: 13.5px; color: var(--gray3); line-height: 1.6; margin-bottom: 16px; }
-    .card-footer {
-      display: flex; align-items: center; justify-content: space-between;
-    }
-    .card-ticker {
-      font-size: 12px; font-weight: 700; color: var(--gold);
-      letter-spacing: 0.08em; background: #FBF6EA; padding: 3px 10px; border-radius: 4px;
-    }
-    .card-read {
-      font-size: 13px; font-weight: 600; color: var(--navy2);
-      display: flex; align-items: center; gap: 6px;
-    }
-    .card-read svg { transition: transform 0.2s; }
-    .report-card:hover .card-read svg { transform: translateX(4px); }
+/* WHY US */
+.whyus-section { background:var(--navy); position:relative; overflow:hidden; }
+.whyus-section::before { content:''; position:absolute; inset:0; background:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23C9A84C' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4z'/%3E%3C/g%3E%3C/svg%3E"); }
+.whyus-section .section-title { color:var(--white); }
+.whyus-section .section-subtitle { color:rgba(255,255,255,.55); }
+.whyus-section .section-tag { color:var(--gold2); }
+.whyus-section .section-tag::before { background:var(--gold2); }
+.whyus-grid { display:grid; grid-template-columns:repeat(4,1fr); border:1px solid rgba(255,255,255,.1); border-radius:14px; overflow:hidden; margin-top:56px; }
+.whyus-item { background:rgba(255,255,255,.04); padding:36px 24px; text-align:center; border-right:1px solid rgba(255,255,255,.08); transition:background .2s; }
+.whyus-item:last-child { border-right:none; }
+.whyus-item:hover { background:rgba(255,255,255,.07); }
+.whyus-num { font-family:'Playfair Display',serif; font-size:44px; font-weight:900; color:var(--gold2); line-height:1; margin-bottom:8px; }
+.whyus-num sup { font-size:22px; vertical-align:super; }
+.whyus-label { font-size:14px; color:rgba(255,255,255,.65); line-height:1.5; }
+.testimonial-row { display:grid; grid-template-columns:1fr 1fr; gap:24px; margin-top:40px; }
+.testimonial-card { background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.1); border-radius:12px; padding:28px; }
+.tquote { font-family:'Playfair Display',serif; font-style:italic; font-size:16px; color:rgba(255,255,255,.8); line-height:1.7; margin-bottom:20px; }
+.tquote::before { content:'\201C'; color:var(--gold2); font-size:36px; line-height:0; vertical-align:-12px; margin-right:4px; }
+.tauthor { display:flex; align-items:center; gap:12px; }
+.tavatar { width:40px; height:40px; border-radius:50%; background:linear-gradient(135deg,var(--gold),var(--gold2)); display:flex; align-items:center; justify-content:center; font-family:'Playfair Display',serif; font-weight:700; color:var(--navy2); font-size:16px; }
+.tname { font-size:14px; font-weight:700; color:var(--white); }
+.ttitle { font-size:12px; color:rgba(255,255,255,.4); }
 
-    /* ===== EMPTY STATE ===== */
-    .empty-state {
-      text-align: center; padding: 80px 24px; color: var(--gray3);
-    }
-    .empty-state svg { opacity: 0.3; margin-bottom: 16px; }
-    .empty-state p { font-size: 15px; }
+/* REPORTS */
+.reports-section { background:var(--gray1); }
+.reports-header { display:flex; align-items:flex-end; justify-content:space-between; margin-bottom:40px; gap:24px; flex-wrap:wrap; }
+.tab-bar { display:flex; align-items:center; border-bottom:2px solid var(--gray2); }
+.tab-btn { background:none; border:none; cursor:pointer; font-family:'Be Vietnam Pro',sans-serif; font-size:14px; font-weight:600; color:var(--gray3); padding:10px 20px; border-bottom:3px solid transparent; margin-bottom:-2px; transition:color .2s; }
+.tab-btn:hover { color:var(--navy2); }
+.tab-btn.active { color:var(--navy2); border-bottom-color:var(--gold); }
+.tab-count { display:inline-flex; align-items:center; justify-content:center; background:var(--gray1); color:var(--gray3); font-size:11px; font-weight:700; width:20px; height:20px; border-radius:20px; margin-left:6px; }
+.tab-btn.active .tab-count { background:var(--navy2); color:var(--white); }
+.filter-bar { display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:28px; }
+.filter-label { font-size:12.5px; color:var(--gray3); font-weight:500; }
+.filter-chip { background:var(--white); border:1.5px solid var(--gray2); border-radius:20px; padding:4px 14px; font-size:12.5px; font-weight:500; color:var(--gray3); cursor:pointer; transition:all .18s; }
+.filter-chip:hover, .filter-chip.active { background:var(--navy2); border-color:var(--navy2); color:var(--white); }
+.report-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(320px,1fr)); gap:22px; }
+.report-card { background:var(--white); border-radius:12px; border:1.5px solid var(--gray2); overflow:hidden; cursor:pointer; transition:transform .22s,box-shadow .22s,border-color .22s; animation:fadeUp .4s ease both; }
+.report-card:hover { transform:translateY(-4px); box-shadow:0 12px 40px rgba(13,43,82,.1); border-color:var(--navy2); }
+@keyframes fadeUp { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
+.card-strip { height:4px; }
+.card-strip.market { background:linear-gradient(90deg,var(--navy2),var(--navy3)); }
+.card-strip.stock  { background:linear-gradient(90deg,var(--green),#2EAD6E); }
+.card-body { padding:20px 22px 22px; }
+.card-meta { display:flex; align-items:center; gap:8px; margin-bottom:11px; }
+.badge { display:inline-flex; align-items:center; padding:3px 9px; border-radius:4px; font-size:11px; font-weight:700; letter-spacing:.04em; text-transform:uppercase; }
+.badge-market { background:#EBF2FC; color:var(--navy3); }
+.badge-stock  { background:#E8F7EF; color:var(--green); }
+.card-date { font-size:12px; color:var(--gray3); margin-left:auto; }
+.card-title { font-family:'Playfair Display',serif; font-size:17px; font-weight:700; color:var(--navy2); line-height:1.4; margin-bottom:9px; }
+.card-desc { font-size:13px; color:var(--gray3); line-height:1.65; margin-bottom:16px; }
+.card-footer { display:flex; align-items:center; justify-content:space-between; }
+.card-ticker { font-size:12px; font-weight:700; color:var(--gold); letter-spacing:.08em; background:#FBF6EA; padding:3px 10px; border-radius:4px; }
+.card-read { font-size:13px; font-weight:600; color:var(--navy3); display:flex; align-items:center; gap:5px; }
+.card-read svg { transition:transform .2s; }
+.report-card:hover .card-read svg { transform:translateX(4px); }
+.empty-state { text-align:center; padding:80px; color:var(--gray3); font-size:15px; grid-column:1/-1; }
 
-    /* ===== VIEWER MODAL ===== */
-    .modal-overlay {
-      position: fixed; inset: 0; z-index: 1000;
-      background: rgba(10,20,40,0.82);
-      backdrop-filter: blur(6px);
-      display: none; align-items: center; justify-content: center;
-      padding: 20px;
-      animation: fadeIn 0.2s ease;
-    }
-    .modal-overlay.open { display: flex; }
-    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-    .modal-box {
-      background: var(--white); border-radius: 14px;
-      width: 100%; max-width: 980px;
-      height: 90vh; max-height: 900px;
-      display: flex; flex-direction: column;
-      overflow: hidden;
-      box-shadow: 0 32px 80px rgba(0,0,0,0.4);
-      animation: slideUp 0.25s ease;
-    }
-    @keyframes slideUp {
-      from { opacity: 0; transform: translateY(24px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-    .modal-header {
-      background: var(--navy);
-      padding: 16px 24px;
-      display: flex; align-items: center; justify-content: space-between;
-      flex-shrink: 0;
-      border-bottom: 2px solid var(--gold);
-    }
-    .modal-title {
-      font-family: 'Playfair Display', serif;
-      font-size: 16px; font-weight: 700; color: var(--white);
-      max-width: 75%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-    }
-    .modal-controls { display: flex; align-items: center; gap: 10px; }
-    .modal-close {
-      background: rgba(255,255,255,0.12); border: none; cursor: pointer;
-      width: 36px; height: 36px; border-radius: 8px;
-      display: flex; align-items: center; justify-content: center;
-      color: var(--white); transition: background 0.18s;
-    }
-    .modal-close:hover { background: rgba(255,255,255,0.22); }
-    .modal-notice {
-      background: #FBF6EA; border-bottom: 1px solid #F0E8CF;
-      padding: 8px 24px;
-      font-size: 12px; color: #8A7040; flex-shrink: 0;
-      display: flex; align-items: center; gap: 8px;
-    }
-    .modal-viewer {
-      flex: 1; position: relative; background: #e8e8e8;
-    }
-    .modal-viewer iframe {
-      width: 100%; height: 100%; border: none;
-      display: block;
-    }
+/* CTA BANNER */
+.cta-section { background:linear-gradient(135deg,var(--navy2) 0%,#1a3a6e 50%,var(--navy3) 100%); padding:80px 48px; text-align:center; position:relative; overflow:hidden; }
+.cta-section::before { content:''; position:absolute; inset:0; background:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23C9A84C' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4z'/%3E%3C/g%3E%3C/svg%3E"); }
+.cta-inner { position:relative; z-index:1; max-width:700px; margin:0 auto; }
+.cta-title { font-family:'Playfair Display',serif; font-size:clamp(26px,3vw,40px); font-weight:800; color:var(--white); line-height:1.25; margin-bottom:14px; }
+.cta-title em { font-style:italic; color:var(--gold2); }
+.cta-subtitle { font-size:16px; color:rgba(255,255,255,.65); margin-bottom:40px; line-height:1.7; }
+.cta-buttons { display:flex; align-items:center; justify-content:center; gap:16px; flex-wrap:wrap; }
+.btn-cta-p { display:inline-flex; align-items:center; gap:10px; background:var(--gold); color:var(--navy2); font-size:16px; font-weight:700; padding:15px 32px; border-radius:8px; border:none; transition:all .2s; }
+.btn-cta-p:hover { background:var(--gold2); transform:translateY(-2px); box-shadow:0 8px 28px rgba(201,168,76,.4); }
+.btn-cta-s { display:inline-flex; align-items:center; gap:10px; background:transparent; color:var(--white); font-size:15px; font-weight:600; padding:15px 32px; border-radius:8px; border:1.5px solid rgba(255,255,255,.3); transition:all .2s; }
+.btn-cta-s:hover { background:rgba(255,255,255,.1); border-color:rgba(255,255,255,.5); }
 
-    /* ===== FOOTER ===== */
-    .site-footer {
-      background: var(--navy); border-top: 3px solid var(--gold);
-      padding: 48px 40px 32px;
-    }
-    .footer-inner {
-      max-width: 1140px; margin: 0 auto;
-      display: grid; grid-template-columns: 1fr 1fr 1fr;
-      gap: 40px; margin-bottom: 40px;
-    }
-    .footer-brand .logo-text span:first-child { font-size: 16px; }
-    .footer-desc { font-size: 13px; color: rgba(255,255,255,0.5); line-height: 1.7; margin-top: 12px; }
-    .footer-heading {
-      font-size: 12px; font-weight: 700; color: var(--gold2);
-      letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 14px;
-    }
-    .footer-links { list-style: none; }
-    .footer-links li { margin-bottom: 8px; }
-    .footer-links a {
-      font-size: 13.5px; color: rgba(255,255,255,0.6); text-decoration: none;
-      transition: color 0.18s;
-    }
-    .footer-links a:hover { color: var(--gold2); }
-    .social-links { display: flex; gap: 10px; margin-top: 4px; }
-    .social-btn {
-      display: flex; align-items: center; gap: 8px;
-      background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12);
-      border-radius: 8px; padding: 8px 14px; text-decoration: none;
-      color: rgba(255,255,255,0.75); font-size: 13px; font-weight: 500;
-      transition: all 0.18s; white-space: nowrap;
-    }
-    .social-btn:hover {
-      background: rgba(201,168,76,0.15); border-color: var(--gold);
-      color: var(--gold2);
-    }
-    .footer-bottom {
-      max-width: 1140px; margin: 0 auto;
-      border-top: 1px solid rgba(255,255,255,0.1); padding-top: 24px;
-      display: flex; align-items: center; justify-content: space-between;
-      font-size: 12px; color: rgba(255,255,255,0.35);
-    }
-    .footer-disclaimer {
-      font-size: 11px; color: rgba(255,255,255,0.3);
-      max-width: 640px; line-height: 1.6;
-    }
+/* MODAL */
+.modal-overlay { position:fixed; inset:0; z-index:1000; background:rgba(8,25,46,.88); backdrop-filter:blur(8px); display:none; align-items:center; justify-content:center; padding:20px; }
+.modal-overlay.open { display:flex; }
+.modal-box { background:var(--white); border-radius:14px; width:100%; max-width:980px; height:90vh; max-height:900px; display:flex; flex-direction:column; overflow:hidden; box-shadow:0 40px 100px rgba(0,0,0,.5); animation:slideUp .25s ease; }
+@keyframes slideUp { from{opacity:0;transform:translateY(24px)} to{opacity:1;transform:translateY(0)} }
+.modal-header { background:var(--navy); padding:16px 24px; display:flex; align-items:center; justify-content:space-between; flex-shrink:0; border-bottom:2px solid var(--gold); }
+.modal-title { font-family:'Playfair Display',serif; font-size:16px; font-weight:700; color:var(--white); max-width:75%; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.modal-close { background:rgba(255,255,255,.12); border:none; cursor:pointer; width:36px; height:36px; border-radius:8px; display:flex; align-items:center; justify-content:center; color:var(--white); transition:background .18s; }
+.modal-close:hover { background:rgba(255,255,255,.22); }
+.modal-notice { background:#FBF6EA; border-bottom:1px solid #F0E8CF; padding:8px 24px; font-size:12px; color:#8A7040; flex-shrink:0; display:flex; align-items:center; gap:8px; }
+.modal-viewer { flex:1; background:#e8e8e8; }
+.modal-viewer iframe { width:100%; height:100%; border:none; display:block; }
 
-    /* ===== RESPONSIVE ===== */
-    @media (max-width: 768px) {
-      .site-header { padding: 0 20px; }
-      .header-links { display: none; }
-      .hero { padding: 48px 24px; }
-      .hero-stats { gap: 28px; }
-      .stat-num { font-size: 24px; }
-      .main { padding: 36px 16px 60px; }
-      .footer-inner { grid-template-columns: 1fr; gap: 28px; }
-      .site-footer { padding: 36px 20px 24px; }
-      .footer-bottom { flex-direction: column; gap: 12px; text-align: center; }
-      .modal-box { height: 95vh; border-radius: 12px; }
-      .modal-title { font-size: 13px; }
-      .social-links { flex-direction: column; }
-    }
+/* FLOATING CHAT */
+.float-chat { position:fixed; bottom:28px; right:28px; z-index:500; display:flex; flex-direction:column; align-items:flex-end; gap:10px; }
+.float-tooltip { background:var(--navy2); color:var(--white); font-size:13px; font-weight:500; padding:8px 14px; border-radius:8px; white-space:nowrap; box-shadow:0 4px 16px rgba(0,0,0,.2); animation:floatIn .5s ease .8s both; position:relative; }
+.float-tooltip::after { content:''; position:absolute; bottom:-6px; right:28px; border:6px solid transparent; border-bottom:none; border-top-color:var(--navy2); }
+.float-chat-btn { display:flex; align-items:center; gap:10px; background:var(--gold); color:var(--navy2); font-size:14px; font-weight:700; padding:13px 22px; border-radius:50px; border:none; box-shadow:0 6px 24px rgba(201,168,76,.45); transition:all .2s; cursor:pointer; animation:floatIn .5s ease .5s both; position:relative; text-decoration:none; }
+.float-chat-btn:hover { background:var(--gold2); transform:translateY(-3px); box-shadow:0 10px 32px rgba(201,168,76,.55); }
+@keyframes floatIn { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+.float-pulse { position:absolute; top:-3px; right:-3px; width:13px; height:13px; border-radius:50%; background:#E74C3C; border:2px solid var(--white); animation:pulse2 1.5s infinite; }
+@keyframes pulse2 { 0%,100%{transform:scale(1);opacity:1} 50%{transform:scale(1.4);opacity:.7} }
+
+/* FOOTER */
+.site-footer { background:var(--navy); border-top:3px solid var(--gold); padding:56px 48px 36px; }
+.footer-inner { max-width:1180px; margin:0 auto; }
+.footer-top { display:grid; grid-template-columns:2fr 1fr 1fr 1fr; gap:48px; margin-bottom:48px; }
+.footer-brand-desc { font-size:13.5px; color:rgba(255,255,255,.45); line-height:1.75; margin-top:16px; max-width:280px; }
+.footer-heading { font-size:11.5px; font-weight:700; color:var(--gold2); letter-spacing:.1em; text-transform:uppercase; margin-bottom:16px; }
+.footer-links { list-style:none; display:flex; flex-direction:column; gap:9px; }
+.footer-links a { font-size:13.5px; color:rgba(255,255,255,.55); transition:color .18s; }
+.footer-links a:hover { color:var(--gold2); }
+.footer-social { display:flex; flex-direction:column; gap:10px; }
+.social-btn { display:flex; align-items:center; gap:10px; background:rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.12); border-radius:8px; padding:10px 14px; color:rgba(255,255,255,.7); font-size:13px; font-weight:500; transition:all .18s; }
+.social-btn:hover { background:rgba(201,168,76,.15); border-color:var(--gold); color:var(--gold2); }
+.footer-bottom { border-top:1px solid rgba(255,255,255,.08); padding-top:28px; display:flex; align-items:flex-start; justify-content:space-between; gap:24px; flex-wrap:wrap; }
+.footer-copy { font-size:12px; color:rgba(255,255,255,.3); }
+.footer-disclaimer { font-size:11px; color:rgba(255,255,255,.25); max-width:640px; line-height:1.6; }
+
+/* RESPONSIVE */
+@media(max-width:1024px){
+  .about-grid{grid-template-columns:1fr;}
+  .about-left{display:none;}
+  .services-grid{grid-template-columns:1fr 1fr;}
+  .whyus-grid{grid-template-columns:1fr 1fr;}
+  .footer-top{grid-template-columns:1fr 1fr;gap:32px;}
+  .hero-visual{display:none;}
+  .testimonial-row{grid-template-columns:1fr;}
+}
+@media(max-width:768px){
+  .section{padding:64px 24px;}
+  .site-header{padding:0 20px;}
+  .stats-strip{padding:18px 20px;}
+  .strip-num{font-size:26px;}
+  .services-grid{grid-template-columns:1fr;}
+  .whyus-grid{grid-template-columns:1fr 1fr;}
+  .nav{display:none;}
+  .hero{padding:72px 24px 60px;}
+  .cta-section{padding:60px 24px;}
+  .site-footer{padding:40px 24px 28px;}
+  .footer-top{grid-template-columns:1fr;gap:28px;}
+  .footer-bottom{flex-direction:column;}
+  .modal-box{height:95vh;border-radius:10px;}
+  .float-tooltip{display:none;}
+  .team-row{flex-direction:column;}
+}
   </style>
 </head>
 <body>
 
-<!-- ===== HEADER ===== -->
-<header class="site-header">
-  <a class="logo-wrap" href="/">
-    <div class="logo-icon">Đ</div>
-    <div class="logo-text">
-      <span>Đầu Tư Thông Minh</span>
-      <span>Research &amp; Analysis Group</span>
+<!-- TICKER -->
+<div class="ticker-bar"><div class="ticker-track" id="ticker-track"></div></div>
+
+<!-- HEADER -->
+<header class="site-header" id="site-header">
+  <a href="/" class="logo">
+    <div class="logo-mark">
+      <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+        <polyline points="2,16 7,9 12,12 17,5 20,8" stroke="#08192E" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+    <div>
+      <div class="logo-name">Đầu Tư Thông Minh</div>
+      <div class="logo-sub">Research &amp; Analysis Group</div>
     </div>
   </a>
-  <nav class="header-links">
-    <a href="#reports">Báo cáo</a>
-    <a href="#about">Giới thiệu</a>
-    <a href="https://zalo.me/g/sxshix010" target="_blank" rel="noopener">Nhóm Zalo</a>
-    <a href="https://www.facebook.com/Smart.Investing.VN" target="_blank" rel="noopener" class="header-cta">Facebook</a>
+  <nav class="nav">
+    <a class="nav-link" href="#about">Về chúng tôi</a>
+    <a class="nav-link" href="#services">Dịch vụ</a>
+    <a class="nav-link" href="#reports">Báo cáo</a>
+    <a class="nav-cta" href="https://zalo.me/g/sxshix010" target="_blank" rel="noopener">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.26 2 11.5c0 2.83 1.3 5.37 3.36 7.14L4.5 22l3.5-1.75C9.2 20.73 10.57 21 12 21c5.52 0 10-4.26 10-9.5S17.52 2 12 2z"/></svg>
+      Chat ngay
+    </a>
   </nav>
 </header>
 
-<!-- ===== HERO ===== -->
+<!-- HERO -->
 <section class="hero">
-  <div class="hero-tag">📊 Phân tích chuyên sâu · Độc lập · Minh bạch</div>
-  <h1>Báo cáo <em>Chứng khoán</em> Việt Nam</h1>
-  <p>Phân tích thị trường, cổ phiếu và dòng tiền từ nhóm nghiên cứu Đầu Tư Thông Minh – cập nhật hằng ngày giao dịch.</p>
-  <div class="hero-stats">
-    <div class="stat-item">
-      <div class="stat-num" id="stat-total">0</div>
-      <div class="stat-label">Báo cáo đã xuất bản</div>
+  <div class="hero-bg">
+    <svg viewBox="0 0 1200 500" preserveAspectRatio="xMidYMid slice">
+      <polyline points="50,380 120,310 200,340 280,260 360,280 440,200 520,225 600,165 680,185 760,130 840,155 920,100 1000,120 1080,75 1160,55" stroke="#C9A84C" stroke-width="1.5" fill="none"/>
+      <g fill="#C9A84C" opacity="0.4">
+        <rect x="55" y="352" width="14" height="34"/><rect x="105" y="302" width="14" height="50"/><rect x="155" y="322" width="14" height="42"/>
+        <rect x="205" y="278" width="14" height="58"/><rect x="255" y="252" width="14" height="66"/><rect x="305" y="225" width="14" height="75"/>
+        <rect x="355" y="242" width="14" height="52"/><rect x="405" y="195" width="14" height="88"/><rect x="455" y="175" width="14" height="72"/>
+      </g>
+    </svg>
+  </div>
+  <div class="hero-content">
+    <div class="hero-eyebrow">
+      <span class="eyebrow-dot"></span>
+      <span class="eyebrow-text">Cập nhật mỗi phiên · HOSE · HNX · UPCOM</span>
     </div>
-    <div class="stat-divider"></div>
-    <div class="stat-item">
-      <div class="stat-num" id="stat-stocks">0</div>
-      <div class="stat-label">Mã cổ phiếu đã phân tích</div>
+    <h1>Nghiên cứu thị trường<br/><em>chứng khoán Việt Nam</em><br/>bởi chuyên gia 20 năm</h1>
+    <p class="hero-desc">Báo cáo phân tích cổ phiếu và thị trường từ đội ngũ chuyên gia thực chiến — minh bạch, độc lập, không xung đột lợi ích. Cập nhật hàng ngày sau đóng cửa phiên.</p>
+    <div class="hero-actions">
+      <a href="#reports" class="btn-primary">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        Xem báo cáo mới nhất
+      </a>
+      <a href="https://zalo.me/g/sxshix010" target="_blank" rel="noopener" class="btn-secondary">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.26 2 11.5c0 2.83 1.3 5.37 3.36 7.14L4.5 22l3.5-1.75C9.2 20.73 10.57 21 12 21c5.52 0 10-4.26 10-9.5S17.52 2 12 2z"/></svg>
+        Tham gia nhóm Zalo
+      </a>
     </div>
-    <div class="stat-divider"></div>
-    <div class="stat-item">
-      <div class="stat-num">HOSE·HNX</div>
-      <div class="stat-label">Sàn giao dịch theo dõi</div>
+  </div>
+  <div class="hero-visual">
+    <div class="hero-card">
+      <div class="hero-card-label">VN-Index hôm nay</div>
+      <div class="hero-card-val">1.268,54</div>
+      <div class="hero-card-chg up">▲ +8,23 pts (+0,65%)</div>
+      <div class="mini-chart">
+        <svg viewBox="0 0 280 40" fill="none"><defs><linearGradient id="g1" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#2ECC71" stop-opacity=".4"/><stop offset="100%" stop-color="#2ECC71" stop-opacity="0"/></linearGradient></defs>
+        <polyline points="0,35 35,28 70,30 105,18 140,22 175,12 210,15 245,8 280,5" stroke="#2ECC71" stroke-width="2" fill="none" stroke-linecap="round"/>
+        <path d="M0,35 35,28 70,30 105,18 140,22 175,12 210,15 245,8 280,5 280,40 0,40Z" fill="url(#g1)"/></svg>
+      </div>
+    </div>
+    <div class="hero-card">
+      <div class="hero-card-label">Báo cáo tuần này</div>
+      <div class="hero-card-val" id="rpt-hero">–</div>
+      <div class="hero-card-chg up">báo cáo đã xuất bản</div>
     </div>
   </div>
 </section>
 
-<!-- ===== MAIN ===== -->
-<main class="main" id="reports">
+<!-- STATS STRIP -->
+<div class="stats-strip">
+  <div class="strip-item"><div class="strip-num" id="s-total">0</div><div class="strip-label">Báo cáo đã xuất bản</div></div>
+  <div class="strip-item"><div class="strip-num">20<span style="font-size:18px;color:var(--gold);font-family:inherit">+</span></div><div class="strip-label">Năm kinh nghiệm</div></div>
+  <div class="strip-item"><div class="strip-num" id="s-stocks">0</div><div class="strip-label">Mã cổ phiếu đã phân tích</div></div>
+  <div class="strip-item"><div class="strip-num">1.200<span style="font-size:18px;color:var(--gold);font-family:inherit">+</span></div><div class="strip-label">Thành viên cộng đồng</div></div>
+</div>
 
-  <!-- Tabs -->
-  <div class="tab-bar">
-    <button class="tab-btn active" data-tab="all">
-      Tất cả <span class="tab-count" id="cnt-all">0</span>
-    </button>
-    <button class="tab-btn" data-tab="market">
-      Báo cáo Thị trường <span class="tab-count" id="cnt-market">0</span>
-    </button>
-    <button class="tab-btn" data-tab="stock">
-      Phân tích Cổ phiếu <span class="tab-count" id="cnt-stock">0</span>
-    </button>
+<!-- ABOUT -->
+<section class="section about-section" id="about">
+  <div class="section-inner">
+    <div class="about-grid">
+      <div class="about-left">
+        <div class="about-img-wrap">
+          <div class="about-img-placeholder">
+            <svg width="300" height="200" viewBox="0 0 300 200" fill="none" style="position:relative;z-index:1;">
+              <defs><linearGradient id="ag" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#C9A84C" stop-opacity=".4"/><stop offset="100%" stop-color="#C9A84C" stop-opacity="0"/></linearGradient></defs>
+              <path d="M20,165 L55,145 L90,150 L125,115 L160,125 L195,82 L230,95 L265,52 L280,62 L280,185 L20,185Z" fill="url(#ag)"/>
+              <polyline points="20,165 55,145 90,150 125,115 160,125 195,82 230,95 265,52 280,62" stroke="#C9A84C" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+              <g>
+                <rect x="30" y="150" width="12" height="24" rx="1" fill="#E74C3C" opacity=".8"/>
+                <rect x="65" y="132" width="12" height="22" rx="1" fill="#2ECC71" opacity=".8"/>
+                <rect x="100" y="136" width="12" height="20" rx="1" fill="#E74C3C" opacity=".8"/>
+                <rect x="135" y="100" width="12" height="26" rx="1" fill="#2ECC71" opacity=".8"/>
+                <rect x="170" y="110" width="12" height="22" rx="1" fill="#E74C3C" opacity=".8"/>
+                <rect x="205" y="68" width="12" height="26" rx="1" fill="#2ECC71" opacity=".8"/>
+                <rect x="240" y="80" width="12" height="24" rx="1" fill="#2ECC71" opacity=".8"/>
+              </g>
+              <g stroke="rgba(255,255,255,.1)" stroke-width="1">
+                <line x1="20" y1="60" x2="280" y2="60"/><line x1="20" y1="100" x2="280" y2="100"/>
+                <line x1="20" y1="140" x2="280" y2="140"/><line x1="20" y1="185" x2="280" y2="185"/>
+              </g>
+            </svg>
+            <div style="position:absolute;bottom:22px;left:22px;right:22px;display:flex;justify-content:space-between;align-items:center;z-index:2;">
+              <span style="font-size:12px;color:rgba(255,255,255,.45);font-weight:500;">Hiệu suất khuyến nghị 2024</span>
+              <span style="font-size:20px;font-weight:700;color:#2ECC71;font-family:'Playfair Display',serif;">+34,7%</span>
+            </div>
+          </div>
+          <div class="about-badge">
+            <div class="about-badge-num">20<span style="font-size:18px">+</span></div>
+            <div class="about-badge-text">Năm<br/>kinh nghiệm</div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="section-tag">Về chúng tôi</div>
+        <h2 class="section-title">Đội ngũ chuyên gia<br/><em>dày dạn thực chiến</em></h2>
+        <p class="section-subtitle">Đầu Tư Thông Minh Group được thành lập bởi các nhà đầu tư chuyên nghiệp, chuyên viên phân tích và quản lý quỹ đã trải qua nhiều chu kỳ của thị trường chứng khoán Việt Nam từ những năm 2000 đến nay.</p>
+        <ul class="about-points">
+          <li class="about-point">
+            <div class="point-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+            <div>
+              <div class="point-title">Độc lập &amp; Minh bạch</div>
+              <div class="point-desc">Không nhận phí từ doanh nghiệp niêm yết. Toàn bộ phân tích dựa trên dữ liệu thực và phương pháp luận công khai, rõ ràng.</div>
+            </div>
+          </li>
+          <li class="about-point">
+            <div class="point-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+            <div>
+              <div class="point-title">Cập nhật mỗi phiên giao dịch</div>
+              <div class="point-desc">Báo cáo thị trường phát hành trong vòng 2 giờ sau đóng cửa. Phân tích cổ phiếu theo sự kiện và kết quả kinh doanh mới nhất.</div>
+            </div>
+          </li>
+          <li class="about-point">
+            <div class="point-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></div>
+            <div>
+              <div class="point-title">Phân tích kỹ thuật &amp; cơ bản kết hợp</div>
+              <div class="point-desc">Mỗi khuyến nghị đều bao gồm định giá DCF/P/E, phân tích kỹ thuật, dòng tiền ngoại và bối cảnh vĩ mô toàn diện.</div>
+            </div>
+          </li>
+        </ul>
+        <div class="team-row">
+          <div class="team-card">
+            <div class="team-avatar">T</div>
+            <div class="team-name">Chuyên gia Phân tích</div>
+            <div class="team-role">Phân tích cơ bản &amp; định giá cổ phiếu</div>
+            <span class="team-exp">20+ năm</span>
+          </div>
+          <div class="team-card">
+            <div class="team-avatar">K</div>
+            <div class="team-name">Chuyên gia Kỹ thuật</div>
+            <div class="team-role">Phân tích kỹ thuật &amp; dòng tiền</div>
+            <span class="team-exp">15+ năm</span>
+          </div>
+          <div class="team-card">
+            <div class="team-avatar">V</div>
+            <div class="team-name">Chuyên gia Vĩ mô</div>
+            <div class="team-role">Phân tích ngành &amp; danh mục</div>
+            <span class="team-exp">18+ năm</span>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
+</section>
 
-  <!-- Filter chips (month) -->
-  <div class="filter-bar" id="filter-bar">
-    <span class="filter-label">Lọc theo tháng:</span>
-    <button class="filter-chip active" data-month="all">Tất cả</button>
+<!-- SERVICES -->
+<section class="section services-section" id="services">
+  <div class="section-inner">
+    <div style="text-align:center;">
+      <div class="section-tag" style="justify-content:center;">Dịch vụ của chúng tôi</div>
+      <h2 class="section-title" style="text-align:center;">Giải pháp đầu tư<br/><em>cho từng nhu cầu</em></h2>
+      <p class="section-subtitle" style="margin:0 auto 0;text-align:center;">Từ nhà đầu tư cá nhân đến tổ chức, chúng tôi cung cấp dịch vụ phù hợp với mục tiêu và khẩu vị rủi ro của từng người.</p>
+    </div>
+    <div class="services-grid">
+      <div class="service-card">
+        <div class="service-icon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="1.8"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg></div>
+        <div class="service-title">Báo cáo Phân tích</div>
+        <div class="service-desc">Báo cáo thị trường hằng ngày và phân tích chuyên sâu từng cổ phiếu với đầy đủ luận điểm đầu tư, định giá và khuyến nghị hành động cụ thể.</div>
+        <ul class="service-features">
+          <li>Báo cáo thị trường mỗi phiên giao dịch</li>
+          <li>Phân tích cổ phiếu theo sự kiện &amp; KQKD</li>
+          <li>Báo cáo ngành &amp; vĩ mô hàng tuần</li>
+          <li>Theo dõi danh mục khuyến nghị thực tế</li>
+        </ul>
+        <a href="#reports" class="service-link">Xem báo cáo <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+      </div>
+      <div class="service-card gold">
+        <div class="service-icon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.8"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+        <div class="service-title">Tư vấn Đầu tư</div>
+        <div class="service-desc">Tư vấn trực tiếp 1-1 với chuyên gia về chiến lược xây dựng danh mục, lựa chọn cổ phiếu phù hợp khẩu vị rủi ro và kế hoạch đầu tư dài hạn.</div>
+        <ul class="service-features">
+          <li>Xây dựng danh mục cá nhân hoá</li>
+          <li>Đánh giá &amp; tối ưu danh mục hiện tại</li>
+          <li>Cảnh báo rủi ro và điều chỉnh cơ cấu</li>
+          <li>Tư vấn qua Zalo hoặc gặp trực tiếp</li>
+        </ul>
+        <a href="https://zalo.me/g/sxshix010" target="_blank" rel="noopener" class="service-link">Liên hệ tư vấn <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+      </div>
+      <div class="service-card green">
+        <div class="service-icon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.8"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
+        <div class="service-title">Quản lý Tài khoản</div>
+        <div class="service-desc">Uỷ quyền quản lý tài khoản cho đội ngũ chuyên gia. Giao dịch theo chiến lược đã thoả thuận, báo cáo hiệu suất minh bạch hàng tuần.</div>
+        <ul class="service-features">
+          <li>Quản lý tài khoản theo chiến lược riêng</li>
+          <li>Báo cáo hiệu suất &amp; giao dịch hàng tuần</li>
+          <li>Giới hạn drawdown tối đa được cam kết</li>
+          <li>Phí quản lý theo kết quả thực tế</li>
+        </ul>
+        <a href="https://zalo.me/g/sxshix010" target="_blank" rel="noopener" class="service-link">Tìm hiểu thêm <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+      </div>
+    </div>
   </div>
+</section>
 
-  <!-- Grid -->
-  <div class="report-grid" id="report-grid"></div>
+<!-- WHY US -->
+<section class="section whyus-section">
+  <div class="section-inner">
+    <div class="section-tag">Tại sao chọn chúng tôi</div>
+    <h2 class="section-title">Con số nói lên tất cả</h2>
+    <p class="section-subtitle">Hơn hai thập kỷ tích luỹ kinh nghiệm, đội ngũ đã đồng hành cùng hàng nghìn nhà đầu tư qua nhiều chu kỳ thăng trầm của thị trường.</p>
+    <div class="whyus-grid">
+      <div class="whyus-item"><div class="whyus-num">20<sup>+</sup></div><div class="whyus-label">Năm kinh nghiệm thực chiến thị trường</div></div>
+      <div class="whyus-item"><div class="whyus-num">500<sup>+</sup></div><div class="whyus-label">Báo cáo phân tích đã xuất bản</div></div>
+      <div class="whyus-item"><div class="whyus-num">1.200<sup>+</sup></div><div class="whyus-label">Thành viên Zalo &amp; Facebook</div></div>
+      <div class="whyus-item"><div class="whyus-num">78<sup>%</sup></div><div class="whyus-label">Tỷ lệ khuyến nghị sinh lời dương</div></div>
+    </div>
+    <div class="testimonial-row">
+      <div class="testimonial-card">
+        <div class="tquote">Báo cáo phân tích rất chi tiết, có đầy đủ định giá và luận điểm đầu tư. Tôi đã theo dõi nhóm 3 năm và thực sự cải thiện được kết quả đầu tư của mình.</div>
+        <div class="tauthor"><div class="tavatar">H</div><div><div class="tname">Nguyễn Văn H.</div><div class="ttitle">Nhà đầu tư cá nhân · Hà Nội</div></div></div>
+      </div>
+      <div class="testimonial-card">
+        <div class="tquote">Dịch vụ quản lý tài khoản rất minh bạch. Hàng tuần nhận báo cáo đầy đủ về hiệu suất và giao dịch. Thực sự yên tâm khi giao phó cho đội ngũ chuyên nghiệp.</div>
+        <div class="tauthor"><div class="tavatar">L</div><div><div class="tname">Trần Thị L.</div><div class="ttitle">Giám đốc doanh nghiệp · TP.HCM</div></div></div>
+      </div>
+    </div>
+  </div>
+</section>
 
-</main>
+<!-- REPORTS -->
+<section class="section reports-section" id="reports">
+  <div class="section-inner">
+    <div class="reports-header">
+      <div>
+        <div class="section-tag">Báo cáo phân tích</div>
+        <h2 class="section-title" style="margin-bottom:0">Nghiên cứu mới nhất</h2>
+      </div>
+      <div class="tab-bar">
+        <button class="tab-btn active" data-tab="all">Tất cả <span class="tab-count" id="cnt-all">0</span></button>
+        <button class="tab-btn" data-tab="market">Thị trường <span class="tab-count" id="cnt-market">0</span></button>
+        <button class="tab-btn" data-tab="stock">Cổ phiếu <span class="tab-count" id="cnt-stock">0</span></button>
+      </div>
+    </div>
+    <div class="filter-bar" id="filter-bar"><span class="filter-label">Lọc theo tháng:</span><button class="filter-chip active" data-month="all">Tất cả</button></div>
+    <div class="report-grid" id="report-grid"><div class="empty-state">Đang tải báo cáo...</div></div>
+  </div>
+</section>
 
-<!-- ===== VIEWER MODAL ===== -->
+<!-- CTA -->
+<section class="cta-section">
+  <div class="cta-inner">
+    <div class="section-tag" style="justify-content:center;color:var(--gold2);">Tham gia cộng đồng</div>
+    <h2 class="cta-title">Bắt đầu đầu tư <em>thông minh</em><br/>từ hôm nay</h2>
+    <p class="cta-subtitle">Tham gia nhóm Zalo và Facebook để nhận báo cáo miễn phí mỗi ngày giao dịch. Cộng đồng hơn 1.200 nhà đầu tư đang chờ anh/chị.</p>
+    <div class="cta-buttons">
+      <a href="https://zalo.me/g/sxshix010" target="_blank" rel="noopener" class="btn-cta-p">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.26 2 11.5c0 2.83 1.3 5.37 3.36 7.14L4.5 22l3.5-1.75C9.2 20.73 10.57 21 12 21c5.52 0 10-4.26 10-9.5S17.52 2 12 2z"/></svg>
+        Chat ngay trên Zalo
+      </a>
+      <a href="https://www.facebook.com/Smart.Investing.VN" target="_blank" rel="noopener" class="btn-cta-s">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
+        Theo dõi Facebook
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- MODAL -->
 <div class="modal-overlay" id="modal">
   <div class="modal-box">
     <div class="modal-header">
       <span class="modal-title" id="modal-title"></span>
-      <div class="modal-controls">
-        <button class="modal-close" id="modal-close" title="Đóng">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg>
-        </button>
-      </div>
+      <button class="modal-close" id="modal-close"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
     </div>
-    <div class="modal-notice">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4m0 4h.01"/></svg>
-      Tài liệu này được bảo vệ bản quyền. Vui lòng không sao chép hoặc phát tán lại.
-    </div>
-    <div class="modal-viewer">
-      <iframe id="modal-iframe" allowfullscreen title="Xem báo cáo" sandbox="allow-same-origin allow-scripts allow-popups allow-forms"></iframe>
-    </div>
+    <div class="modal-notice"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4m0 4h.01"/></svg> Tài liệu được bảo vệ bản quyền. Vui lòng không sao chép hoặc phát tán lại.</div>
+    <div class="modal-viewer"><iframe id="modal-iframe" allowfullscreen title="Xem báo cáo" sandbox="allow-same-origin allow-scripts allow-popups"></iframe></div>
   </div>
 </div>
 
-<!-- ===== FOOTER ===== -->
-<footer class="site-footer" id="about">
+<!-- FLOATING CHAT -->
+<div class="float-chat">
+  <div class="float-tooltip">💬 Chat ngay với chúng tôi!</div>
+  <a href="https://zalo.me/g/sxshix010" target="_blank" rel="noopener" class="float-chat-btn">
+    <span class="float-pulse"></span>
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.26 2 11.5c0 2.83 1.3 5.37 3.36 7.14L4.5 22l3.5-1.75C9.2 20.73 10.57 21 12 21c5.52 0 10-4.26 10-9.5S17.52 2 12 2z"/></svg>
+    Chat ngay qua Zalo
+  </a>
+</div>
+
+<!-- FOOTER -->
+<footer class="site-footer">
   <div class="footer-inner">
-    <div class="footer-brand">
-      <div class="logo-wrap" style="text-decoration:none;">
-        <div class="logo-icon">Đ</div>
-        <div class="logo-text">
-          <span>Đầu Tư Thông Minh</span>
-          <span>Research &amp; Analysis Group</span>
+    <div class="footer-top">
+      <div>
+        <div class="logo">
+          <div class="logo-mark"><svg width="22" height="22" viewBox="0 0 22 22" fill="none"><polyline points="2,16 7,9 12,12 17,5 20,8" stroke="#08192E" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div><div class="logo-name">Đầu Tư Thông Minh</div><div class="logo-sub">Research &amp; Analysis Group</div></div>
+        </div>
+        <p class="footer-brand-desc">Nhóm nghiên cứu độc lập chuyên phân tích thị trường chứng khoán Việt Nam. Đội ngũ có kinh nghiệm trên 20 năm thực chiến tại HOSE, HNX và UPCOM.</p>
+      </div>
+      <div>
+        <div class="footer-heading">Trang</div>
+        <ul class="footer-links">
+          <li><a href="#about">Về chúng tôi</a></li>
+          <li><a href="#services">Dịch vụ</a></li>
+          <li><a href="#reports">Báo cáo thị trường</a></li>
+          <li><a href="#reports">Phân tích cổ phiếu</a></li>
+        </ul>
+      </div>
+      <div>
+        <div class="footer-heading">Dịch vụ</div>
+        <ul class="footer-links">
+          <li><a href="#services">Báo cáo phân tích</a></li>
+          <li><a href="#services">Tư vấn đầu tư</a></li>
+          <li><a href="#services">Quản lý tài khoản</a></li>
+        </ul>
+      </div>
+      <div>
+        <div class="footer-heading">Kết nối</div>
+        <div class="footer-social">
+          <a href="https://zalo.me/g/sxshix010" target="_blank" rel="noopener" class="social-btn"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.26 2 11.5c0 2.83 1.3 5.37 3.36 7.14L4.5 22l3.5-1.75C9.2 20.73 10.57 21 12 21c5.52 0 10-4.26 10-9.5S17.52 2 12 2z"/></svg> Nhóm Zalo</a>
+          <a href="https://www.facebook.com/Smart.Investing.VN" target="_blank" rel="noopener" class="social-btn"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg> Facebook</a>
         </div>
       </div>
-      <p class="footer-desc">Nhóm nghiên cứu độc lập chuyên phân tích thị trường chứng khoán Việt Nam. Cập nhật hằng ngày phiên giao dịch.</p>
     </div>
-    <div>
-      <div class="footer-heading">Danh mục báo cáo</div>
-      <ul class="footer-links">
-        <li><a href="#" onclick="setTab('all')">Tất cả báo cáo</a></li>
-        <li><a href="#" onclick="setTab('market')">Báo cáo thị trường</a></li>
-        <li><a href="#" onclick="setTab('stock')">Phân tích cổ phiếu</a></li>
-      </ul>
+    <div class="footer-bottom">
+      <div class="footer-copy">© 2025 Đầu Tư Thông Minh Group. Tất cả quyền được bảo lưu.</div>
+      <div class="footer-disclaimer">Nội dung trên website chỉ mang tính chất tham khảo, không phải khuyến nghị đầu tư chính thức theo quy định pháp luật. Nhà đầu tư tự chịu trách nhiệm với mọi quyết định đầu tư của mình.</div>
     </div>
-    <div>
-      <div class="footer-heading">Theo dõi nhóm</div>
-      <div class="social-links">
-        <a href="https://zalo.me/g/sxshix010" target="_blank" rel="noopener" class="social-btn">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.26 2 11.5c0 2.83 1.3 5.37 3.36 7.14L4.5 22l3.5-1.75C9.2 20.73 10.57 21 12 21c5.52 0 10-4.26 10-9.5S17.52 2 12 2z"/></svg>
-          Nhóm Zalo
-        </a>
-        <a href="https://www.facebook.com/Smart.Investing.VN" target="_blank" rel="noopener" class="social-btn">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
-          Facebook
-        </a>
-      </div>
-    </div>
-  </div>
-  <div class="footer-bottom">
-    <span>© 2025 Đầu Tư Thông Minh Group. Tất cả quyền được bảo lưu.</span>
-    <span class="footer-disclaimer">Nội dung trên website chỉ mang tính chất tham khảo, không phải khuyến nghị đầu tư chính thức. Nhà đầu tư tự chịu trách nhiệm với quyết định của mình.</span>
   </div>
 </footer>
 
-<!-- ===== SCRIPT ===== -->
 <script>
-/* ============================================================
-   Dữ liệu load từ reports.json – quản lý qua admin.html
-============================================================ */
-let REPORTS = [];
-let currentTab = 'all';
-let currentMonth = 'all';
+/* TICKER */
+const TK=[
+  {s:'VN-Index',v:'1.268,54',c:'+8,23',p:'+0,65%',u:true},{s:'HNX-Index',v:'234,18',c:'+1,45',p:'+0,62%',u:true},
+  {s:'VN30',v:'1.312,40',c:'+9,10',p:'+0,70%',u:true},{s:'VCB',v:'82.000',c:'-500',p:'-0,61%',u:false},
+  {s:'HPG',v:'26.150',c:'+350',p:'+1,36%',u:true},{s:'MWG',v:'62.400',c:'+1.200',p:'+1,96%',u:true},
+  {s:'FPT',v:'126.500',c:'+2.500',p:'+2,02%',u:true},{s:'VHM',v:'38.700',c:'-200',p:'-0,51%',u:false},
+  {s:'TCB',v:'24.600',c:'+300',p:'+1,23%',u:true},{s:'BID',v:'44.900',c:'-100',p:'-0,22%',u:false},
+  {s:'STB',v:'32.100',c:'+500',p:'+1,58%',u:true},{s:'GAS',v:'71.200',c:'+800',p:'+1,14%',u:true},
+];
+document.getElementById('ticker-track').innerHTML=[...TK,...TK].map(t=>`<div class="ticker-item"><span class="sym">${t.s}</span><span>${t.v}</span><span class="${t.u?'up':'dn'}">${t.c} (${t.p})</span></div>`).join('');
 
-function formatDate(dateStr) {
-  const d = new Date(dateStr);
-  return d.toLocaleDateString('vi-VN', { day:'2-digit', month:'2-digit', year:'numeric' });
+/* SCROLL */
+window.addEventListener('scroll',()=>document.getElementById('site-header').classList.toggle('scrolled',scrollY>40));
+
+/* REPORTS */
+let REPORTS=[],tab='all',mon='all';
+const fmt=s=>{const[y,m,d]=s.split('-');return`${d}/${m}/${y}`;};
+const gm=s=>s.slice(0,7);
+function filtered(){return REPORTS.filter(r=>(tab==='all'||r.type===tab)&&(mon==='all'||gm(r.date)===mon));}
+function chips(){
+  const ms=[...new Set(REPORTS.map(r=>gm(r.date)))].sort().reverse();
+  const b=document.getElementById('filter-bar');
+  b.innerHTML='<span class="filter-label">Lọc theo tháng:</span>'+`<button class="filter-chip ${mon==='all'?'active':''}" data-month="all">Tất cả</button>`+ms.map(m=>`<button class="filter-chip ${mon===m?'active':''}" data-month="${m}">T.${parseInt(m.split('-')[1])}/${m.split('-')[0]}</button>`).join('');
+  b.querySelectorAll('.filter-chip').forEach(x=>x.addEventListener('click',()=>{mon=x.dataset.month;renderAll();}));
 }
-
-function getMonth(dateStr) {
-  return dateStr.slice(0, 7); // YYYY-MM
+function grid(){
+  const g=document.getElementById('report-grid'),list=filtered();
+  if(!list.length){g.innerHTML='<div class="empty-state">Chưa có báo cáo trong mục này.</div>';return;}
+  g.innerHTML=list.map((r,i)=>`<div class="report-card" style="animation-delay:${i*.05}s" onclick="openR(${REPORTS.indexOf(r)})"><div class="card-strip ${r.type}"></div><div class="card-body"><div class="card-meta"><span class="badge badge-${r.type}">${r.type==='market'?'📈 Thị trường':'🔍 Cổ phiếu'}</span><span class="card-date">${fmt(r.date)}</span></div><div class="card-title">${r.title}</div><div class="card-desc">${r.desc}</div><div class="card-footer">${r.ticker?`<span class="card-ticker">${r.ticker}</span>`:'<span></span>'}<span class="card-read">Xem báo cáo <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span></div></div></div>`).join('');
 }
-
-function getMonthLabel(ym) {
-  const [y, m] = ym.split('-');
-  return `Tháng ${parseInt(m)}/${y}`;
+function counts(){
+  const t=REPORTS.length,m=REPORTS.filter(r=>r.type==='market').length,s=REPORTS.filter(r=>r.type==='stock').length;
+  document.getElementById('cnt-all').textContent=t;
+  document.getElementById('cnt-market').textContent=m;
+  document.getElementById('cnt-stock').textContent=s;
+  cnt('s-total',t);cnt('s-stocks',s);
+  document.getElementById('rpt-hero').textContent=t;
 }
+function cnt(id,n){let v=0;const e=document.getElementById(id);const f=()=>{v+=Math.ceil((n-v)/5);e.textContent=v;if(v<n)requestAnimationFrame(f);else e.textContent=n;};requestAnimationFrame(f);}
+function setTab(t){tab=t;document.querySelectorAll('.tab-btn').forEach(b=>b.classList.toggle('active',b.dataset.tab===t));grid();}
+function renderAll(){chips();grid();}
+document.querySelectorAll('.tab-btn').forEach(b=>b.addEventListener('click',()=>setTab(b.dataset.tab)));
 
-function getFilteredReports() {
-  return REPORTS.filter(r => {
-    const tabOk = currentTab === 'all' || r.type === currentTab;
-    const monthOk = currentMonth === 'all' || getMonth(r.date) === currentMonth;
-    return tabOk && monthOk;
-  });
-}
-
-function renderFilterChips() {
-  const months = [...new Set(REPORTS.map(r => getMonth(r.date)))].sort().reverse();
-  const bar = document.getElementById('filter-bar');
-  // Keep label + "Tất cả" chip
-  bar.innerHTML = '<span class="filter-label">Lọc theo tháng:</span>' +
-    `<button class="filter-chip ${currentMonth==='all'?'active':''}" data-month="all">Tất cả</button>` +
-    months.map(m => `<button class="filter-chip ${currentMonth===m?'active':''}" data-month="${m}">${getMonthLabel(m)}</button>`).join('');
-  bar.querySelectorAll('.filter-chip').forEach(btn => {
-    btn.addEventListener('click', () => { currentMonth = btn.dataset.month; renderAll(); });
-  });
-}
-
-function arrowSvg() {
-  return `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>`;
-}
-
-function renderGrid() {
-  const grid = document.getElementById('report-grid');
-  const filtered = getFilteredReports();
-  if (!filtered.length) {
-    grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1">
-      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-      <p>Chưa có báo cáo nào trong mục này.</p>
-    </div>`;
-    return;
-  }
-  grid.innerHTML = filtered.map((r, i) => `
-    <div class="report-card" style="animation-delay:${i*0.05}s" onclick="openReport(${REPORTS.indexOf(r)})">
-      <div class="card-thumb type-${r.type}"></div>
-      <div class="card-body">
-        <div class="card-meta">
-          <span class="badge badge-${r.type}">${r.type==='market'?'📈 Thị trường':'🔍 Cổ phiếu'}</span>
-          <span class="card-date">${formatDate(r.date)}</span>
-        </div>
-        <div class="card-title">${r.title}</div>
-        <div class="card-desc">${r.desc}</div>
-        <div class="card-footer">
-          ${r.ticker ? `<span class="card-ticker">${r.ticker}</span>` : '<span></span>'}
-          <span class="card-read">Xem báo cáo ${arrowSvg()}</span>
-        </div>
-      </div>
-    </div>
-  `).join('');
-}
-
-function updateCounts() {
-  const total = REPORTS.length;
-  const mkt = REPORTS.filter(r=>r.type==='market').length;
-  const stk = REPORTS.filter(r=>r.type==='stock').length;
-  document.getElementById('cnt-all').textContent = total;
-  document.getElementById('cnt-market').textContent = mkt;
-  document.getElementById('cnt-stock').textContent = stk;
-  // Hero stats counter
-  animateCount('stat-total', total);
-  animateCount('stat-stocks', stk);
-}
-
-function animateCount(id, target) {
-  let start = 0;
-  const el = document.getElementById(id);
-  const step = () => {
-    start += Math.ceil((target - start) / 6);
-    el.textContent = start;
-    if (start < target) requestAnimationFrame(step);
-    else el.textContent = target;
-  };
-  requestAnimationFrame(step);
-}
-
-function setTab(tab) {
-  currentTab = tab;
-  document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
-  renderGrid();
-}
-
-function renderAll() {
-  renderFilterChips();
-  renderGrid();
-}
-
-// Tab clicks
-document.querySelectorAll('.tab-btn').forEach(btn => {
-  btn.addEventListener('click', () => setTab(btn.dataset.tab));
-});
-
-// Modal
-function openReport(idx) {
-  const r = REPORTS[idx];
-  document.getElementById('modal-title').textContent = r.title;
-  // Google Drive preview URL – ẩn nút download với người xem thông thường
-  const previewUrl = `https://drive.google.com/file/d/${r.driveId}/preview`;
-  document.getElementById('modal-iframe').src = previewUrl;
+function openR(i){
+  const r=REPORTS[i];
+  document.getElementById('modal-title').textContent=r.title;
+  document.getElementById('modal-iframe').src=`https://drive.google.com/file/d/${r.driveId}/preview`;
   document.getElementById('modal').classList.add('open');
-  document.body.style.overflow = 'hidden';
+  document.body.style.overflow='hidden';
 }
+function closeM(){document.getElementById('modal').classList.remove('open');document.getElementById('modal-iframe').src='';document.body.style.overflow='';}
+document.getElementById('modal-close').addEventListener('click',closeM);
+document.getElementById('modal').addEventListener('click',e=>{if(e.target===document.getElementById('modal'))closeM();});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeM();});
 
-function closeModal() {
-  document.getElementById('modal').classList.remove('open');
-  document.getElementById('modal-iframe').src = '';
-  document.body.style.overflow = '';
-}
-
-document.getElementById('modal-close').addEventListener('click', closeModal);
-document.getElementById('modal').addEventListener('click', e => {
-  if (e.target === document.getElementById('modal')) closeModal();
-});
-document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
-
-// Anti-download
-document.addEventListener('contextmenu', e => e.preventDefault());
-document.addEventListener('keydown', e => {
-  // Chặn Ctrl+S, Ctrl+U, Ctrl+P, F12
-  if ((e.ctrlKey || e.metaKey) && ['s','u','p'].includes(e.key.toLowerCase())) e.preventDefault();
-  if (e.key === 'F12') e.preventDefault();
-  if (e.ctrlKey && e.shiftKey && ['i','j','c'].includes(e.key.toLowerCase())) e.preventDefault();
+document.addEventListener('contextmenu',e=>e.preventDefault());
+document.addEventListener('keydown',e=>{
+  if((e.ctrlKey||e.metaKey)&&['s','u','p'].includes(e.key.toLowerCase()))e.preventDefault();
+  if(e.key==='F12')e.preventDefault();
+  if(e.ctrlKey&&e.shiftKey&&['i','j','c'].includes(e.key.toLowerCase()))e.preventDefault();
 });
 
-// Init – fetch dữ liệu từ reports.json
-(async () => {
-  try {
-    const res = await fetch('./reports.json?v=' + Date.now());
-    REPORTS = await res.json();
-  } catch(e) {
-    REPORTS = [];
-  }
-  updateCounts();
-  renderAll();
+(async()=>{
+  try{const r=await fetch('./reports.json?v='+Date.now());REPORTS=await r.json();}catch(e){REPORTS=[];}
+  counts();renderAll();
 })();
 </script>
 </body>
