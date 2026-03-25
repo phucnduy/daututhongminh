@@ -1,0 +1,29 @@
+[
+  {
+    "id": "ws-001",
+    "ticker": "VCB",
+    "name": "Vietcombank",
+    "cost": 85000,
+    "qty": 1000,
+    "exchange": "HOSE",
+    "addedAt": "2025-03-25"
+  },
+  {
+    "id": "ws-002",
+    "ticker": "FPT",
+    "name": "FPT Corporation",
+    "cost": 118000,
+    "qty": 500,
+    "exchange": "HOSE",
+    "addedAt": "2025-03-25"
+  },
+  {
+    "id": "ws-003",
+    "ticker": "HPG",
+    "name": "Hoa Phat Group",
+    "cost": 0,
+    "qty": 0,
+    "exchange": "HOSE",
+    "addedAt": "2025-03-25"
+  }
+]

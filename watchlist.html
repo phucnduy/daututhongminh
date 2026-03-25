@@ -1,0 +1,974 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Theo Dõi Giá – Đầu Tư Thông Minh Group</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Be+Vietnam+Pro:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+  <style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --navy:#08192E;--navy2:#0D2B52;--navy3:#1B4F8A;
+  --gold:#C9A84C;--gold2:#E8C86A;
+  --green:#1A7A4A;--green2:#E8F7EF;--green3:#2ECC71;
+  --red:#C0392B;--red2:#FDECEA;
+  --cream:#F8F5EE;--white:#FFFFFF;
+  --g1:#F2F4F7;--g2:#D4D8E1;--g3:#8A94A6;--text:#1A2438;
+  --ceil:#E74C3C;--floor:#2980B9;--ref:#F39C12;
+  --ease:cubic-bezier(.4,0,.2,1);
+}
+html{scroll-behavior:smooth;}
+body{font-family:'Be Vietnam Pro',sans-serif;background:var(--g1);color:var(--text);min-height:100vh;-webkit-font-smoothing:antialiased;}
+a{text-decoration:none;color:inherit;}
+button{cursor:pointer;font-family:inherit;}
+
+/* ── LOGIN ── */
+.login-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,var(--navy),#1a3a6e);padding:24px;}
+.login-box{background:var(--white);border-radius:16px;padding:44px 40px;width:100%;max-width:460px;box-shadow:0 24px 60px rgba(0,0,0,.25);}
+.login-logo{display:flex;align-items:center;gap:12px;margin-bottom:28px;}
+.login-icon{width:42px;height:42px;background:linear-gradient(135deg,var(--gold),var(--gold2));border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.login-brand{font-family:'Playfair Display',serif;font-size:16px;font-weight:700;color:var(--navy);}
+.login-brand-sub{font-size:11px;color:var(--g3);text-transform:uppercase;letter-spacing:.1em;}
+.login-title{font-size:22px;font-weight:700;color:var(--navy);margin-bottom:6px;}
+.login-sub{font-size:13.5px;color:var(--g3);margin-bottom:28px;line-height:1.6;}
+.login-sub a{color:var(--navy3);font-weight:500;}
+.field{margin-bottom:16px;}
+label{display:block;font-size:13px;font-weight:600;color:var(--navy);margin-bottom:5px;}
+label span{font-weight:400;color:var(--g3);}
+input,select{width:100%;padding:10px 14px;border:1.5px solid var(--g2);border-radius:7px;font-family:inherit;font-size:14px;color:var(--text);background:var(--white);outline:none;transition:border-color .18s,box-shadow .18s;}
+input:focus,select:focus{border-color:var(--navy3);box-shadow:0 0 0 3px rgba(27,79,138,.1);}
+.hint{font-size:11.5px;color:var(--g3);margin-top:5px;line-height:1.5;}
+.hint code{background:var(--g1);padding:1px 5px;border-radius:3px;font-size:11px;}
+.btn-full{width:100%;padding:12px;border-radius:7px;font-size:15px;font-weight:700;border:none;transition:all .18s;}
+.btn-navy{background:var(--navy2);color:var(--white);}
+.btn-navy:hover{background:var(--navy);}
+.btn-navy:disabled{background:var(--g2);cursor:not-allowed;}
+
+/* ── LAYOUT ── */
+.app{display:none;}
+.app-header{background:var(--navy);border-bottom:3px solid var(--gold);padding:0 28px;height:60px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:0 2px 16px rgba(0,0,0,.2);}
+.app-logo{display:flex;align-items:center;gap:10px;}
+.app-logo-mark{width:34px;height:34px;background:linear-gradient(135deg,var(--gold),var(--gold2));border-radius:6px;display:flex;align-items:center;justify-content:center;}
+.app-logo-name{font-family:'Playfair Display',serif;font-size:14px;font-weight:700;color:var(--white);}
+.app-logo-sub{font-size:10px;color:var(--gold2);letter-spacing:.1em;text-transform:uppercase;}
+.app-header-right{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.refresh-status{display:flex;align-items:center;gap:7px;font-size:12px;color:rgba(255,255,255,.55);}
+.refresh-dot{width:7px;height:7px;border-radius:50%;background:var(--green3);animation:blink 1s infinite;}
+.refresh-dot.paused{background:var(--g3);animation:none;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+.countdown-ring{font-size:12px;font-weight:700;color:var(--gold2);min-width:22px;text-align:center;}
+.btn-sm{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:6px;font-size:12.5px;font-weight:600;border:none;transition:all .18s;}
+.btn-add{background:var(--gold);color:var(--navy2);}
+.btn-add:hover{background:var(--gold2);}
+.btn-refresh{background:rgba(255,255,255,.1);color:rgba(255,255,255,.8);border:1px solid rgba(255,255,255,.15);}
+.btn-refresh:hover{background:rgba(255,255,255,.18);}
+.btn-logout{background:rgba(255,255,255,.07);color:rgba(255,255,255,.6);border:1px solid rgba(255,255,255,.12);}
+.btn-logout:hover{background:rgba(255,255,255,.13);color:var(--white);}
+.repo-badge{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);border-radius:5px;padding:4px 10px;font-size:11.5px;color:rgba(255,255,255,.55);display:flex;align-items:center;gap:5px;}
+
+/* ── MARKET SUMMARY BAR ── */
+.market-bar{background:var(--navy2);padding:10px 28px;display:flex;align-items:center;gap:24px;overflow-x:auto;border-bottom:1px solid rgba(255,255,255,.07);}
+.market-bar::-webkit-scrollbar{height:3px;}
+.market-bar::-webkit-scrollbar-track{background:transparent;}
+.market-bar::-webkit-scrollbar-thumb{background:rgba(255,255,255,.2);border-radius:2px;}
+.mb-item{display:flex;align-items:center;gap:8px;flex-shrink:0;}
+.mb-name{font-size:11.5px;font-weight:700;color:var(--gold2);}
+.mb-val{font-size:12px;font-weight:600;color:var(--white);}
+.mb-chg{font-size:11.5px;font-weight:600;}
+.mb-chg.up{color:var(--green3);}
+.mb-chg.dn{color:#E74C3C;}
+.mb-chg.nc{color:var(--ref);}
+.mb-sep{width:1px;height:18px;background:rgba(255,255,255,.12);flex-shrink:0;}
+
+/* ── MAIN CONTENT ── */
+.app-body{max-width:1300px;margin:0 auto;padding:24px 28px 60px;}
+
+/* Summary stats */
+.summary-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px;}
+.stat-card{background:var(--white);border-radius:10px;padding:16px 18px;border:1.5px solid var(--g2);}
+.stat-label{font-size:11.5px;color:var(--g3);font-weight:500;margin-bottom:5px;text-transform:uppercase;letter-spacing:.05em;}
+.stat-val{font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:var(--navy2);line-height:1;}
+.stat-sub{font-size:12px;color:var(--g3);margin-top:4px;}
+.stat-val.profit{color:var(--green);}
+.stat-val.loss{color:var(--red);}
+
+/* Watchlist grid */
+.wl-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+.wl-title{font-family:'Playfair Display',serif;font-size:20px;font-weight:700;color:var(--navy2);}
+.wl-count{font-size:13px;color:var(--g3);margin-left:8px;}
+.sort-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.sort-label{font-size:12px;color:var(--g3);}
+.sort-btn{background:var(--g1);border:1.5px solid var(--g2);border-radius:20px;padding:4px 12px;font-size:12px;font-weight:500;color:var(--g3);cursor:pointer;transition:all .15s;}
+.sort-btn:hover,.sort-btn.active{background:var(--navy2);border-color:var(--navy2);color:var(--white);}
+
+.wl-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px;}
+
+/* ── STOCK CARD ── */
+.stock-card{background:var(--white);border-radius:12px;border:1.5px solid var(--g2);overflow:hidden;transition:border-color .2s,box-shadow .2s;position:relative;}
+.stock-card:hover{border-color:var(--navy3);box-shadow:0 6px 24px rgba(13,43,82,.09);}
+.stock-card.up-flash{animation:flashGreen .6s ease;}
+.stock-card.dn-flash{animation:flashRed .6s ease;}
+@keyframes flashGreen{0%,100%{background:var(--white)}50%{background:#f0fdf4}}
+@keyframes flashRed{0%,100%{background:var(--white)}50%{background:#fff5f5}}
+.card-top-bar{height:4px;}
+.card-top-bar.up{background:linear-gradient(90deg,var(--green),var(--green3));}
+.card-top-bar.dn{background:linear-gradient(90deg,var(--red),#E74C3C);}
+.card-top-bar.nc{background:linear-gradient(90deg,var(--ref),#F1C40F);}
+.card-top-bar.loading{background:var(--g2);}
+.card-body{padding:14px 16px 0;}
+.card-row1{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:10px;}
+.card-ticker{font-family:'Playfair Display',serif;font-size:20px;font-weight:700;color:var(--navy2);line-height:1;}
+.card-name{font-size:11px;color:var(--g3);margin-top:2px;}
+.card-exchange{display:inline-block;font-size:10px;font-weight:700;padding:2px 6px;border-radius:3px;background:#EBF2FC;color:var(--navy3);margin-top:3px;letter-spacing:.04em;}
+.card-actions{display:flex;gap:6px;}
+.card-btn{background:var(--g1);border:none;border-radius:5px;width:28px;height:28px;display:flex;align-items:center;justify-content:center;color:var(--g3);cursor:pointer;transition:all .15s;flex-shrink:0;}
+.card-btn:hover{background:var(--g2);color:var(--text);}
+.card-btn.del:hover{background:#FDECEA;color:var(--red);}
+
+/* Price section */
+.card-price-row{display:flex;align-items:baseline;gap:10px;margin-bottom:6px;}
+.card-price{font-family:'Playfair Display',serif;font-size:26px;font-weight:700;line-height:1;}
+.card-price.up{color:var(--green);}
+.card-price.dn{color:var(--red);}
+.card-price.nc{color:var(--ref);}
+.card-price.ceil-hit{color:var(--ceil);}
+.card-price.floor-hit{color:var(--floor);}
+.card-price.loading{color:var(--g2);}
+.card-change{font-size:14px;font-weight:700;padding:3px 8px;border-radius:5px;}
+.card-change.up{background:var(--green2);color:var(--green);}
+.card-change.dn{background:var(--red2);color:var(--red);}
+.card-change.nc{background:#FEF9EC;color:var(--ref);}
+
+/* Ref / Ceil / Floor */
+.card-levels{display:flex;gap:0;margin-bottom:8px;border:1px solid var(--g2);border-radius:6px;overflow:hidden;}
+.level-item{flex:1;text-align:center;padding:5px 4px;}
+.level-item:not(:last-child){border-right:1px solid var(--g2);}
+.level-label{font-size:9.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;margin-bottom:1px;}
+.level-val{font-size:12px;font-weight:700;}
+.level-item.ref .level-label{color:var(--ref);}
+.level-item.ref .level-val{color:var(--ref);}
+.level-item.ceil .level-label{color:var(--ceil);}
+.level-item.ceil .level-val{color:var(--ceil);}
+.level-item.floor .level-label{color:var(--floor);}
+.level-item.floor .level-val{color:var(--floor);}
+
+/* Volume */
+.card-vol-row{display:flex;align-items:center;justify-content:space-between;font-size:12px;color:var(--g3);margin-bottom:8px;}
+.vol-val{font-weight:600;color:var(--text);}
+
+/* Mini chart */
+.card-chart{height:44px;margin:0 -16px;padding:0 8px;}
+.card-chart svg{width:100%;height:100%;}
+
+/* P&L section */
+.card-pnl{margin:0 -0px;padding:10px 16px;border-top:1px solid var(--g1);background:var(--g1);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px;}
+.pnl-label{font-size:11px;color:var(--g3);font-weight:500;}
+.pnl-val{font-size:13.5px;font-weight:700;}
+.pnl-val.profit{color:var(--green);}
+.pnl-val.loss{color:var(--red);}
+.pnl-val.nc{color:var(--g3);}
+.pnl-detail{font-size:11px;color:var(--g3);}
+
+/* Updated time per card */
+.card-updated{font-size:10px;color:var(--g3);padding:6px 16px;border-top:1px solid var(--g1);background:var(--white);}
+
+/* Error state */
+.card-error{padding:20px 16px;text-align:center;color:var(--red);font-size:13px;}
+
+/* ── ADD MODAL ── */
+.overlay{position:fixed;inset:0;z-index:500;background:rgba(8,25,46,.75);backdrop-filter:blur(6px);display:none;align-items:center;justify-content:center;padding:20px;}
+.overlay.open{display:flex;}
+.modal{background:var(--white);border-radius:14px;width:100%;max-width:440px;overflow:hidden;box-shadow:0 24px 60px rgba(0,0,0,.3);animation:slideUp .22s var(--ease);}
+@keyframes slideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.modal-head{background:var(--navy);padding:16px 20px;display:flex;align-items:center;justify-content:space-between;border-bottom:2px solid var(--gold);}
+.modal-head-title{font-family:'Playfair Display',serif;font-size:16px;font-weight:700;color:var(--white);}
+.modal-close-btn{background:rgba(255,255,255,.12);border:none;cursor:pointer;width:30px;height:30px;border-radius:6px;display:flex;align-items:center;justify-content:center;color:var(--white);transition:background .15s;}
+.modal-close-btn:hover{background:rgba(255,255,255,.2);}
+.modal-body{padding:22px 20px 20px;}
+.modal-foot{padding:0 20px 20px;display:flex;gap:10px;justify-content:flex-end;}
+.btn-cancel{background:var(--g1);color:var(--g3);border:none;border-radius:7px;padding:9px 18px;font-size:14px;font-weight:600;}
+.btn-cancel:hover{background:var(--g2);}
+.btn-save{background:var(--navy2);color:var(--white);border:none;border-radius:7px;padding:9px 22px;font-size:14px;font-weight:700;}
+.btn-save:hover{background:var(--navy);}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+
+/* ── CONFIRM DELETE ── */
+.confirm-box{background:var(--white);border-radius:12px;padding:28px;max-width:360px;width:90%;box-shadow:0 20px 48px rgba(0,0,0,.2);}
+.confirm-title{font-size:17px;font-weight:700;color:var(--navy);margin-bottom:8px;}
+.confirm-desc{font-size:13.5px;color:var(--g3);line-height:1.55;margin-bottom:20px;}
+.confirm-btns{display:flex;gap:10px;justify-content:flex-end;}
+.btn-del-confirm{background:var(--red);color:var(--white);border:none;border-radius:7px;padding:8px 18px;font-size:13.5px;font-weight:700;}
+.btn-del-confirm:hover{background:#A93226;}
+
+/* ── TOAST ── */
+.toast-wrap{position:fixed;bottom:24px;right:24px;z-index:9999;display:flex;flex-direction:column;gap:8px;}
+.toast{background:var(--white);border-radius:9px;padding:12px 16px;box-shadow:0 6px 24px rgba(0,0,0,.12);border-left:3px solid var(--green);font-size:13.5px;font-weight:500;color:var(--text);min-width:240px;animation:slideInR .22s ease;}
+.toast.err{border-left-color:var(--red);}
+@keyframes slideInR{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:translateX(0)}}
+
+/* ── LOADING SKELETON ── */
+.skel{background:var(--g2);border-radius:4px;animation:shimmer 1.3s infinite;}
+@keyframes shimmer{0%,100%{opacity:.5}50%{opacity:1}}
+
+/* ── EMPTY STATE ── */
+.empty-wrap{text-align:center;padding:64px 24px;color:var(--g3);}
+.empty-icon{font-size:48px;margin-bottom:16px;opacity:.35;}
+.empty-title{font-size:16px;font-weight:600;color:var(--navy2);margin-bottom:6px;}
+.empty-desc{font-size:14px;line-height:1.6;}
+
+/* ── RESPONSIVE ── */
+@media(max-width:768px){
+  .app-header{padding:0 16px;}
+  .market-bar{padding:8px 16px;}
+  .app-body{padding:16px 16px 48px;}
+  .summary-row{grid-template-columns:1fr 1fr;}
+  .wl-grid{grid-template-columns:1fr;}
+  .repo-badge{display:none;}
+}
+@media(max-width:480px){
+  .summary-row{grid-template-columns:1fr;}
+}
+  </style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════
+     LOGIN
+══════════════════════════════════════════ -->
+<div id="screen-login" class="login-screen">
+  <div class="login-box">
+    <div class="login-logo">
+      <div class="login-icon">
+        <svg width="20" height="20" viewBox="0 0 22 22" fill="none"><polyline points="2,16 7,9 12,12 17,5 20,8" stroke="#08192E" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <div>
+        <div class="login-brand">Đầu Tư Thông Minh</div>
+        <div class="login-brand-sub">Theo dõi giá cổ phiếu</div>
+      </div>
+    </div>
+    <h2 class="login-title">Đăng nhập</h2>
+    <p class="login-sub">Dùng GitHub Token để đồng bộ danh sách theo dõi trên mọi thiết bị.<br/>
+    <a href="https://github.com/settings/tokens/new?description=DTDM+Watchlist&scopes=repo" target="_blank" rel="noopener">→ Tạo token mới</a> (tích quyền <code>repo</code>)</p>
+    <div class="field"><label>GitHub Username</label><input type="text" id="inp-owner" placeholder="your-username" autocomplete="off"/></div>
+    <div class="field"><label>Tên Repository</label><input type="text" id="inp-repo" placeholder="dtdm-reports" autocomplete="off"/></div>
+    <div class="field"><label>Personal Access Token</label><input type="password" id="inp-token" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx" autocomplete="off"/><div class="hint">Token lưu trong trình duyệt, không gửi đi đâu ngoài GitHub API.</div></div>
+    <button class="btn-full btn-navy" id="btn-login" onclick="doLogin()">Đăng nhập</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     APP
+══════════════════════════════════════════ -->
+<div id="screen-app" class="app">
+
+  <!-- Header -->
+  <header class="app-header">
+    <a href="/" class="app-logo">
+      <div class="app-logo-mark">
+        <svg width="18" height="18" viewBox="0 0 22 22" fill="none"><polyline points="2,16 7,9 12,12 17,5 20,8" stroke="#08192E" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <div>
+        <div class="app-logo-name">Theo Dõi Giá</div>
+        <div class="app-logo-sub">Live Watchlist</div>
+      </div>
+    </a>
+    <div class="app-header-right">
+      <div class="refresh-status">
+        <div class="refresh-dot" id="refresh-dot"></div>
+        <span>Cập nhật sau</span>
+        <span class="countdown-ring" id="countdown">30</span>
+        <span>giây</span>
+      </div>
+      <button class="btn-sm btn-refresh" onclick="forceRefresh()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.51"/></svg>
+        Refresh
+      </button>
+      <button class="btn-sm btn-add" onclick="openAddModal()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+        Thêm mã
+      </button>
+      <div class="repo-badge">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>
+        <span id="lbl-repo">...</span>
+      </div>
+      <button class="btn-sm btn-logout" onclick="doLogout()">Đăng xuất</button>
+    </div>
+  </header>
+
+  <!-- Market summary bar -->
+  <div class="market-bar" id="market-bar">
+    <span style="font-size:11.5px;color:rgba(255,255,255,.4);">Đang tải chỉ số thị trường...</span>
+  </div>
+
+  <!-- Body -->
+  <div class="app-body">
+
+    <!-- Portfolio summary -->
+    <div class="summary-row">
+      <div class="stat-card"><div class="stat-label">Tổng mã theo dõi</div><div class="stat-val" id="sum-total">–</div><div class="stat-sub">cổ phiếu</div></div>
+      <div class="stat-card"><div class="stat-label">Tăng / Giảm / Tham chiếu</div><div class="stat-val" id="sum-updn">–</div><div class="stat-sub" id="sum-updn-sub">hôm nay</div></div>
+      <div class="stat-card"><div class="stat-label">Lãi/Lỗ danh mục hôm nay</div><div class="stat-val nc" id="sum-pnl-today">–</div><div class="stat-sub">theo giá vốn đã nhập</div></div>
+      <div class="stat-card"><div class="stat-label">Lãi/Lỗ tổng danh mục</div><div class="stat-val nc" id="sum-pnl-total">–</div><div class="stat-sub" id="sum-pnl-pct">–</div></div>
+    </div>
+
+    <!-- Watchlist -->
+    <div class="wl-header">
+      <div>
+        <span class="wl-title">Danh sách theo dõi</span>
+        <span class="wl-count" id="wl-count"></span>
+      </div>
+      <div class="sort-row">
+        <span class="sort-label">Sắp xếp:</span>
+        <button class="sort-btn active" data-sort="custom">Mặc định</button>
+        <button class="sort-btn" data-sort="change_desc">% ↓</button>
+        <button class="sort-btn" data-sort="change_asc">% ↑</button>
+        <button class="sort-btn" data-sort="name">A–Z</button>
+      </div>
+    </div>
+
+    <div class="wl-grid" id="wl-grid">
+      <div class="empty-wrap">
+        <div class="empty-icon">📊</div>
+        <div class="title">Đang tải...</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ADD / EDIT MODAL -->
+<div class="overlay" id="add-overlay">
+  <div class="modal">
+    <div class="modal-head">
+      <span class="modal-head-title" id="modal-head-title">Thêm cổ phiếu</span>
+      <button class="modal-close-btn" onclick="closeModal()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row" style="margin-bottom:14px;">
+        <div class="field" style="margin-bottom:0;">
+          <label>Mã cổ phiếu <span>*</span></label>
+          <input type="text" id="f-ticker" placeholder="VCB, FPT, HPG..." style="text-transform:uppercase;" oninput="this.value=this.value.toUpperCase()"/>
+        </div>
+        <div class="field" style="margin-bottom:0;">
+          <label>Sàn <span>(tùy chọn)</span></label>
+          <select id="f-exchange">
+            <option value="HOSE">HOSE (±7%)</option>
+            <option value="HNX">HNX (±10%)</option>
+            <option value="UPCOM">UPCOM (±15%)</option>
+          </select>
+        </div>
+      </div>
+      <div class="field" style="margin-bottom:14px;">
+        <label>Tên công ty <span>(tùy chọn)</span></label>
+        <input type="text" id="f-name" placeholder="Vietcombank..."/>
+      </div>
+      <div class="form-row" style="margin-bottom:14px;">
+        <div class="field" style="margin-bottom:0;">
+          <label>Giá vốn (đồng) <span>(tùy chọn)</span></label>
+          <input type="number" id="f-cost" placeholder="85000" min="0"/>
+        </div>
+        <div class="field" style="margin-bottom:0;">
+          <label>Số lượng CP <span>(tùy chọn)</span></label>
+          <input type="number" id="f-qty" placeholder="1000" min="0"/>
+        </div>
+      </div>
+      <div class="hint">Nhập giá vốn và số lượng để tính lãi/lỗ tự động theo giá thị trường.</div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-cancel" onclick="closeModal()">Hủy</button>
+      <button class="btn-save" id="btn-save-stock" onclick="saveStock()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+        Lưu lên GitHub
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- CONFIRM DELETE -->
+<div class="overlay" id="confirm-overlay">
+  <div class="confirm-box">
+    <div class="confirm-title">Xoá khỏi danh sách?</div>
+    <div class="confirm-desc" id="confirm-desc"></div>
+    <div class="confirm-btns">
+      <button class="btn-cancel" onclick="closeConfirm()">Hủy</button>
+      <button class="btn-del-confirm" id="btn-del-ok">Xoá</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast-wrap" id="toast-wrap"></div>
+
+<!-- ══════════════════════════════════════════
+     JAVASCRIPT
+══════════════════════════════════════════ -->
+<script>
+'use strict';
+
+/* ─── CONSTANTS ─── */
+const TCBS     = 'https://apipubaws.tcbs.com.vn/stock-insight/v1';
+const REFRESH_SEC = 30;
+const EXCHANGE_BANDS = { HOSE: 0.07, HNX: 0.1, UPCOM: 0.15 };
+const INDICES = [
+  { id: 'VNINDEX', name: 'VN-Index' },
+  { id: 'HNXIndex', name: 'HNX-Index' },
+  { id: 'VN30',    name: 'VN30' },
+];
+
+/* ─── STATE ─── */
+let cfg = null, watchlist = [], fileSha = null;
+let liveData = {};         // { ticker: { price, ref, change, changePct, vol, intraday[] } }
+let sortMode = 'custom';
+let editId = null;
+let refreshTimer = null, countdownTimer = null, countdown = REFRESH_SEC;
+let prevPrices = {};       // for flash animation
+
+/* ─── UTILS ─── */
+const fN  = n => n == null ? '–' : n.toLocaleString('vi-VN');
+const fP  = n => n == null ? '–' : (n >= 0 ? '+' : '') + n.toFixed(2) + '%';
+const fPt = (n, d=0) => n == null ? '–' : (n >= 0 ? '+' : '') + n.toLocaleString('vi-VN', {minimumFractionDigits:d, maximumFractionDigits:d});
+
+/* ─── TOAST ─── */
+function toast(msg, err=false) {
+  const c = document.getElementById('toast-wrap');
+  const t = document.createElement('div');
+  t.className = 'toast' + (err ? ' err' : '');
+  t.textContent = msg;
+  c.appendChild(t);
+  setTimeout(() => { t.style.animation='slideInR .22s ease reverse'; setTimeout(()=>t.remove(),220); }, 3500);
+}
+
+/* ─── AUTH ─── */
+async function doLogin() {
+  const owner = document.getElementById('inp-owner').value.trim();
+  const repo  = document.getElementById('inp-repo').value.trim();
+  const token = document.getElementById('inp-token').value.trim();
+  if (!owner || !repo || !token) { toast('Vui lòng điền đầy đủ thông tin.', true); return; }
+  const btn = document.getElementById('btn-login');
+  btn.disabled = true; btn.textContent = 'Đang xác thực...';
+  try {
+    const r = await fetch(`https://api.github.com/repos/${owner}/${repo}`,
+      { headers: { Authorization: `Bearer ${token}`, Accept: 'application/vnd.github+json' } });
+    if (r.status === 401) throw new Error('Token không hợp lệ hoặc đã hết hạn.');
+    if (r.status === 404) throw new Error('Không tìm thấy repository.');
+    if (!r.ok) throw new Error(`Lỗi HTTP ${r.status}`);
+    cfg = { owner, repo, token };
+    localStorage.setItem('dtdm_wl_cfg', JSON.stringify(cfg));
+    showApp();
+  } catch(e) {
+    toast(e.message, true);
+    btn.disabled = false; btn.textContent = 'Đăng nhập';
+  }
+}
+
+function doLogout() {
+  localStorage.removeItem('dtdm_wl_cfg');
+  cfg = null; watchlist = []; fileSha = null;
+  clearAllTimers();
+  document.getElementById('screen-app').style.display = 'none';
+  document.getElementById('screen-login').style.display = '';
+}
+
+function showApp() {
+  document.getElementById('screen-login').style.display = 'none';
+  const app = document.getElementById('screen-app');
+  app.style.display = 'block'; app.classList.add('app');
+  document.getElementById('lbl-repo').textContent = `${cfg.owner}/${cfg.repo}`;
+  loadWatchlist();
+}
+
+/* ─── GITHUB API ─── */
+async function ghGet(path) {
+  if (!cfg) throw new Error('Chưa đăng nhập');
+  const r = await fetch(`https://api.github.com${path}`,
+    { headers: { Authorization: `Bearer ${cfg.token}`, Accept: 'application/vnd.github+json' } });
+  if (!r.ok) throw new Error(`GitHub API lỗi: ${r.status}`);
+  return r.json();
+}
+
+async function ghPut(path, content, message) {
+  if (!cfg) throw new Error('Chưa đăng nhập');
+  const body = {
+    message,
+    content: btoa(unescape(encodeURIComponent(JSON.stringify(content, null, 2)))),
+    ...(fileSha ? { sha: fileSha } : {})
+  };
+  const r = await fetch(`https://api.github.com/repos/${cfg.owner}/${cfg.repo}/contents/${path}`, {
+    method: 'PUT',
+    headers: { Authorization: `Bearer ${cfg.token}`, Accept: 'application/vnd.github+json', 'Content-Type': 'application/json' },
+    body: JSON.stringify(body)
+  });
+  if (!r.ok) { const e = await r.json(); throw new Error(e.message || 'Lỗi lưu GitHub'); }
+  const d = await r.json();
+  fileSha = d.content.sha;
+}
+
+/* ─── LOAD WATCHLIST ─── */
+async function loadWatchlist() {
+  try {
+    const d = await ghGet(`/repos/${cfg.owner}/${cfg.repo}/contents/watchlist.json`);
+    fileSha = d.sha;
+    watchlist = JSON.parse(decodeURIComponent(escape(atob(d.content.replace(/\n/g,'')))));
+  } catch(e) {
+    if (e.message.includes('404') || e.message.includes('lỗi: 404')) {
+      watchlist = []; fileSha = null;
+    } else { toast('Không tải được watchlist.json: ' + e.message, true); watchlist = []; }
+  }
+  renderSkeletons();
+  await refreshPrices();
+  startTimers();
+}
+
+/* ─── SAVE WATCHLIST ─── */
+async function saveWatchlist(msg) {
+  await ghPut('watchlist.json', watchlist, msg);
+}
+
+/* ─── TCBS PRICE FETCH ─── */
+async function fetchPrice(ticker) {
+  try {
+    const to   = Math.floor(Date.now() / 1000);
+    const from = to - 86400; // 24h intraday
+    const r = await fetch(`${TCBS}/stock/intraday?ticker=${ticker}&page=0&size=100`,
+      { signal: AbortSignal.timeout(6000) });
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const d = await r.json();
+    const data = d?.data || [];
+    if (!data.length) throw new Error('empty');
+
+    // Latest trade
+    const last = data[data.length - 1];
+    const price   = last.p;
+    const ref     = last.rp || price; // reference price
+    const change  = price - ref;
+    const changePct = ref ? (change / ref * 100) : 0;
+    const vol     = data.reduce((s, x) => s + (x.v || 0), 0);
+
+    // Intraday prices for mini chart (up to 50 points)
+    const step    = Math.max(1, Math.floor(data.length / 50));
+    const intraday = data.filter((_,i) => i % step === 0).map(x => x.p);
+
+    return { price, ref, change, changePct, vol, intraday };
+  } catch(e) {
+    return null;
+  }
+}
+
+async function fetchIndexPrice(indexId) {
+  try {
+    const to   = Math.floor(Date.now() / 1000);
+    const from = to - 86400 * 3;
+    const r = await fetch(`${TCBS}/index/chart?indexId=${indexId}&resolution=1D&from=${from}&to=${to}`,
+      { signal: AbortSignal.timeout(6000) });
+    if (!r.ok) throw new Error();
+    const d = await r.json();
+    const c = d.c || [];
+    const last = c[c.length-1], prev = c[c.length-2] || last;
+    if (!last) throw new Error();
+    const chg = last - prev;
+    const pct = prev ? (chg/prev*100) : 0;
+    return { val: last, chg, pct };
+  } catch(e) { return null; }
+}
+
+/* ─── REFRESH ALL PRICES ─── */
+async function refreshPrices() {
+  if (!watchlist.length) { renderGrid(); updateSummary(); return; }
+  prevPrices = { ...Object.fromEntries(Object.entries(liveData).map(([k,v]) => [k, v?.price])) };
+
+  // Fetch all in parallel
+  const results = await Promise.allSettled(watchlist.map(s => fetchPrice(s.ticker)));
+  results.forEach((r, i) => {
+    const sym = watchlist[i].ticker;
+    if (r.status === 'fulfilled' && r.value) liveData[sym] = r.value;
+    else if (!liveData[sym]) liveData[sym] = null; // keep old data if re-fetch fails
+  });
+
+  renderGrid();
+  updateSummary();
+
+  // Market indices
+  const idxResults = await Promise.allSettled(INDICES.map(idx => fetchIndexPrice(idx.id)));
+  const bar = document.getElementById('market-bar');
+  const items = idxResults.map((r, i) => {
+    const idx = INDICES[i];
+    if (r.status !== 'fulfilled' || !r.value) return `<div class="mb-item"><span class="mb-name">${idx.name}</span><span class="mb-val" style="color:var(--g3)">–</span></div>`;
+    const { val, chg, pct } = r.value;
+    const cls = chg > 0 ? 'up' : chg < 0 ? 'dn' : 'nc';
+    const arrow = chg > 0 ? '▲' : chg < 0 ? '▼' : '–';
+    return `<div class="mb-item">
+      <span class="mb-name">${idx.name}</span>
+      <span class="mb-val">${fN(Math.round(val*100)/100)}</span>
+      <span class="mb-chg ${cls}">${arrow} ${fP(pct)}</span>
+    </div>`;
+  });
+  bar.innerHTML = items.join('<div class="mb-sep"></div>');
+}
+
+function forceRefresh() {
+  clearAllTimers();
+  countdown = REFRESH_SEC;
+  document.getElementById('countdown').textContent = REFRESH_SEC;
+  document.getElementById('refresh-dot').className = 'refresh-dot';
+  refreshPrices().then(() => startTimers());
+}
+
+/* ─── TIMERS ─── */
+function startTimers() {
+  clearAllTimers();
+  countdown = REFRESH_SEC;
+  countdownTimer = setInterval(() => {
+    countdown--;
+    document.getElementById('countdown').textContent = countdown;
+    if (countdown <= 0) {
+      countdown = REFRESH_SEC;
+      document.getElementById('refresh-dot').className = 'refresh-dot';
+      refreshPrices();
+    }
+  }, 1000);
+}
+function clearAllTimers() {
+  clearInterval(refreshTimer);
+  clearInterval(countdownTimer);
+}
+
+/* ─── COMPUTE LEVELS ─── */
+function getLevels(sym) {
+  const ld = liveData[sym];
+  if (!ld) return null;
+  const s = watchlist.find(x => x.ticker === sym);
+  const band = EXCHANGE_BANDS[s?.exchange || 'HOSE'];
+  const ref  = ld.ref;
+  return {
+    ref,
+    ceil: Math.floor(ref * (1 + band) / 100) * 100,
+    floor: Math.ceil(ref * (1 - band) / 100) * 100,
+  };
+}
+
+/* ─── DRAW MINI CHART ─── */
+function miniChart(prices, isUp) {
+  if (!prices || prices.length < 2) return '<svg viewBox="0 0 300 44"></svg>';
+  const min = Math.min(...prices), max = Math.max(...prices), range = max - min || 1;
+  const W = 300, H = 44;
+  const pts = prices.map((v, i) => {
+    const x = (i / (prices.length - 1)) * W;
+    const y = H - ((v - min) / range) * (H - 6) - 3;
+    return `${x.toFixed(1)},${y.toFixed(1)}`;
+  }).join(' ');
+  const color = isUp ? 'var(--green3)' : isUp === false ? '#E74C3C' : 'var(--ref)';
+  return `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none">
+    <defs><linearGradient id="cg${isUp?'u':'d'}" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="${color}" stop-opacity=".25"/>
+      <stop offset="100%" stop-color="${color}" stop-opacity="0"/>
+    </linearGradient></defs>
+    <path d="M${pts.split(' ').join(' L')} L${W},${H} L0,${H} Z" fill="url(#cg${isUp?'u':'d'})"/>
+    <polyline points="${pts}" stroke="${color}" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  </svg>`;
+}
+
+/* ─── P&L CALCULATION ─── */
+function calcPnL(stock, price) {
+  if (!stock.cost || !stock.qty || !price) return null;
+  const cost      = stock.cost;
+  const qty       = stock.qty;
+  const value_now = price * qty;
+  const value_in  = cost * qty;
+  const pnl       = value_now - value_in;
+  const pnl_pct   = ((price - cost) / cost) * 100;
+  return { pnl, pnl_pct, value_now, value_in };
+}
+
+/* ─── RENDER GRID ─── */
+function getSorted() {
+  const list = [...watchlist];
+  switch (sortMode) {
+    case 'change_desc': return list.sort((a,b) => (liveData[b.ticker]?.changePct||0) - (liveData[a.ticker]?.changePct||0));
+    case 'change_asc':  return list.sort((a,b) => (liveData[a.ticker]?.changePct||0) - (liveData[b.ticker]?.changePct||0));
+    case 'name':        return list.sort((a,b) => a.ticker.localeCompare(b.ticker));
+    default:            return list;
+  }
+}
+
+function renderSkeletons() {
+  document.getElementById('wl-grid').innerHTML = watchlist.map(s => `
+    <div class="stock-card" id="card-${s.ticker}">
+      <div class="card-top-bar loading"></div>
+      <div class="card-body">
+        <div class="card-row1"><div><div class="card-ticker">${s.ticker}</div><div class="card-name">${s.name||''}</div></div></div>
+        <div style="height:32px;margin-bottom:8px;"><div class="skel" style="height:28px;width:140px;margin-bottom:4px;"></div></div>
+        <div class="skel" style="height:36px;border-radius:6px;margin-bottom:8px;"></div>
+        <div class="skel" style="height:44px;border-radius:4px;margin-bottom:8px;"></div>
+      </div>
+    </div>`).join('');
+}
+
+function renderGrid() {
+  const sorted = getSorted();
+  const now = new Date().toLocaleTimeString('vi-VN');
+  document.getElementById('wl-count').textContent = `· ${sorted.length} mã`;
+
+  if (!sorted.length) {
+    document.getElementById('wl-grid').innerHTML = `<div class="empty-wrap" style="grid-column:1/-1;">
+      <div class="empty-icon">📋</div>
+      <div class="empty-title">Chưa có mã nào</div>
+      <div class="empty-desc">Nhấn "Thêm mã" để bắt đầu theo dõi cổ phiếu.</div>
+    </div>`;
+    return;
+  }
+
+  document.getElementById('wl-grid').innerHTML = sorted.map(s => {
+    const ld = liveData[s.ticker];
+    if (!ld) return renderLoadingCard(s);
+    const { price, ref, change, changePct, vol, intraday } = ld;
+    const cls    = change > 0 ? 'up' : change < 0 ? 'dn' : 'nc';
+    const lvls   = getLevels(s.ticker);
+    const isCeil = lvls && Math.abs(price - lvls.ceil)  < 50;
+    const isFloor= lvls && Math.abs(price - lvls.floor) < 50;
+    const priceCls = isCeil ? 'ceil-hit' : isFloor ? 'floor-hit' : cls;
+    const arrow  = change > 0 ? '▲' : change < 0 ? '▼' : '–';
+    const band   = EXCHANGE_BANDS[s.exchange || 'HOSE'];
+
+    // Flash check
+    const prev = prevPrices[s.ticker];
+    const flashCls = prev && price > prev ? ' up-flash' : prev && price < prev ? ' dn-flash' : '';
+
+    // P&L
+    const pnl = calcPnL(s, price);
+    const pnl_today = s.qty ? (change * s.qty) : null;
+
+    return `
+    <div class="stock-card${flashCls}" id="card-${s.ticker}">
+      <div class="card-top-bar ${cls}"></div>
+      <div class="card-body">
+        <div class="card-row1">
+          <div>
+            <div class="card-ticker">${s.ticker}</div>
+            ${s.name ? `<div class="card-name">${s.name}</div>` : ''}
+            <div class="card-exchange">${s.exchange||'HOSE'} ±${(band*100).toFixed(0)}%</div>
+          </div>
+          <div class="card-actions">
+            <button class="card-btn" onclick="openEditModal('${s.id}')" title="Chỉnh sửa">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            </button>
+            <button class="card-btn del" onclick="confirmDelete('${s.id}','${s.ticker}')" title="Xoá">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="card-price-row">
+          <span class="card-price ${priceCls}">${fN(price)}</span>
+          <span class="card-change ${cls}">${arrow} ${fP(changePct)}</span>
+        </div>
+
+        ${lvls ? `
+        <div class="card-levels">
+          <div class="level-item ref"><div class="level-label">Tham chiếu</div><div class="level-val">${fN(lvls.ref)}</div></div>
+          <div class="level-item ceil"><div class="level-label">Trần</div><div class="level-val">${fN(lvls.ceil)}</div></div>
+          <div class="level-item floor"><div class="level-label">Sàn</div><div class="level-val">${fN(lvls.floor)}</div></div>
+        </div>` : ''}
+
+        <div class="card-vol-row">
+          <span>Khối lượng:</span>
+          <span class="vol-val">${vol >= 1000000 ? (vol/1000000).toFixed(2)+'M' : vol >= 1000 ? (vol/1000).toFixed(1)+'K' : fN(vol)}</span>
+          <span style="margin-left:auto;font-size:11px;color:var(--g3);">${isCeil ? '⚠ Trần' : isFloor ? '⚠ Sàn' : ''}</span>
+        </div>
+      </div>
+
+      <div class="card-chart">${miniChart(intraday, change > 0 ? true : change < 0 ? false : null)}</div>
+
+      ${pnl || pnl_today ? `
+      <div class="card-pnl">
+        <div>
+          <div class="pnl-label">Giá vốn: ${fN(s.cost)} · SL: ${fN(s.qty)}</div>
+          ${pnl_today ? `<div class="pnl-detail">Lãi/Lỗ hôm nay: <strong class="${pnl_today>=0?'pnl-val profit':'pnl-val loss'}">${fPt(pnl_today)}</strong></div>` : ''}
+        </div>
+        ${pnl ? `
+        <div style="text-align:right;">
+          <div class="pnl-val ${pnl.pnl>=0?'profit':'loss'}">${fPt(pnl.pnl)}</div>
+          <div class="pnl-detail">${fP(pnl.pnl_pct)}</div>
+        </div>` : ''}
+      </div>` : ''}
+
+      <div class="card-updated">Cập nhật lúc ${now}</div>
+    </div>`;
+  }).join('');
+}
+
+function renderLoadingCard(s) {
+  return `<div class="stock-card" id="card-${s.ticker}">
+    <div class="card-top-bar loading"></div>
+    <div class="card-body">
+      <div class="card-row1"><div><div class="card-ticker">${s.ticker}</div></div>
+        <div class="card-actions">
+          <button class="card-btn del" onclick="confirmDelete('${s.id}','${s.ticker}')"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg></button>
+        </div>
+      </div>
+      <div class="card-error">Không tải được dữ liệu. Kiểm tra lại mã.</div>
+    </div>
+  </div>`;
+}
+
+/* ─── SUMMARY ─── */
+function updateSummary() {
+  const total = watchlist.length;
+  let ups = 0, dns = 0, ncs = 0;
+  let pnl_today = 0, pnl_total = 0, has_pnl = false;
+  let total_value = 0;
+
+  watchlist.forEach(s => {
+    const ld = liveData[s.ticker];
+    if (!ld) return;
+    if (ld.change > 0) ups++;
+    else if (ld.change < 0) dns++;
+    else ncs++;
+    if (s.cost && s.qty) {
+      has_pnl = true;
+      pnl_today += (ld.change * s.qty);
+      const p = calcPnL(s, ld.price);
+      if (p) { pnl_total += p.pnl; total_value += p.value_in; }
+    }
+  });
+
+  document.getElementById('sum-total').textContent = total;
+  document.getElementById('sum-updn').innerHTML =
+    `<span style="color:var(--green3)">${ups}▲</span> / <span style="color:#E74C3C">${dns}▼</span> / <span style="color:var(--ref)">${ncs}–</span>`;
+
+  const todayCls = pnl_today > 0 ? 'profit' : pnl_today < 0 ? 'loss' : 'nc';
+  const totalCls = pnl_total > 0 ? 'profit' : pnl_total < 0 ? 'loss' : 'nc';
+  document.getElementById('sum-pnl-today').className = `stat-val ${todayCls}`;
+  document.getElementById('sum-pnl-today').textContent = has_pnl ? fPt(pnl_today) : 'Chưa nhập giá vốn';
+  document.getElementById('sum-pnl-total').className = `stat-val ${totalCls}`;
+  document.getElementById('sum-pnl-total').textContent = has_pnl ? fPt(pnl_total) : '–';
+  document.getElementById('sum-pnl-pct').textContent = has_pnl && total_value
+    ? fP(pnl_total / total_value * 100)
+    : 'Nhập giá vốn + số lượng để tính';
+}
+
+/* ─── ADD / EDIT MODAL ─── */
+function openAddModal() {
+  editId = null;
+  document.getElementById('modal-head-title').textContent = 'Thêm cổ phiếu';
+  document.getElementById('f-ticker').value = '';
+  document.getElementById('f-name').value = '';
+  document.getElementById('f-cost').value = '';
+  document.getElementById('f-qty').value = '';
+  document.getElementById('f-exchange').value = 'HOSE';
+  document.getElementById('f-ticker').disabled = false;
+  document.getElementById('add-overlay').classList.add('open');
+}
+
+function openEditModal(id) {
+  const s = watchlist.find(x => x.id === id);
+  if (!s) return;
+  editId = id;
+  document.getElementById('modal-head-title').textContent = `Chỉnh sửa · ${s.ticker}`;
+  document.getElementById('f-ticker').value = s.ticker;
+  document.getElementById('f-name').value   = s.name || '';
+  document.getElementById('f-cost').value   = s.cost || '';
+  document.getElementById('f-qty').value    = s.qty  || '';
+  document.getElementById('f-exchange').value = s.exchange || 'HOSE';
+  document.getElementById('f-ticker').disabled = true; // cannot change ticker when editing
+  document.getElementById('add-overlay').classList.add('open');
+}
+
+function closeModal() { document.getElementById('add-overlay').classList.remove('open'); }
+
+async function saveStock() {
+  const ticker   = document.getElementById('f-ticker').value.trim().toUpperCase();
+  const name     = document.getElementById('f-name').value.trim();
+  const cost     = parseFloat(document.getElementById('f-cost').value) || 0;
+  const qty      = parseFloat(document.getElementById('f-qty').value)  || 0;
+  const exchange = document.getElementById('f-exchange').value;
+  if (!ticker) { toast('Vui lòng nhập mã cổ phiếu.', true); return; }
+
+  const btn = document.getElementById('btn-save-stock');
+  btn.disabled = true; btn.textContent = 'Đang lưu...';
+  try {
+    if (editId) {
+      const idx = watchlist.findIndex(x => x.id === editId);
+      if (idx >= 0) watchlist[idx] = { ...watchlist[idx], name, cost, qty, exchange };
+      await saveWatchlist(`[Watchlist] Cập nhật ${ticker}`);
+      toast(`Đã cập nhật ${ticker}`);
+    } else {
+      if (watchlist.find(x => x.ticker === ticker)) { toast(`${ticker} đã có trong danh sách.`, true); return; }
+      watchlist.push({ id: 'ws-' + Date.now(), ticker, name, cost, qty, exchange, addedAt: new Date().toISOString().slice(0,10) });
+      await saveWatchlist(`[Watchlist] Thêm ${ticker}`);
+      toast(`Đã thêm ${ticker} vào danh sách`);
+    }
+    closeModal();
+    renderGrid();
+    updateSummary();
+    // Fetch price for new stock immediately
+    if (!editId) {
+      fetchPrice(ticker).then(d => {
+        if (d) { liveData[ticker] = d; renderGrid(); updateSummary(); }
+      });
+    }
+  } catch(e) {
+    toast('Lỗi lưu: ' + e.message, true);
+  } finally {
+    btn.disabled = false; btn.textContent = 'Lưu lên GitHub';
+    btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg> Lưu lên GitHub';
+  }
+}
+
+/* ─── DELETE ─── */
+function confirmDelete(id, ticker) {
+  document.getElementById('confirm-desc').textContent = `Sẽ xoá "${ticker}" khỏi danh sách theo dõi. Hành động này không thể hoàn tác.`;
+  document.getElementById('confirm-overlay').classList.add('open');
+  document.getElementById('btn-del-ok').onclick = () => doDelete(id, ticker);
+}
+function closeConfirm() { document.getElementById('confirm-overlay').classList.remove('open'); }
+async function doDelete(id, ticker) {
+  closeConfirm();
+  watchlist = watchlist.filter(x => x.id !== id);
+  delete liveData[ticker];
+  try {
+    await saveWatchlist(`[Watchlist] Xoá ${ticker}`);
+    toast(`Đã xoá ${ticker}`);
+  } catch(e) { toast('Xoá lỗi: ' + e.message, true); }
+  renderGrid();
+  updateSummary();
+}
+
+/* ─── SORT ─── */
+document.querySelectorAll('.sort-btn').forEach(b => b.addEventListener('click', () => {
+  sortMode = b.dataset.sort;
+  document.querySelectorAll('.sort-btn').forEach(x => x.classList.remove('active'));
+  b.classList.add('active');
+  renderGrid();
+}));
+
+/* ─── KEYBOARD / CLOSE OVERLAY ─── */
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') { closeModal(); closeConfirm(); }
+  if (e.key === 'Enter' && document.getElementById('add-overlay').classList.contains('open')) saveStock();
+});
+document.getElementById('add-overlay').addEventListener('click', e => {
+  if (e.target === document.getElementById('add-overlay')) closeModal();
+});
+document.getElementById('confirm-overlay').addEventListener('click', e => {
+  if (e.target === document.getElementById('confirm-overlay')) closeConfirm();
+});
+
+/* ─── INIT ─── */
+window.addEventListener('DOMContentLoaded', async () => {
+  const saved = localStorage.getItem('dtdm_wl_cfg');
+  if (saved) {
+    try {
+      const parsed = JSON.parse(saved);
+      if (parsed?.owner && parsed?.repo && parsed?.token) {
+        const check = await fetch(`https://api.github.com/repos/${parsed.owner}/${parsed.repo}`,
+          { headers: { Authorization: `Bearer ${parsed.token}`, Accept: 'application/vnd.github+json' } });
+        if (check.ok) { cfg = parsed; showApp(); return; }
+      }
+      localStorage.removeItem('dtdm_wl_cfg');
+    } catch(e) { localStorage.removeItem('dtdm_wl_cfg'); }
+  }
+});
+</script>
+</body>
+</html>
