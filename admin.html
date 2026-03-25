@@ -449,18 +449,35 @@ let reports = [];      // array hiện tại
 let fileSha = null;    // SHA của reports.json trên GitHub (cần để update)
 
 /* ===== INIT ===== */
-window.addEventListener('DOMContentLoaded', () => {
+window.addEventListener('DOMContentLoaded', async () => {
   // Set ngày mặc định = hôm nay
   document.getElementById('f-date').value = new Date().toISOString().slice(0, 10);
   onTypeChange();
 
-  // Kiểm tra token đã lưu
+  // Kiểm tra token đã lưu – xác thực lại trước khi vào admin
   const saved = localStorage.getItem('dtdm_cfg');
   if (saved) {
     try {
-      cfg = JSON.parse(saved);
-      showAdmin();
-    } catch(e) { localStorage.removeItem('dtdm_cfg'); }
+      const parsed = JSON.parse(saved);
+      if (parsed?.owner && parsed?.repo && parsed?.token) {
+        // Xác thực token còn hiệu lực không
+        const check = await fetch(`https://api.github.com/repos/${parsed.owner}/${parsed.repo}`, {
+          headers: { Authorization: `Bearer ${parsed.token}`, Accept: 'application/vnd.github+json' }
+        });
+        if (check.ok) {
+          cfg = parsed;
+          showAdmin();
+        } else {
+          // Token hết hạn hoặc bị thu hồi
+          localStorage.removeItem('dtdm_cfg');
+          showToast('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.', 'error');
+        }
+      } else {
+        localStorage.removeItem('dtdm_cfg');
+      }
+    } catch(e) {
+      localStorage.removeItem('dtdm_cfg');
+    }
   }
 });
 
@@ -476,13 +493,20 @@ async function doLogin() {
   btn.innerHTML = '<div class="spinner"></div> Đang xác thực...';
 
   try {
-    // Test quyền truy cập repo
-    const res = await ghGet(`/repos/${owner}/${repo}`);
-    if (!res.ok) throw new Error('Không thể truy cập repository. Kiểm tra lại username, repo, và token.');
+    // Xác thực bằng token truyền thẳng, KHÔNG dùng cfg (vì cfg chưa được set)
+    const res = await fetch(`https://api.github.com/repos/${owner}/${repo}`, {
+      headers: { Authorization: `Bearer ${token}`, Accept: 'application/vnd.github+json' }
+    });
+    if (res.status === 401) throw new Error('Token không hợp lệ hoặc đã hết hạn. Vui lòng tạo token mới.');
+    if (res.status === 404) throw new Error('Không tìm thấy repository. Kiểm tra lại username và tên repo.');
+    if (!res.ok) throw new Error(`Lỗi xác thực (HTTP ${res.status}). Kiểm tra lại thông tin.`);
+
+    // Chỉ gán cfg sau khi xác thực thành công
     cfg = { owner, repo, token };
     localStorage.setItem('dtdm_cfg', JSON.stringify(cfg));
     showAdmin();
   } catch(e) {
+    cfg = null; // Đảm bảo cfg không bị set nửa chừng
     showToast(e.message, 'error');
     btn.disabled = false;
     btn.innerHTML = 'Đăng nhập';
@@ -498,6 +522,7 @@ function doLogout() {
 }
 
 function showAdmin() {
+  if (!cfg) { doLogout(); return; } // Guard: không vào admin nếu cfg null
   document.getElementById('screen-login').style.display = 'none';
   document.getElementById('screen-admin').classList.remove('hidden');
   document.getElementById('lbl-repo').textContent = `${cfg.owner}/${cfg.repo}`;
@@ -506,12 +531,14 @@ function showAdmin() {
 
 /* ===== GITHUB API ===== */
 function ghGet(path) {
+  if (!cfg) throw new Error('Chưa đăng nhập. Vui lòng tải lại trang.');
   return fetch(`https://api.github.com${path}`, {
     headers: { Authorization: `Bearer ${cfg.token}`, Accept: 'application/vnd.github+json' }
   });
 }
 
 async function ghPutJson(content, message) {
+  if (!cfg) throw new Error('Chưa đăng nhập. Vui lòng tải lại trang.');
   const body = { message, content: btoa(unescape(encodeURIComponent(JSON.stringify(content, null, 2)))), sha: fileSha };
   const res = await fetch(`https://api.github.com/repos/${cfg.owner}/${cfg.repo}/contents/reports.json`, {
     method: 'PUT',
@@ -522,6 +549,7 @@ async function ghPutJson(content, message) {
     },
     body: JSON.stringify(body)
   });
+  if (res.status === 401) { doLogout(); throw new Error('Token hết hạn. Vui lòng đăng nhập lại.'); }
   if (!res.ok) {
     const err = await res.json();
     throw new Error(err.message || 'Lỗi khi lưu lên GitHub');
@@ -533,6 +561,7 @@ async function ghPutJson(content, message) {
 
 /* ===== LOAD REPORTS ===== */
 async function loadReports() {
+  if (!cfg) { doLogout(); return; }
   document.getElementById('table-loading').classList.remove('hidden');
   document.getElementById('table-wrap').classList.add('hidden');
   document.getElementById('table-empty').classList.add('hidden');
@@ -540,8 +569,10 @@ async function loadReports() {
   try {
     const res = await ghGet(`/repos/${cfg.owner}/${cfg.repo}/contents/reports.json`);
     if (res.status === 404) {
-      // File chưa có, khởi tạo rỗng
       reports = []; fileSha = null;
+    } else if (res.status === 401) {
+      doLogout();
+      throw new Error('Token hết hạn. Vui lòng đăng nhập lại.');
     } else if (!res.ok) {
       throw new Error('Không thể tải danh sách báo cáo');
     } else {
