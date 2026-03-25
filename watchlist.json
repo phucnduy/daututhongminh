@@ -25,5 +25,14 @@
     "qty": 0,
     "exchange": "HOSE",
     "addedAt": "2025-03-25"
+  },
+  {
+    "id": "ws-1774435683274",
+    "ticker": "TV1",
+    "name": "",
+    "cost": 27600,
+    "qty": 0,
+    "exchange": "HOSE",
+    "addedAt": "2026-03-25"
   }
 ]
