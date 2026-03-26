@@ -449,26 +449,11 @@ function goPage(n){ curPage = n; render(); window.scrollTo({top:0,behavior:'smoo
 
 /* ── MODAL ── */
 
-function closeModal(){
-  document.getElementById('modal-overlay').classList.remove('open');
-  history.replaceState(null,'',location.pathname);
-  openId = null;
-}
 
-function copyModalLink(){
-  const url = location.origin + location.pathname + '?r=' + openId;
-  navigator.clipboard.writeText(url).then(() => {
-    const btn = document.getElementById('m-copy');
-    btn.classList.add('copied'); btn.childNodes[1].textContent = ' Đã sao chép!';
-    toast('✅ Đã sao chép link báo cáo');
-    setTimeout(() => { btn.classList.remove('copied'); btn.childNodes[1].textContent = ' Sao chép link chia sẻ'; }, 2500);
-  });
-}
 
-document.getElementById('modal-overlay').addEventListener('click', e => {
-  if (e.target === document.getElementById('modal-overlay')) closeModal();
-});
-document.addEventListener('keydown', e => { if (e.key==='Escape') closeModal(); });
+
+
+
 
 window.addEventListener('DOMContentLoaded', loadReports);
 
