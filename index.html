@@ -713,30 +713,38 @@ async function fetchVNIndex() {
   try {
     const h = await ssiH();
     if (!h) throw new Error('no-ssi');
-    // Lấy 7 ngày gần nhất để có dữ liệu kể cả cuối tuần
-    const to   = new Date();
-    const from = new Date(); from.setDate(from.getDate()-7);
-    const fmt  = d => `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
+    const today = new Date();
+    const fmt   = d => `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
+
+    // IntradayOhlc cho VNINDEX — lấy được giá realtime trong phiên
     const r = await fetch(
-      `${SSI_BASE}DailyIndex&indexId=VNINDEX&market=HOSE&fromDate=${fmt(from)}&toDate=${fmt(to)}&pageIndex=1&pageSize=10&ascending=false`,
+      `${SSI_BASE}IntradayOhlc&symbol=VNINDEX&resolution=1&fromDate=${fmt(today)}&toDate=${fmt(today)}&pageIndex=1&pageSize=100&ascending=false`,
       {headers:h, signal:AbortSignal.timeout(7000)}
     );
     if (!r.ok) throw new Error('HTTP '+r.status);
     const d = await r.json();
     const rows = d?.data || [];
     if (!rows.length) throw new Error('empty');
-    const last = rows[0];
-    const val  = parseFloat(last.IndexValue) || 0;
-    const chg  = parseFloat(last.Change) || 0;
-    const pct  = parseFloat(last.RatioChange) || 0;
-    const isUp = chg >= 0;
+
+    // Nến gần nhất
+    const last     = rows[0];
+    const val      = parseFloat(last.Close) || 0;
+    // Tính change so với giá mở phiên (nến đầu tiên của ngày)
+    const firstRow = rows[rows.length - 1];
+    const open     = parseFloat(firstRow.Open) || val;
+    const chg      = val - open;
+    const pct      = open ? (chg / open * 100) : 0;
+    const isUp     = chg >= 0;
+
     document.getElementById('vni-val').textContent = fmtNum(Math.round(val*100)/100);
     const chgEl = document.getElementById('vni-chg');
     chgEl.textContent = `${isUp ? '▲' : '▼'} ${fmtPt(chg)} (${fmtPt(pct)}%)`;
     chgEl.className   = `hc-chg ${isUp ? 'up' : 'dn'}`;
-    // Mini chart từ 5 phiên gần nhất
-    const prices = rows.map(r => parseFloat(r.IndexValue)||0).filter(Boolean).reverse();
+
+    // Mini chart từ nến 1 phút (đảo ngược vì API trả mới nhất trước)
+    const prices = rows.map(x => parseFloat(x.Close)||0).filter(Boolean).reverse();
     drawMiniChart(prices.length > 1 ? prices : FALLBACK_CHART, isUp);
+
   } catch(e) {
     document.getElementById('vni-val').textContent = '–';
     document.getElementById('vni-chg').textContent = e.message === 'no-ssi' ? 'Chưa cấu hình SSI' : 'Lỗi tải dữ liệu';
@@ -777,30 +785,34 @@ async function fetchStockPrices() {
     const to   = new Date();
     const from = new Date(); from.setDate(from.getDate()-5);
     const fmt  = d => `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
-    const results = await Promise.allSettled(
-      TICKER_SYMS.map(sym =>
-        fetch(`${SSI_BASE}DailyOHLC&symbol=${sym}&market=HOSE&fromDate=${fmt(from)}&toDate=${fmt(to)}&pageIndex=1&pageSize=10&ascending=false`,
-          {headers:h, signal:AbortSignal.timeout(6000)})
-          .then(r => r.json())
-          .then(d => {
-            const row  = d?.data?.[0];
-            const prev = d?.data?.[1];
-            if (!row) return null;
-            const price    = parseFloat(row.Close) || 0;
-            const prevClose= prev ? (parseFloat(prev.Close)||price) : price;
-            const change   = price - prevClose;
-            const pct      = prevClose ? (change/prevClose*100) : 0;
-            const isUp     = change >= 0;
-            return {
-              s: sym, v: fmtNum(price),
-              c: (isUp?'+':'') + fmtNum(change),
-              p: `${isUp?'+':''}${pct.toFixed(2)}%`,
-              u: isUp ? 1 : 0
-            };
-          })
-      )
-    );
-    const items = results.filter(r=>r.status==='fulfilled'&&r.value).map(r=>r.value);
+    // SSI rate limit 1 req/s — gọi tuần tự với delay
+    const items = [];
+    const delay = ms => new Promise(res => setTimeout(res, ms));
+    for (const sym of TICKER_SYMS) {
+      try {
+        const res = await fetch(
+          `${SSI_BASE}DailyOHLC&symbol=${sym}&market=HOSE&fromDate=${fmt(from)}&toDate=${fmt(to)}&pageIndex=1&pageSize=10&ascending=false`,
+          {headers:h, signal:AbortSignal.timeout(6000)}
+        );
+        const d = await res.json();
+        const row  = d?.data?.[0];
+        const prev = d?.data?.[1];
+        if (row) {
+          const price    = parseFloat(row.Close) || 0;
+          const prevClose= prev ? (parseFloat(prev.Close)||price) : price;
+          const change   = price - prevClose;
+          const pct      = prevClose ? (change/prevClose*100) : 0;
+          const isUp     = change >= 0;
+          items.push({
+            s: sym, v: fmtNum(price),
+            c: (isUp?'+':'') + fmtNum(change),
+            p: `${isUp?'+':''}${pct.toFixed(2)}%`,
+            u: isUp ? 1 : 0
+          });
+        }
+      } catch(e) { /* bỏ qua mã lỗi */ }
+      await delay(1100); // tránh rate limit 1 req/s
+    }
     if (items.length < 2) throw new Error('insufficient');
     buildTicker(items);
   } catch(e) {
