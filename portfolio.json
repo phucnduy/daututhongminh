@@ -1,13 +1,13 @@
 {
   "initialCash": 1000000000,
-  "cash": 833500000,
+  "cash": 743500000,
   "holdings": [
     {
       "id": "h-1774489865810",
       "ticker": "TV1",
       "exchange": "UPCOM",
-      "avgCost": 26700,
-      "qty": 7000,
+      "avgCost": 27690,
+      "qty": 10000,
       "buyDate": "2026-01-29",
       "transactions": [
         {
@@ -17,6 +17,14 @@
           "qty": 10000,
           "fee": 0,
           "note": "Target 53600"
+        },
+        {
+          "type": "buy",
+          "date": "2026-03-09",
+          "price": 30000,
+          "qty": 3000,
+          "fee": 0,
+          "note": ""
         }
       ]
     }
@@ -53,8 +61,18 @@
       "qty": 3000,
       "fee": 0,
       "note": "Chốt lãi"
+    },
+    {
+      "type": "buy",
+      "ticker": "TV1",
+      "exchange": "UPCOM",
+      "date": "2026-03-09",
+      "price": 30000,
+      "qty": 3000,
+      "fee": 0,
+      "note": ""
     }
   ],
   "note": "Quản lý bởi Đầu Tư Thông Minh Group",
-  "updatedAt": "2026-03-26T01:52:06.541Z"
+  "updatedAt": "2026-03-26T01:52:41.158Z"
 }
