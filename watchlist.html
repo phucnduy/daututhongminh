@@ -361,7 +361,7 @@ tr:hover td{background:#FAFBFC;}
 <script>
 'use strict';
 const GITHUB_OWNER='phucnduy', GITHUB_REPO='daututhongminh';
-const SSI_BASE='https://fc-data.ssi.com.vn/api/v2/Market';
+const SSI_BASE='https://daututhongminh-delta.vercel.app/api/ssi?ep=';
 
 let cfg=null, portfolio=null, portSha=null;
 let ssiToken=null, ssiTokenExp=0;
@@ -477,7 +477,7 @@ async function ssiGetToken(){
   if(ssiToken&&Date.now()<ssiTokenExp) return ssiToken;
   const cid=localStorage.getItem('ssi_cid'),cs=localStorage.getItem('ssi_cs');
   if(!cid||!cs) throw new Error('Chưa cấu hình SSI API. Vào Cài đặt để nhập Consumer ID/Secret.');
-  const r=await fetch(`${SSI_BASE}/AccessToken`,{
+  const r=await fetch(`${SSI_BASE}AccessToken`,{
     method:'POST',headers:{'Content-Type':'application/json'},
     body:JSON.stringify({consumerID:cid,consumerSecret:cs}),
     signal:AbortSignal.timeout(8000)
@@ -497,7 +497,7 @@ async function fetchDailyPrice(ticker, exchange='HOSE'){
     // Lấy 3 ngày gần nhất để có giá dù cuối tuần hay lễ
     const d=new Date(); d.setDate(d.getDate()-5);
     const from=`${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
-    const r=await fetch(`${SSI_BASE}/DailyStockPrice?symbol=${ticker}&market=${exchange}&fromDate=${from}&toDate=${today}&pageIndex=1&pageSize=5&ascending=false`,
+    const r=await fetch(`${SSI_BASE}DailyStockPrice?symbol=${ticker}&market=${exchange}&fromDate=${from}&toDate=${today}&pageIndex=1&pageSize=10&ascending=false`,
       {headers:{Authorization:`Bearer ${tk}`,Accept:'application/json'},signal:AbortSignal.timeout(7000)});
     if(!r.ok) return null;
     const data=await r.json();
@@ -837,7 +837,7 @@ async function testSSI(){
   if(!cid||!cs){el.textContent='Nhập Consumer ID và Secret trước.';el.style.color='var(--red)';return;}
   el.textContent='Đang kiểm tra...';el.style.color='var(--g3)';
   try{
-    const r=await fetch(`${SSI_BASE}/AccessToken`,{
+    const r=await fetch(`${SSI_BASE}AccessToken`,{
       method:'POST',headers:{'Content-Type':'application/json'},
       body:JSON.stringify({consumerID:cid,consumerSecret:cs}),
       signal:AbortSignal.timeout(8000)

@@ -127,7 +127,7 @@ tr:hover td{background:#FAFBFC;}
 'use strict';
 const GITHUB_OWNER='phucnduy', GITHUB_REPO='daututhongminh';
 const RAW=`https://raw.githubusercontent.com/${GITHUB_OWNER}/${GITHUB_REPO}/main`;
-const SSI_BASE='https://fc-data.ssi.com.vn/api/v2/Market';
+const SSI_BASE='https://daututhongminh-delta.vercel.app/api/ssi?ep=';
 
 let portfolio=null, liveData={};
 let ssiToken=null, ssiTokenExp=0;
@@ -138,7 +138,7 @@ const fDate=d=>d?d.split('-').reverse().join('/'):'';
 
 async function ssiGetToken(cid,cs){
   if(ssiToken&&Date.now()<ssiTokenExp)return ssiToken;
-  const r=await fetch(`${SSI_BASE}/AccessToken`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({consumerID:cid,consumerSecret:cs}),signal:AbortSignal.timeout(8000)});
+  const r=await fetch(`${SSI_BASE}AccessToken`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({consumerID:cid,consumerSecret:cs}),signal:AbortSignal.timeout(8000)});
   if(!r.ok)throw new Error(`SSI auth ${r.status}`);
   const d=await r.json();
   const tk=d?.data?.accessToken||d?.accessToken;
@@ -153,7 +153,7 @@ async function fetchDailyPrice(ticker, exchange, cid, cs){
     const d=new Date(); d.setDate(d.getDate()-5);
     const from=`${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
     const today=`${String(new Date().getDate()).padStart(2,'0')}/${String(new Date().getMonth()+1).padStart(2,'0')}/${new Date().getFullYear()}`;
-    const r=await fetch(`${SSI_BASE}/DailyStockPrice?symbol=${ticker}&market=${exchange}&fromDate=${from}&toDate=${today}&pageIndex=1&pageSize=5&ascending=false`,
+    const r=await fetch(`${SSI_BASE}DailyStockPrice?symbol=${ticker}&market=${exchange}&fromDate=${from}&toDate=${today}&pageIndex=1&pageSize=10&ascending=false`,
       {headers:{Authorization:`Bearer ${tk}`,Accept:'application/json'},signal:AbortSignal.timeout(7000)});
     if(!r.ok)return null;
     const data=await r.json();

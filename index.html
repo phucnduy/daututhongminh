@@ -662,7 +662,7 @@ img{max-width:100%;display:block;}
 //   tự đọc SSI credentials từ ssi-config.json và lấy link public watchlist
 const SITE_GITHUB_OWNER = 'phucnduy';
 const SITE_GITHUB_REPO  = 'daututhongminh';
-const SSI_BASE  = 'https://fc-data.ssi.com.vn/api/v2/Market';
+const SSI_BASE  = 'https://daututhongminh-delta.vercel.app/api/ssi?ep=';
 const TICKER_SYMS = ['VCB','HPG','MWG','FPT','VHM','TCB','BID','STB','VIC','GAS','SSI','VND'];
 const PAGE_SIZE   = 9;
 
@@ -672,7 +672,7 @@ async function ssiGetToken(){
   if(_ssiToken&&Date.now()<_ssiTokenExp) return _ssiToken;
   if(!_ssiCid||!_ssiCs) return null;
   try{
-    const r=await fetch(`${SSI_BASE}/AccessToken`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({consumerID:_ssiCid,consumerSecret:_ssiCs}),signal:AbortSignal.timeout(7000)});
+    const r=await fetch(`${SSI_BASE}AccessToken`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({consumerID:_ssiCid,consumerSecret:_ssiCs}),signal:AbortSignal.timeout(7000)});
     if(!r.ok) return null;
     const d=await r.json();
     _ssiToken=d?.data?.accessToken||d?.accessToken;
@@ -718,7 +718,7 @@ async function fetchVNIndex() {
     const from = new Date(); from.setDate(from.getDate()-7);
     const fmt  = d => `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
     const r = await fetch(
-      `${SSI_BASE}/DailyIndex?indexId=VNINDEX&market=HOSE&fromDate=${fmt(from)}&toDate=${fmt(to)}&pageIndex=1&pageSize=10&ascending=false`,
+      `${SSI_BASE}DailyIndex?indexId=VNINDEX&market=HOSE&fromDate=${fmt(from)}&toDate=${fmt(to)}&pageIndex=1&pageSize=10&ascending=false`,
       {headers:h, signal:AbortSignal.timeout(7000)}
     );
     if (!r.ok) throw new Error('HTTP '+r.status);
@@ -779,7 +779,7 @@ async function fetchStockPrices() {
     const fmt  = d => `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
     const results = await Promise.allSettled(
       TICKER_SYMS.map(sym =>
-        fetch(`${SSI_BASE}/DailyStockPrice?symbol=${sym}&market=HOSE&fromDate=${fmt(from)}&toDate=${fmt(to)}&pageIndex=1&pageSize=5&ascending=false`,
+        fetch(`${SSI_BASE}DailyStockPrice?symbol=${sym}&market=HOSE&fromDate=${fmt(from)}&toDate=${fmt(to)}&pageIndex=1&pageSize=10&ascending=false`,
           {headers:h, signal:AbortSignal.timeout(6000)})
           .then(r => r.json())
           .then(d => {
