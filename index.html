@@ -923,79 +923,84 @@ function renderReports() {
 }
 
 function renderSlider() {
-  const items = filtered();
-  const track = document.getElementById('rep-grid');
-  const dots  = document.getElementById('slider-dots');
-  const info  = document.getElementById('list-info');
+  var items = filtered();
+  var track = document.getElementById('rep-grid');
+  var dots  = document.getElementById('slider-dots');
+  var info  = document.getElementById('list-info');
 
   if (!items.length) {
     track.innerHTML = '<div style="padding:40px;text-align:center;color:var(--g3);font-size:14px;width:100%;">Không tìm thấy báo cáo phù hợp.</div>';
-    dots.innerHTML = '';
-    info.textContent = '';
-    document.getElementById('arr-prev').classList.add('hidden');
-    document.getElementById('arr-next').classList.add('hidden');
+    dots.innerHTML = ''; info.textContent = '';
+    document.getElementById('arr-prev').className = 'slider-arr prev hidden';
+    document.getElementById('arr-next').className = 'slider-arr next hidden';
     return;
   }
 
-  // Build tất cả cards
+  // Build cards
   track.innerHTML = '';
+  var ICONS = {
+    market: '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#1B4F8A" stroke-width="2.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>',
+    stock:  '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#1A7A4A" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>'
+  };
+  var MONTHS = ['','Tháng 1','Tháng 2','Tháng 3','Tháng 4','Tháng 5','Tháng 6','Tháng 7','Tháng 8','Tháng 9','Tháng 10','Tháng 11','Tháng 12'];
+  var SHARE_SVG = '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>';
+  var ARROW_SVG = '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>';
 
-  /* Mini grid — Option C strip */
-  document.getElementById('rep-grid').innerHTML = minis.map(function(r,i) {
-    var isMarket = r.type === 'market';
-    var icon = isMarket
-      ? '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#1B4F8A" stroke-width="2.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>'
-      : '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#1A7A4A" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>';
-    var months = ['','Tháng 1','Tháng 2','Tháng 3','Tháng 4','Tháng 5','Tháng 6','Tháng 7','Tháng 8','Tháng 9','Tháng 10','Tháng 11','Tháng 12'];
+  items.forEach(function(r) {
+    var isM = r.type === 'market';
     var parts = r.date ? r.date.split('-') : [];
     var dd = parts.length === 3 ? parseInt(parts[2]) : '';
-    var mm = parts.length === 3 ? parseInt(parts[1]) : 0;
-    var stripDate = parts.length === 3 ? dd + ' ' + months[mm] : fmt(r.date);
-    var watermark = isMarket ? String(dd) : (r.ticker || '');
-    var stripDateFull = isMarket ? stripDate : (r.ticker ? r.ticker + ' · ' + stripDate : stripDate);
-    var tickerHtml = r.ticker ? '<span class="rm-ticker">' + r.ticker + '</span>' : '';
-    var delay = (i % PAGE_SIZE) * 0.05;
-    var readColor = isMarket ? 'color:var(--navy3)' : 'color:var(--green)';
-    return '<div class="rep-mini fade-in" style="animation-delay:' + delay + 's" onclick="openReport(\'' + r.id + '\')">' 
-      + '<div class="rm-strip ' + r.type + '">'
-        + '<div class="rm-strip-icon ' + r.type + '">' + icon + '</div>'
+    var mo = parts.length === 3 ? parseInt(parts[1]) : 0;
+    var stripDate = dd && mo ? dd + ' ' + MONTHS[mo] : fmt(r.date);
+    var stripFull = isM ? stripDate : (r.ticker ? r.ticker + ' · ' + stripDate : stripDate);
+    var wm = isM ? String(dd) : (r.ticker || '');
+    var ticker = r.ticker ? '<span class="rm-ticker">' + r.ticker + '</span>' : '';
+    var readColor = isM ? 'color:var(--navy3)' : 'color:var(--green)';
+
+    var div = document.createElement('div');
+    div.className = 'rep-mini fade-in';
+    div.innerHTML =
+      '<div class="rm-strip ' + r.type + '">'
+        + '<div class="rm-strip-icon ' + r.type + '">' + ICONS[r.type] + '</div>'
         + '<div class="rm-strip-txt">'
-          + '<div class="rm-strip-type">' + (isMarket ? 'Thị trường' : 'Cổ phiếu') + '</div>'
-          + '<div class="rm-strip-date">' + stripDateFull + '</div>'
+          + '<div class="rm-strip-type">' + (isM ? 'Thị trường' : 'Cổ phiếu') + '</div>'
+          + '<div class="rm-strip-date">' + stripFull + '</div>'
         + '</div>'
-        + '<div class="rm-strip-watermark">' + watermark + '</div>'
+        + '<div class="rm-strip-watermark">' + wm + '</div>'
       + '</div>'
       + '<div class="rm-body">'
-        + '<div class="rm-top">'
-          + '<div class="rm-left">'
-            + '<span class="rm-badge ' + r.type + '">' + (isMarket ? 'Thị trường' : 'Cổ phiếu') + '</span>'
-            + tickerHtml
-          + '</div>'
-          + '<span class="rm-date">' + fmt(r.date) + '</span>'
-        + '</div>'
+        + '<div class="rm-top"><div class="rm-left"><span class="rm-badge ' + r.type + '">' + (isM ? 'Thị trường' : 'Cổ phiếu') + '</span>' + ticker + '</div><span class="rm-date">' + fmt(r.date) + '</span></div>'
         + '<div class="rm-title">' + r.title + '</div>'
         + '<div class="rm-desc">' + (r.desc || '') + '</div>'
         + '<div class="rm-footer">'
-          + '<span class="rm-read" style="' + readColor + '">Đọc báo cáo <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>'
-          + '<button class="rm-share" onclick="event.stopPropagation();copyLink(\'' + r.id + '\',this)" title="Sao chép link">'
-            + '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>'
-          + '</button>'
+          + '<span class="rm-read" style="' + readColor + '">Đọc báo cáo ' + ARROW_SVG + '</span>'
+          + '<button class="rm-share" data-id="' + r.id + '" title="Sao chép link">' + SHARE_SVG + '</button>'
         + '</div>'
-      + '</div>'
-    + '</div>';
-  }).join('');
+      + '</div>';
 
-  // Cập nhật slider position
-  const PER = 3;
-  const pages = Math.max(1, items.length - PER + 1);
+    div.querySelector('.rep-mini,.rm-body,.rm-title,.rm-strip').addEventListener('click', function(e) {
+      if (!e.target.classList.contains('rm-share')) openReport(r.id);
+    });
+    div.addEventListener('click', function(e) {
+      if (!e.target.closest('.rm-share')) openReport(r.id);
+    });
+    div.querySelector('.rm-share').addEventListener('click', function(e) {
+      e.stopPropagation();
+      copyLink(r.id, this);
+    });
+    track.appendChild(div);
+  });
+
+  // Slider position
+  var PER = 3;
+  var pages = Math.max(1, items.length - PER + 1);
   if (sliderCur >= pages) sliderCur = pages - 1;
   if (sliderCur < 0) sliderCur = 0;
 
-  // Card width
-  const outer = document.getElementById('slider-outer');
-  const outerW = outer ? outer.offsetWidth : 800;
-  const cardW = (outerW - 16 - 22) / 3; // 16=padding, 22=2 gaps
-  const offset = sliderCur * (cardW + 11);
+  var outer = document.getElementById('slider-outer');
+  var outerW = outer ? outer.offsetWidth : 860;
+  var cardW = (outerW - 16 - 22) / 3;
+  var offset = sliderCur * (cardW + 11);
   track.style.transform = 'translateX(-' + offset + 'px)';
 
   // Arrows
@@ -1007,14 +1012,13 @@ function renderSlider() {
   for (var i = 0; i < pages; i++) {
     var dot = document.createElement('div');
     dot.className = 'slider-dot' + (i === sliderCur ? ' active' : '');
-    (function(idx){ dot.onclick = function(){ sliderCur = idx; renderSlider(); }; })(i);
+    (function(idx){ dot.addEventListener('click', function(){ sliderCur = idx; renderSlider(); }); })(i);
     dots.appendChild(dot);
   }
 
   info.textContent = items.length + ' báo cáo';
   observeFadeIn();
 }
-
 function slide(dir) {
   sliderCur += dir;
   renderSlider();

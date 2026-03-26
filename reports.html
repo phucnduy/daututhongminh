@@ -279,9 +279,12 @@ function toast(msg){
 /* ── LOAD ── */
 async function loadReports(){
   try {
-    const r = await fetch(RAW_BASE + '/reports.json?t=' + Date.now());
-    if (!r.ok) throw new Error();
-    REPORTS = await r.json();
+    // Thử local (Vercel/GitHub Pages) trước, fallback raw GitHub
+    let res = null;
+    try { res = await fetch('./reports.json?t=' + Date.now()); } catch(e){}
+    if (!res || !res.ok) res = await fetch(RAW_BASE + '/reports.json?t=' + Date.now());
+    if (!res.ok) throw new Error('Cannot load');
+    REPORTS = await res.json();
     REPORTS.sort((a,b) => b.date.localeCompare(a.date));
   } catch(e) { REPORTS = []; }
   updateStats();
