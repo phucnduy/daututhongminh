@@ -893,7 +893,8 @@ function renderChips() {
 
 /* Shareable link helpers */
 function copyLink(id, btnEl) {
-  navigator.clipboard.writeText(`${base()}?r=${id}`).then(() => {
+  const shareUrl = location.origin + '/api/og?r=' + id;
+  navigator.clipboard.writeText(shareUrl).then(() => {
     const orig = btnEl.innerHTML;
     btnEl.classList.add('copied');
     btnEl.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>';
@@ -903,7 +904,8 @@ function copyLink(id, btnEl) {
 
 function copyModalLink() {
   if (!openId) return;
-  navigator.clipboard.writeText(`${base()}?r=${openId}`).then(() => {
+  const shareUrl = location.origin + '/api/og?r=' + openId;
+  navigator.clipboard.writeText(shareUrl).then(() => {
     const btn = document.getElementById('modal-share');
     btn.classList.add('copied');
     btn.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> <span>Đã sao chép!</span>';
@@ -1059,6 +1061,7 @@ function openReport(id) {
   document.getElementById('modal-iframe').src = `https://drive.google.com/file/d/${r.driveId}/preview`;
   document.getElementById('modal').classList.add('open');
   document.body.style.overflow = 'hidden';
+  setPageMeta(r.title, r.desc || '');
 }
 function closeModal() {
   document.getElementById('modal').classList.remove('open');
@@ -1066,10 +1069,30 @@ function closeModal() {
   document.body.style.overflow = '';
   openId = null;
   history.replaceState(null, '', location.pathname);
+  resetPageMeta();
 }
 document.getElementById('modal-close').addEventListener('click', closeModal);
 document.getElementById('modal').addEventListener('click', e => { if (e.target === document.getElementById('modal')) closeModal(); });
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+
+function setPageMeta(title, desc) {
+  var fullTitle = title ? title + ' – ' + 'Đầu Tư Thông Minh Group' : document.title;
+  document.title = fullTitle;
+  var ogTitle = document.querySelector('meta[property="og:title"]');
+  var ogDesc  = document.querySelector('meta[property="og:description"]');
+  var ogUrl   = document.querySelector('meta[property="og:url"]');
+  if (ogTitle) ogTitle.setAttribute('content', title || 'Đầu Tư Thông Minh Group');
+  if (ogDesc)  ogDesc.setAttribute('content',  desc  || 'Báo cáo phân tích chứng khoán Việt Nam từ chuyên gia 20 năm kinh nghiệm.');
+  if (ogUrl)   ogUrl.setAttribute('content',   location.href);
+}
+function resetPageMeta() {
+  document.title = 'Đầu Tư Thông Minh Group';
+  var ogTitle = document.querySelector('meta[property="og:title"]');
+  var ogDesc  = document.querySelector('meta[property="og:description"]');
+  if (ogTitle) ogTitle.setAttribute('content', 'Đầu Tư Thông Minh Group');
+  if (ogDesc)  ogDesc.setAttribute('content',  'Báo cáo phân tích chứng khoán Việt Nam từ chuyên gia 20 năm kinh nghiệm.');
+}
 
 /* ─────────────────────────── INTERSECTION OBSERVER ─────────────────────────── */
 let fadeObserver;
