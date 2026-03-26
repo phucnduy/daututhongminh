@@ -376,7 +376,7 @@ img{max-width:100%;display:block;}
     <a class="nav-link" href="#services">Dịch vụ</a>
     <a class="nav-link" href="#" id="nav-watchlist-link" style="display:none;">
       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-      Theo dõi giá
+      Danh mục
     </a>
     <a class="nav-cta" href="https://zalo.me/g/sxshix010" target="_blank" rel="noopener">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.26 2 11.5c0 2.83 1.3 5.37 3.36 7.14L4.5 22l3.5-1.75C9.2 20.73 10.57 21 12 21c5.52 0 10-4.26 10-9.5S17.52 2 12 2z"/></svg>
@@ -660,8 +660,8 @@ img{max-width:100%;display:block;}
 /* ─── CONFIG ─── */
 // ⚙ Anh nhập GitHub owner/repo của mình vào đây để index.html
 //   tự đọc SSI credentials từ ssi-config.json và lấy link public watchlist
-const SITE_GITHUB_OWNER = 'phucnduy';  // ← điền username GitHub của anh
-const SITE_GITHUB_REPO  = 'daututhongminh';  // ← điền tên repo
+const SITE_GITHUB_OWNER = 'phucnduy';
+const SITE_GITHUB_REPO  = 'daututhongminh';
 const SSI_BASE  = 'https://fc-data.ssi.com.vn/api/v2/Market';
 const TICKER_SYMS = ['VCB','HPG','MWG','FPT','VHM','TCB','BID','STB','VIC','GAS','SSI','VND'];
 const PAGE_SIZE   = 9;
@@ -688,10 +688,10 @@ async function loadSsiConfig(){
     if(!r.ok) return;
     const d=await r.json();
     if(d.consumerID&&d.consumerSecret){_ssiCid=d.consumerID;_ssiCs=d.consumerSecret;}
-    // Show watchlist link in nav
+    // Show portfolio link in nav
     if(d.consumerID){
       const link=document.getElementById('nav-watchlist-link');
-      if(link){link.href=`/public-watchlist.html?owner=${SITE_GITHUB_OWNER}&repo=${SITE_GITHUB_REPO}`;link.style.display='';}
+      if(link){link.href=`/public-watchlist.html`;link.style.display='';}
     }
   }catch(e){}
 }
@@ -713,28 +713,34 @@ async function fetchVNIndex() {
   try {
     const h = await ssiH();
     if (!h) throw new Error('no-ssi');
-    const r = await fetch(`${SSI_BASE}/IndexIntraday?index=VNINDEX&pageIndex=1&pageSize=20`,{headers:h,signal:AbortSignal.timeout(7000)});
+    // Lấy 7 ngày gần nhất để có dữ liệu kể cả cuối tuần
+    const to   = new Date();
+    const from = new Date(); from.setDate(from.getDate()-7);
+    const fmt  = d => `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
+    const r = await fetch(
+      `${SSI_BASE}/DailyIndex?indexId=VNINDEX&market=HOSE&fromDate=${fmt(from)}&toDate=${fmt(to)}&pageIndex=1&pageSize=10&ascending=false`,
+      {headers:h, signal:AbortSignal.timeout(7000)}
+    );
     if (!r.ok) throw new Error('HTTP '+r.status);
     const d = await r.json();
     const rows = d?.data || [];
     if (!rows.length) throw new Error('empty');
-    const last = rows[0] || rows[rows.length-1];
-    const val  = last.indexValue || last.IndexValue || last.value;
-    const chg  = last.change     || last.Change     || 0;
-    const pct  = last.changePercent || last.ChangePercent || (val ? chg/val*100 : 0);
+    const last = rows[0];
+    const val  = parseFloat(last.IndexValue) || 0;
+    const chg  = parseFloat(last.Change) || 0;
+    const pct  = parseFloat(last.RatioChange) || 0;
     const isUp = chg >= 0;
     document.getElementById('vni-val').textContent = fmtNum(Math.round(val*100)/100);
     const chgEl = document.getElementById('vni-chg');
     chgEl.textContent = `${isUp ? '▲' : '▼'} ${fmtPt(chg)} (${fmtPt(pct)}%)`;
     chgEl.className   = `hc-chg ${isUp ? 'up' : 'dn'}`;
-    const prices = rows.map(x=>x.indexValue||x.IndexValue||x.value).filter(Boolean).reverse();
+    // Mini chart từ 5 phiên gần nhất
+    const prices = rows.map(r => parseFloat(r.IndexValue)||0).filter(Boolean).reverse();
     drawMiniChart(prices.length > 1 ? prices : FALLBACK_CHART, isUp);
   } catch(e) {
-    if (e.message !== 'no-ssi') {
-      document.getElementById('vni-val').textContent = '–';
-      document.getElementById('vni-chg').textContent = 'SSI API chưa cấu hình';
-      document.getElementById('vni-chg').className = 'hc-chg neutral';
-    }
+    document.getElementById('vni-val').textContent = '–';
+    document.getElementById('vni-chg').textContent = e.message === 'no-ssi' ? 'Chưa cấu hình SSI' : 'Lỗi tải dữ liệu';
+    document.getElementById('vni-chg').className = 'hc-chg neutral';
     drawMiniChart(FALLBACK_CHART, true);
   }
 }
@@ -763,22 +769,26 @@ async function fetchStockPrices() {
     {s:'VN-Index',v:'–',c:'–',p:'–',u:1},{s:'VCB',v:'–',c:'–',p:'–',u:0},
     {s:'HPG',v:'–',c:'–',p:'–',u:1},{s:'FPT',v:'–',c:'–',p:'–',u:1},
     {s:'MWG',v:'–',c:'–',p:'–',u:1},{s:'TCB',v:'–',c:'–',p:'–',u:1},
-    {s:'VHM',v:'–',c:'–',p:'–',u:0},{s:'SSI',v:'–',c:'–',p:'–',u:1},
+    {s:'SSI',v:'–',c:'–',p:'–',u:1},{s:'BID',v:'–',c:'–',p:'–',u:0},
   ];
   try {
     const h = await ssiH();
     if (!h) throw new Error('no-ssi');
+    const to   = new Date();
+    const from = new Date(); from.setDate(from.getDate()-5);
+    const fmt  = d => `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
     const results = await Promise.allSettled(
       TICKER_SYMS.map(sym =>
-        fetch(`${SSI_BASE}/StockPrice?market=HOSE&symbol=${sym}&pageIndex=1&pageSize=1`,{headers:h,signal:AbortSignal.timeout(6000)})
+        fetch(`${SSI_BASE}/DailyStockPrice?symbol=${sym}&market=HOSE&fromDate=${fmt(from)}&toDate=${fmt(to)}&pageIndex=1&pageSize=5&ascending=false`,
+          {headers:h, signal:AbortSignal.timeout(6000)})
           .then(r => r.json())
           .then(d => {
-            const it = d?.data?.[0];
-            if (!it) return null;
-            const price  = it.StockPrice??it.currentPrice??it.matchPrice??it.lastPrice;
-            const ref    = it.RefPrice??it.refPrice??it.referencePrice||price;
-            const change = price - ref;
-            const pct    = ref ? change/ref*100 : 0;
+            const row = d?.data?.[0];
+            if (!row) return null;
+            const price  = parseFloat(row.ClosePrice) || 0;
+            const ref    = parseFloat(row.RefPrice)   || price;
+            const change = parseFloat(row.PriceChange) || 0;
+            const pct    = parseFloat(row.PerPriceChange) || 0;
             const isUp   = change >= 0;
             return {
               s: sym, v: fmtNum(price),
@@ -790,10 +800,10 @@ async function fetchStockPrices() {
       )
     );
     const items = results.filter(r=>r.status==='fulfilled'&&r.value).map(r=>r.value);
-    if (items.length < 3) throw new Error('insufficient');
+    if (items.length < 2) throw new Error('insufficient');
     buildTicker(items);
   } catch(e) {
-    buildTicker(e.message === 'no-ssi' ? FALLBACK : FALLBACK);
+    buildTicker(FALLBACK);
   }
 }
 

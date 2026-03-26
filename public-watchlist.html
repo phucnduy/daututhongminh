@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Theo Dõi Giá Cổ Phiếu – Đầu Tư Thông Minh Group</title>
-  <meta name="description" content="Theo dõi giá cổ phiếu trực tuyến từ Đầu Tư Thông Minh Group. Cập nhật tự động mỗi 30 giây."/>
+  <title>Danh mục Đầu tư – Đầu Tư Thông Minh Group</title>
+  <meta name="description" content="Danh mục đầu tư cổ phiếu từ Đầu Tư Thông Minh Group."/>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Be+Vietnam+Pro:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
   <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
@@ -19,138 +19,70 @@
 }
 html,body{font-family:'Be Vietnam Pro',sans-serif;background:var(--g1);color:var(--text);min-height:100vh;-webkit-font-smoothing:antialiased;}
 a{text-decoration:none;color:inherit;}
-
-/* ── HEADER ── */
-.site-header{background:var(--navy);border-bottom:3px solid var(--gold);padding:0 28px;height:58px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:0 2px 16px rgba(0,0,0,.2);}
+.site-header{background:var(--navy);border-bottom:3px solid var(--gold);padding:0 28px;height:58px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
 .logo{display:flex;align-items:center;gap:10px;}
-.logo-mark{width:32px;height:32px;background:linear-gradient(135deg,var(--gold),var(--gold2));border-radius:6px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.logo-mark{width:32px;height:32px;background:linear-gradient(135deg,var(--gold),var(--gold2));border-radius:6px;display:flex;align-items:center;justify-content:center;}
 .logo-name{font-family:'Playfair Display',serif;font-size:14px;font-weight:700;color:var(--white);}
 .logo-sub{font-size:10px;color:var(--gold2);letter-spacing:.1em;text-transform:uppercase;}
 .header-right{display:flex;align-items:center;gap:10px;}
-.refresh-info{display:flex;align-items:center;gap:6px;font-size:12px;color:rgba(255,255,255,.5);}
-.rdot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
-.rdot.ok{background:var(--green3);animation:blink 1.2s infinite;}
-.rdot.loading{background:var(--gold2);animation:blink .6s infinite;}
-.rdot.err{background:var(--ceil);animation:none;}
-@keyframes blink{0%,100%{opacity:1}50%{opacity:.25}}
-.countdown{font-size:12px;font-weight:700;color:var(--gold2);}
+.price-info{font-size:12px;color:rgba(255,255,255,.5);}
+.pdot{width:7px;height:7px;border-radius:50%;background:var(--green3);display:inline-block;margin-right:5px;}
+.pdot.stale{background:var(--gold2);}
 .hbtn{display:inline-flex;align-items:center;gap:5px;padding:7px 14px;border-radius:6px;font-size:12.5px;font-weight:600;border:none;transition:all .18s;cursor:pointer;}
 .hbtn-gold{background:var(--gold);color:var(--navy2);}
 .hbtn-gold:hover{background:var(--gold2);}
 .hbtn-ghost{background:rgba(255,255,255,.1);color:rgba(255,255,255,.78);border:1px solid rgba(255,255,255,.15);}
 .hbtn-ghost:hover{background:rgba(255,255,255,.18);}
-
-/* ── MARKET BAR ── */
-.market-bar{background:var(--navy2);padding:9px 28px;display:flex;align-items:center;gap:20px;overflow-x:auto;border-bottom:1px solid rgba(255,255,255,.06);}
-.market-bar::-webkit-scrollbar{height:3px;}
-.market-bar::-webkit-scrollbar-thumb{background:rgba(255,255,255,.2);border-radius:2px;}
-.mb-item{display:flex;align-items:center;gap:7px;flex-shrink:0;}
-.mb-name{font-size:11.5px;font-weight:700;color:var(--gold2);}
-.mb-val{font-size:12px;font-weight:600;color:var(--white);}
-.mb-chg{font-size:11.5px;font-weight:600;}
-.mb-chg.up{color:var(--green3);}.mb-chg.dn{color:#E74C3C;}.mb-chg.nc{color:var(--ref);}
-.mb-sep{width:1px;height:16px;background:rgba(255,255,255,.1);}
-
-/* ── BODY ── */
-.body{max-width:1300px;margin:0 auto;padding:20px 24px 60px;}
-
-/* ── SUMMARY ── */
-.sum-row{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px;}
-.sum-card{background:var(--white);border-radius:10px;padding:14px 16px;border:1.5px solid var(--g2);}
-.sum-lbl{font-size:11px;color:var(--g3);font-weight:500;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;}
-.sum-val{font-family:'Playfair Display',serif;font-size:20px;font-weight:700;color:var(--navy2);}
-.sum-sub{font-size:11.5px;color:var(--g3);margin-top:3px;}
-
-/* ── TOOLBAR ── */
-.toolbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;gap:10px;flex-wrap:wrap;}
-.wl-title{font-family:'Playfair Display',serif;font-size:19px;font-weight:700;color:var(--navy2);}
-.wl-sub{font-size:13px;font-weight:400;color:var(--g3);}
-.sort-row{display:flex;align-items:center;gap:7px;}
-.sort-label{font-size:12px;color:var(--g3);}
-.sort-btn{background:var(--g1);border:1.5px solid var(--g2);border-radius:20px;padding:4px 11px;font-size:12px;font-weight:500;color:var(--g3);cursor:pointer;transition:all .15s;}
-.sort-btn.active,.sort-btn:hover{background:var(--navy2);border-color:var(--navy2);color:var(--white);}
-
-/* ── STOCK CARDS ── */
-.wl-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:13px;}
-.stock-card{background:var(--white);border-radius:11px;border:1.5px solid var(--g2);overflow:hidden;transition:border-color .2s,box-shadow .2s;}
-.stock-card:hover{border-color:var(--navy3);box-shadow:0 5px 20px rgba(13,43,82,.09);}
-.stock-card.flash-up{animation:flashG .5s ease;}
-.stock-card.flash-dn{animation:flashR .5s ease;}
-@keyframes flashG{0%,100%{background:var(--white)}50%{background:#f0fdf4}}
-@keyframes flashR{0%,100%{background:var(--white)}50%{background:#fff5f5}}
-.card-topbar{height:3px;}
-.card-topbar.up{background:linear-gradient(90deg,var(--green),var(--green3));}
-.card-topbar.dn{background:linear-gradient(90deg,var(--red),#E74C3C);}
-.card-topbar.nc{background:linear-gradient(90deg,var(--ref),#F39C12);}
-.card-topbar.loading{background:var(--g2);}
-.card-inner{padding:13px 14px 0;}
-.card-r1{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:9px;}
-.card-ticker{font-family:'Playfair Display',serif;font-size:19px;font-weight:700;color:var(--navy2);}
-.card-co{font-size:11px;color:var(--g3);margin-top:1px;}
-.card-exch{display:inline-block;font-size:9.5px;font-weight:700;padding:2px 6px;border-radius:3px;background:#EBF2FC;color:var(--navy3);margin-top:3px;}
-.price-row{display:flex;align-items:baseline;gap:9px;margin-bottom:5px;}
-.price{font-family:'Playfair Display',serif;font-size:24px;font-weight:700;line-height:1;}
-.price.up{color:var(--green);}.price.dn{color:var(--red);}.price.nc{color:var(--ref);}.price.ceil{color:var(--ceil);}.price.floor{color:var(--floor);}.price.loading{color:var(--g2);}
-.chg-badge{font-size:12.5px;font-weight:700;padding:2px 7px;border-radius:4px;}
-.chg-badge.up{background:var(--green2);color:var(--green);}
-.chg-badge.dn{background:#FDECEA;color:var(--red);}
-.chg-badge.nc{background:#FEF5E7;color:var(--ref);}
-.levels-row{display:flex;gap:0;border:1px solid var(--g2);border-radius:5px;overflow:hidden;margin-bottom:7px;}
-.lv{flex:1;text-align:center;padding:4px 3px;}
-.lv:not(:last-child){border-right:1px solid var(--g2);}
-.lv-lbl{font-size:9px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;margin-bottom:1px;}
-.lv-val{font-size:11.5px;font-weight:700;}
-.lv.ref .lv-lbl,.lv.ref .lv-val{color:var(--ref);}
-.lv.ceil .lv-lbl,.lv.ceil .lv-val{color:var(--ceil);}
-.lv.floor .lv-lbl,.lv.floor .lv-val{color:var(--floor);}
-.vol-row{display:flex;align-items:center;justify-content:space-between;font-size:11.5px;color:var(--g3);margin-bottom:7px;}
-.vol-val{font-weight:600;color:var(--text);}
-.warn-tag{font-size:10px;font-weight:700;padding:1px 5px;border-radius:3px;}
-.warn-ceil{background:#FDECEA;color:var(--ceil);}
-.warn-floor{background:#EBF5FB;color:var(--floor);}
-.card-chart{height:42px;margin:0 -14px;padding:0 6px;}
-.card-chart svg{width:100%;height:100%;}
-.card-ts{font-size:9.5px;color:var(--g3);padding:5px 14px;border-top:1px solid var(--g1);}
-.card-err{padding:18px 14px;text-align:center;color:var(--red);font-size:13px;}
-.skel{background:linear-gradient(90deg,var(--g2) 25%,var(--g1) 50%,var(--g2) 75%);background-size:200%;animation:shimmer 1.3s infinite;border-radius:4px;}
-@keyframes shimmer{0%{background-position:200%}100%{background-position:-200%}}
-
-/* ── EMPTY / ERROR STATE ── */
-.empty-wrap{text-align:center;padding:60px 24px;color:var(--g3);grid-column:1/-1;}
-.empty-ico{font-size:44px;opacity:.3;margin-bottom:14px;}
-.empty-title{font-size:16px;font-weight:600;color:var(--navy2);margin-bottom:6px;}
-.empty-desc{font-size:14px;line-height:1.6;max-width:400px;margin:0 auto;}
-
-/* ── SETUP NOTICE ── */
-.setup-notice{background:var(--white);border-radius:12px;padding:32px;max-width:560px;margin:60px auto;text-align:center;border:1.5px solid var(--g2);box-shadow:0 8px 32px rgba(13,43,82,.08);}
+.body{max-width:1400px;margin:0 auto;padding:20px 24px 60px;}
+/* NAV CARDS */
+.nav-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:24px;}
+.nav-card{background:var(--white);border-radius:10px;padding:14px 16px;border:1.5px solid var(--g2);}
+.nav-card.highlight{border-color:var(--gold);background:linear-gradient(135deg,var(--navy2),#1a3a6e);}
+.nav-lbl{font-size:11px;font-weight:500;color:var(--g3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px;}
+.nav-card.highlight .nav-lbl{color:rgba(255,255,255,.55);}
+.nav-val{font-family:'Playfair Display',serif;font-size:19px;font-weight:700;color:var(--navy2);line-height:1;}
+.nav-card.highlight .nav-val{color:var(--gold2);font-size:22px;}
+.nav-sub{font-size:11.5px;color:var(--g3);margin-top:4px;}
+.nav-card.highlight .nav-sub{color:rgba(255,255,255,.4);}
+.nav-val.profit{color:var(--green);}
+.nav-val.loss{color:var(--red);}
+.nav-val.nc{color:var(--g3);}
+/* SECTION */
+.sec-card{background:var(--white);border-radius:12px;border:1.5px solid var(--g2);margin-bottom:20px;overflow:hidden;}
+.sec-head{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--g2);}
+.sec-title{font-family:'Playfair Display',serif;font-size:16px;font-weight:700;color:var(--navy2);}
+/* TABLE */
+.tbl-wrap{overflow-x:auto;}
+table{width:100%;border-collapse:collapse;font-size:13px;}
+th{background:var(--g1);text-align:left;padding:9px 12px;font-size:11px;font-weight:700;color:var(--g3);text-transform:uppercase;letter-spacing:.05em;white-space:nowrap;}
+td{padding:11px 12px;border-bottom:1px solid var(--g1);vertical-align:middle;}
+tr:last-child td{border-bottom:none;}
+tr:hover td{background:#FAFBFC;}
+.ticker-cell{font-family:'Playfair Display',serif;font-size:15px;font-weight:700;color:var(--navy2);}
+.exchange-tag{display:inline-block;font-size:9.5px;font-weight:700;padding:2px 5px;border-radius:3px;background:#EBF2FC;color:var(--navy3);margin-left:4px;}
+.up-cell{color:var(--green);font-weight:700;}
+.dn-cell{color:var(--red);font-weight:700;}
+.nc-cell{color:var(--ref);font-weight:700;}
+.alloc-bar{height:6px;background:var(--g2);border-radius:3px;margin-top:4px;overflow:hidden;}
+.alloc-fill{height:100%;background:linear-gradient(90deg,var(--navy2),var(--navy3));border-radius:3px;}
+.empty-row td{text-align:center;color:var(--g3);padding:32px;font-size:13.5px;}
+/* SETUP */
+.setup-notice{background:var(--white);border-radius:12px;padding:32px;max-width:560px;margin:60px auto;text-align:center;border:1.5px solid var(--g2);}
 .sn-ico{font-size:40px;margin-bottom:16px;}
 .sn-title{font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:var(--navy2);margin-bottom:10px;}
 .sn-desc{font-size:14px;color:var(--g3);line-height:1.65;margin-bottom:20px;}
-.sn-code{background:var(--g1);border:1px solid var(--g2);border-radius:7px;padding:10px 14px;font-size:12.5px;color:var(--navy2);font-family:monospace;word-break:break-all;text-align:left;margin-bottom:16px;}
-
-/* ── DISCLAIMER ── */
+/* DISCLAIMER */
 .disclaimer{background:rgba(230,126,34,.08);border:1px solid rgba(230,126,34,.2);border-radius:8px;padding:10px 14px;font-size:12px;color:var(--ref);margin-bottom:20px;line-height:1.55;}
-
-/* ── FOOTER ── */
-.site-footer{background:var(--navy);border-top:2px solid var(--gold);padding:20px 28px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-top:40px;}
+/* FOOTER */
+.site-footer{background:var(--navy);border-top:2px solid var(--gold);padding:18px 28px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-top:40px;}
 .footer-brand{font-family:'Playfair Display',serif;font-size:14px;font-weight:700;color:var(--white);}
-.footer-links-row{display:flex;align-items:center;gap:16px;}
-.footer-links-row a{font-size:12.5px;color:rgba(255,255,255,.55);transition:color .18s;}
-.footer-links-row a:hover{color:var(--gold2);}
+.footer-links{display:flex;align-items:center;gap:16px;}
+.footer-links a{font-size:12.5px;color:rgba(255,255,255,.55);transition:color .18s;}
+.footer-links a:hover{color:var(--gold2);}
 .footer-copy{font-size:11px;color:rgba(255,255,255,.3);}
-
-/* ── RESPONSIVE ── */
-@media(max-width:768px){
-  .site-header{padding:0 16px;}
-  .market-bar{padding:8px 16px;}
-  .body{padding:14px 14px 48px;}
-  .sum-row{grid-template-columns:1fr 1fr;}
-  .wl-grid{grid-template-columns:1fr;}
-  .site-footer{flex-direction:column;align-items:flex-start;padding:16px 16px;}
-  .header-right{gap:6px;}
-  .refresh-info span:not(.countdown){display:none;}
-}
-@media(max-width:480px){.sum-row{grid-template-columns:1fr;}}
+@media(max-width:1024px){.nav-grid{grid-template-columns:repeat(3,1fr);};}
+@media(max-width:768px){.site-header{padding:0 16px;}.body{padding:14px 14px 48px;}.nav-grid{grid-template-columns:1fr 1fr;}.header-right .price-info{display:none;};}
+@media(max-width:480px){.nav-grid{grid-template-columns:1fr;};}
   </style>
 </head>
 <body>
@@ -158,18 +90,13 @@ a{text-decoration:none;color:inherit;}
 <header class="site-header">
   <a href="/" class="logo">
     <div class="logo-mark"><svg width="16" height="16" viewBox="0 0 22 22" fill="none"><polyline points="2,16 7,9 12,12 17,5 20,8" stroke="#08192E" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-    <div><div class="logo-name">Đầu Tư Thông Minh</div><div class="logo-sub">Theo Dõi Giá Live</div></div>
+    <div><div class="logo-name">Danh mục Đầu tư</div><div class="logo-sub">Đầu Tư Thông Minh Group</div></div>
   </a>
   <div class="header-right">
-    <div class="refresh-info">
-      <div class="rdot loading" id="rdot"></div>
-      <span>Cập nhật sau</span>
-      <span class="countdown" id="countdown">30</span>
-      <span>giây</span>
-    </div>
-    <button class="hbtn hbtn-ghost" onclick="forceRefresh()">
+    <span class="price-info"><span class="pdot" id="pdot"></span><span id="price-date">Đang tải giá...</span></span>
+    <button class="hbtn hbtn-ghost" onclick="refreshPrices()">
       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.51"/></svg>
-      Refresh
+      Cập nhật giá
     </button>
     <a href="/" class="hbtn hbtn-gold">
       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
@@ -178,318 +105,234 @@ a{text-decoration:none;color:inherit;}
   </div>
 </header>
 
-<div class="market-bar" id="market-bar">
-  <span style="font-size:11.5px;color:rgba(255,255,255,.35);">Đang tải chỉ số...</span>
-</div>
-
 <div class="body" id="main-body">
-  <!-- Content injected by JS -->
-  <div class="empty-wrap">
-    <div class="empty-ico">⏳</div>
-    <div class="empty-title">Đang tải dữ liệu...</div>
-    <div class="empty-desc">Đang kết nối SSI API và tải danh sách cổ phiếu.</div>
+  <div class="setup-notice">
+    <div class="sn-ico">⏳</div>
+    <div class="sn-title">Đang tải dữ liệu...</div>
+    <div class="sn-desc">Đang kết nối SSI API và tải thông tin danh mục.</div>
   </div>
 </div>
 
 <footer class="site-footer">
   <div class="footer-brand">Đầu Tư Thông Minh Group</div>
-  <div class="footer-links-row">
+  <div class="footer-links">
     <a href="https://zalo.me/g/sxshix010" target="_blank" rel="noopener">Nhóm Zalo</a>
     <a href="https://www.facebook.com/Smart.Investing.VN" target="_blank" rel="noopener">Facebook</a>
     <a href="/">Báo cáo phân tích</a>
   </div>
-  <div class="footer-copy">Dữ liệu từ SSI FastConnect · Chỉ mang tính tham khảo</div>
+  <div class="footer-copy">Dữ liệu giá từ SSI FastConnect · Chỉ mang tính tham khảo</div>
 </footer>
 
 <script>
 'use strict';
+const GITHUB_OWNER='phucnduy', GITHUB_REPO='daututhongminh';
+const RAW=`https://raw.githubusercontent.com/${GITHUB_OWNER}/${GITHUB_REPO}/main`;
+const SSI_BASE='https://fc-data.ssi.com.vn/api/v2/Market';
 
-const REFRESH_SEC = 30;
-const BANDS = { HOSE:.07, HNX:.1, UPCOM:.15 };
-const INDICES_CFG = [
-  {id:'VNINDEX',name:'VN-Index'},
-  {id:'HNXIndex',name:'HNX-Index'},
-  {id:'VN30',name:'VN30'},
-];
-const SSI_BASE = 'https://fc-data.ssi.com.vn/api/v2/Market';
-const RAW = 'https://raw.githubusercontent.com';
-
-/* ─── STATE ─── */
-let githubOwner='', githubRepo='', watchlist=[], live={}, prevPx={};
+let portfolio=null, liveData={};
 let ssiToken=null, ssiTokenExp=0;
-let sortMode='custom', cdTimer=null, countdown=REFRESH_SEC;
 
-/* ─── UTILS ─── */
-const fN  = n=>n==null?'–':n.toLocaleString('vi-VN');
-const fP  = n=>n==null?'–':(n>=0?'+':'')+n.toFixed(2)+'%';
-const now_ = ()=>new Date().toLocaleTimeString('vi-VN');
+const fN=n=>n==null?'–':Math.round(n).toLocaleString('vi-VN');
+const fP=(n,d=2)=>n==null?'–':(n>=0?'+':'')+n.toFixed(d)+'%';
+const fDate=d=>d?d.split('-').reverse().join('/'):'';
 
-/* ─── READ URL PARAMS ─── */
-function getParams(){
-  const p=new URLSearchParams(location.search);
-  return {owner:p.get('owner')||'', repo:p.get('repo')||''};
-}
-
-/* ─── SSI TOKEN ─── */
 async function ssiGetToken(cid,cs){
-  if(ssiToken&&Date.now()<ssiTokenExp) return ssiToken;
-  const r=await fetch(`${SSI_BASE}/AccessToken`,{
-    method:'POST',headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({consumerID:cid,consumerSecret:cs}),
-    signal:AbortSignal.timeout(8000)
-  });
-  if(!r.ok) throw new Error(`SSI auth HTTP ${r.status}`);
+  if(ssiToken&&Date.now()<ssiTokenExp)return ssiToken;
+  const r=await fetch(`${SSI_BASE}/AccessToken`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({consumerID:cid,consumerSecret:cs}),signal:AbortSignal.timeout(8000)});
+  if(!r.ok)throw new Error(`SSI auth ${r.status}`);
   const d=await r.json();
   const tk=d?.data?.accessToken||d?.accessToken;
-  if(!tk) throw new Error('SSI không trả về token');
+  if(!tk)throw new Error('Không nhận được token SSI');
   ssiToken=tk;ssiTokenExp=Date.now()+22*60*1000;
   return ssiToken;
 }
-async function ssiH(cid,cs){
-  const tk=await ssiGetToken(cid,cs);
-  return {Authorization:`Bearer ${tk}`,Accept:'application/json'};
-}
 
-/* ─── FETCH PRICE ─── */
-async function fetchStock(sym,market,cid,cs){
+async function fetchDailyPrice(ticker, exchange, cid, cs){
   try{
-    const h=await ssiH(cid,cs);
-    const r=await fetch(`${SSI_BASE}/StockPrice?market=${market}&symbol=${sym}&pageIndex=1&pageSize=1`,
-      {headers:h,signal:AbortSignal.timeout(7000)});
-    if(!r.ok) return null;
-    const d=await r.json();
-    const it=d?.data?.[0];
-    if(!it) return null;
-    const price=it.StockPrice??it.currentPrice??it.matchPrice??it.lastPrice;
-    const ref  =it.RefPrice??it.refPrice??it.referencePrice;
-    const ceil_=it.CeilingPrice??it.ceilingPrice;
-    const flr  =it.FloorPrice??it.floorPrice;
-    const vol  =it.TradingVolume??it.tradingVolume??it.totalTradingVolume??0;
-    const chg=price-ref, pct=ref?(chg/ref*100):0;
-    return {price,ref,ceil:ceil_,floor:flr,change:chg,changePct:pct,vol};
-  }catch(e){return null;}
-}
-async function fetchIntraday(sym,cid,cs){
-  try{
-    const h=await ssiH(cid,cs);
-    const r=await fetch(`${SSI_BASE}/StockIntraday?symbol=${sym}&pageIndex=1&pageSize=100`,
-      {headers:h,signal:AbortSignal.timeout(7000)});
-    if(!r.ok) return [];
-    const d=await r.json();
-    const rows=d?.data||[];
-    const step=Math.max(1,Math.floor(rows.length/50));
-    return rows.filter((_,i)=>i%step===0).map(x=>x.p||x.price||x.Price||0).filter(Boolean);
-  }catch(e){return [];}
-}
-async function fetchIndex(indexId,cid,cs){
-  try{
-    const h=await ssiH(cid,cs);
-    const r=await fetch(`${SSI_BASE}/IndexIntraday?index=${indexId}&pageIndex=1&pageSize=5`,
-      {headers:h,signal:AbortSignal.timeout(7000)});
-    if(!r.ok) return null;
-    const d=await r.json();
-    const rows=d?.data||[];
-    const last=rows[0]||rows[rows.length-1];
-    if(!last) return null;
-    const val=last.indexValue||last.IndexValue||last.value;
-    const chg=last.change||last.Change||0;
-    const pct=last.changePercent||last.ChangePercent||last.changePct||(val&&chg/val*100);
-    return {val,chg,pct};
+    const tk=await ssiGetToken(cid,cs);
+    const d=new Date(); d.setDate(d.getDate()-5);
+    const from=`${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
+    const today=`${String(new Date().getDate()).padStart(2,'0')}/${String(new Date().getMonth()+1).padStart(2,'0')}/${new Date().getFullYear()}`;
+    const r=await fetch(`${SSI_BASE}/DailyStockPrice?symbol=${ticker}&market=${exchange}&fromDate=${from}&toDate=${today}&pageIndex=1&pageSize=5&ascending=false`,
+      {headers:{Authorization:`Bearer ${tk}`,Accept:'application/json'},signal:AbortSignal.timeout(7000)});
+    if(!r.ok)return null;
+    const data=await r.json();
+    if(!data?.data?.length)return null;
+    const row=data.data[0];
+    return{price:parseFloat(row.ClosePrice)||0,ref:parseFloat(row.RefPrice)||0,ceil:parseFloat(row.CeilingPrice)||0,floor:parseFloat(row.FloorPrice)||0,change:parseFloat(row.PriceChange)||0,changePct:parseFloat(row.PerPriceChange)||0,vol:parseFloat(row.TotalTradedVol)||0,date:row.TradingDate};
   }catch(e){return null;}
 }
 
-/* ─── MINI CHART ─── */
-function miniSvg(pts,up){
-  if(!pts||pts.length<2) return '<svg viewBox="0 0 300 42"></svg>';
-  const mn=Math.min(...pts),mx=Math.max(...pts),rng=mx-mn||1;
-  const W=300,H=42;
-  const coords=pts.map((v,i)=>{
-    const x=(i/(pts.length-1))*W;
-    const y=H-((v-mn)/rng)*(H-5)-2.5;
-    return `${x.toFixed(1)},${y.toFixed(1)}`;
-  }).join(' ');
-  const col=up===true?'var(--green3)':up===false?'#E74C3C':'var(--ref)';
-  return `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none">
-    <defs><linearGradient id="g${up?'u':'d'}" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0%" stop-color="${col}" stop-opacity=".22"/>
-      <stop offset="100%" stop-color="${col}" stop-opacity="0"/>
-    </linearGradient></defs>
-    <path d="M${coords.split(' ').join(' L')} L${W},${H} L0,${H}Z" fill="url(#g${up?'u':'d'})"/>
-    <polyline points="${coords}" stroke="${col}" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-  </svg>`;
+async function refreshPrices(){
+  if(!portfolio?.holdings?.length)return;
+  const ssiCfg=await fetch(`${RAW}/ssi-config.json`).then(r=>r.ok?r.json():null).catch(()=>null);
+  if(!ssiCfg?.consumerID){document.getElementById('price-date').textContent='Chưa cấu hình SSI API';return;}
+  document.getElementById('pdot').className='pdot stale';
+  document.getElementById('price-date').textContent='Đang tải giá...';
+  await Promise.allSettled(portfolio.holdings.map(h=>fetchDailyPrice(h.ticker,h.exchange||'HOSE',ssiCfg.consumerID,ssiCfg.consumerSecret).then(d=>{if(d)liveData[h.ticker]=d;})));
+  const dates=Object.values(liveData).map(x=>x.date).filter(Boolean);
+  document.getElementById('pdot').className='pdot';
+  document.getElementById('price-date').textContent=dates.length?`Giá đóng cửa ${dates[0]}`:'Không có dữ liệu';
+  renderAll();
 }
 
-/* ─── SUMMARY ─── */
-function renderSummary(){
-  let up=0,dn=0,nc=0;
-  watchlist.forEach(s=>{
-    const ld=live[s.ticker];
-    if(!ld)return;
-    if(ld.change>0)up++;else if(ld.change<0)dn++;else nc++;
+function calcNAV(){
+  if(!portfolio)return{nav:0,stockVal:0,unrealized:0,realized:0};
+  let stockVal=0,unrealized=0;
+  (portfolio.holdings||[]).forEach(h=>{
+    const ld=liveData[h.ticker];
+    const price=ld?.price||h.avgCost;
+    stockVal+=price*h.qty;
+    unrealized+=(price-h.avgCost)*h.qty;
   });
-  return `<div class="sum-row">
-    <div class="sum-card"><div class="sum-lbl">Tổng mã theo dõi</div><div class="sum-val">${watchlist.length}</div><div class="sum-sub">cổ phiếu</div></div>
-    <div class="sum-card"><div class="sum-lbl">Tăng / Giảm / Tham chiếu</div><div class="sum-val"><span style="color:var(--green3)">${up}▲</span> / <span style="color:#E74C3C">${dn}▼</span> / <span style="color:var(--ref)">${nc}–</span></div><div class="sum-sub">hôm nay</div></div>
-    <div class="sum-card"><div class="sum-lbl">Cập nhật lúc</div><div class="sum-val" style="font-size:18px;">${now_()}</div><div class="sum-sub">Nguồn: SSI FastConnect API</div></div>
+  const realized=(portfolio.closedPositions||[]).reduce((s,p)=>s+(p.realizedPnL||0),0);
+  return{nav:(portfolio.cash||0)+stockVal+realized,stockVal,unrealized,realized};
+}
+
+function renderSummary(){
+  const{nav,stockVal,unrealized,realized}=calcNAV();
+  const init=portfolio.initialCash||0;
+  const ret=init?((nav-init)/init*100):0;
+  const cash=portfolio.cash||0;
+  const retCls=ret>0?'profit':ret<0?'loss':'nc';
+  return `<div class="nav-grid">
+    <div class="nav-card highlight">
+      <div class="nav-lbl">Tổng NAV Quỹ</div>
+      <div class="nav-val">${fN(nav)} đ</div>
+      <div class="nav-sub">Lợi nhuận: <strong style="color:var(--${ret>=0?'green3':'ceil'})">${fN(nav-init)} đ (${fP(ret)})</strong></div>
+    </div>
+    <div class="nav-card"><div class="nav-lbl">Vốn ban đầu</div><div class="nav-val">${fN(init)} đ</div><div class="nav-sub">Tiền đầu tư ban đầu</div></div>
+    <div class="nav-card"><div class="nav-lbl">Tiền mặt còn lại</div><div class="nav-val">${fN(cash)} đ</div><div class="nav-sub">${nav?((cash/nav)*100).toFixed(1):0}% tổng NAV</div></div>
+    <div class="nav-card"><div class="nav-lbl">Giá trị CP đang nắm</div><div class="nav-val">${fN(stockVal)} đ</div><div class="nav-sub">L/L chưa TH: <span class="${unrealized>=0?'up-cell':'dn-cell'}">${fN(unrealized)} đ</span></div></div>
+    <div class="nav-card"><div class="nav-lbl">Lãi/Lỗ đã thực hiện</div><div class="nav-val ${realized>0?'profit':realized<0?'loss':'nc'}">${fN(realized)} đ</div><div class="nav-sub">${(portfolio.closedPositions||[]).length} vị thế đã đóng</div></div>
   </div>`;
 }
 
-/* ─── RENDER GRID ─── */
-function getSorted(){
-  const l=[...watchlist];
-  if(sortMode==='change_d') return l.sort((a,b)=>(live[b.ticker]?.changePct||0)-(live[a.ticker]?.changePct||0));
-  if(sortMode==='change_a') return l.sort((a,b)=>(live[a.ticker]?.changePct||0)-(live[b.ticker]?.changePct||0));
-  if(sortMode==='az')       return l.sort((a,b)=>a.ticker.localeCompare(b.ticker));
-  return l;
+function renderHoldings(){
+  const holdings=portfolio.holdings||[];
+  const{nav}=calcNAV();
+  if(!holdings.length)return`<div class="empty-row" style="text-align:center;padding:32px;color:var(--g3)">Chưa có cổ phiếu nào trong danh mục</div>`;
+  return`<div class="sec-card">
+    <div class="sec-head"><span class="sec-title">📊 Danh mục đang nắm giữ · ${holdings.length} mã</span></div>
+    <div class="tbl-wrap"><table>
+      <thead><tr>
+        <th>Mã CK</th><th>Sàn</th>
+        <th style="text-align:right">Giá TB mua</th>
+        <th style="text-align:right">KL</th>
+        <th style="text-align:right">Giá hiện tại</th>
+        <th style="text-align:right">Tăng/Giảm hôm nay</th>
+        <th style="text-align:right">Giá trị</th>
+        <th style="text-align:right">Lãi/Lỗ chưa TH</th>
+        <th style="text-align:right">% L/L</th>
+        <th style="text-align:right">% NAV</th>
+        <th style="text-align:right">KL giao dịch</th>
+        <th style="text-align:right">Trần / Sàn</th>
+      </tr></thead>
+      <tbody>
+      ${holdings.map(h=>{
+        const ld=liveData[h.ticker];
+        const price=ld?.price||null;
+        const val=price?price*h.qty:h.avgCost*h.qty;
+        const pnl=price?(price-h.avgCost)*h.qty:null;
+        const pnlPct=price?((price-h.avgCost)/h.avgCost*100):null;
+        const navPct=nav&&price?(val/nav*100):null;
+        const cls=ld?.change>0?'up-cell':ld?.change<0?'dn-cell':'nc-cell';
+        const pnlCls=pnl>0?'up-cell':pnl<0?'dn-cell':'nc-cell';
+        const arrow=ld?.change>0?'▲':ld?.change<0?'▼':'–';
+        return`<tr>
+          <td><span class="ticker-cell">${h.ticker}</span></td>
+          <td><span class="exchange-tag">${h.exchange||'HOSE'}</span></td>
+          <td style="text-align:right">${fN(h.avgCost)}</td>
+          <td style="text-align:right">${fN(h.qty)}</td>
+          <td style="text-align:right;font-weight:700">${price?fN(price):'–'}</td>
+          <td style="text-align:right" class="${cls}">${ld?`${arrow} ${fN(ld.change)} (${fP(ld.changePct)})`:'–'}</td>
+          <td style="text-align:right;font-weight:600">${fN(val)} đ</td>
+          <td style="text-align:right" class="${pnlCls}">${pnl!=null?fN(pnl)+' đ':'–'}</td>
+          <td style="text-align:right" class="${pnlCls}">${pnlPct!=null?fP(pnlPct):'–'}</td>
+          <td style="text-align:right">${navPct!=null?`${navPct.toFixed(1)}%<div class="alloc-bar"><div class="alloc-fill" style="width:${Math.min(navPct,100)}%"></div></div>`:'–'}</td>
+          <td style="text-align:right">${ld?fN(ld.vol):'–'}</td>
+          <td style="text-align:right;font-size:11.5px">${ld?`<span style="color:var(--ceil)">${fN(ld.ceil)}</span> / <span style="color:var(--floor)">${fN(ld.floor)}</span>`:'–'}</td>
+        </tr>`;
+      }).join('')}
+      </tbody>
+    </table></div>
+  </div>`;
 }
 
-function renderCards(){
-  const sorted=getSorted();
-  if(!sorted.length) return `<div class="empty-wrap"><div class="empty-ico">📋</div><div class="empty-title">Chưa có mã nào</div><div class="empty-desc">Admin chưa thêm cổ phiếu vào danh sách.</div></div>`;
-  return `<div class="wl-grid">${sorted.map(s=>{
-    const ld=live[s.ticker];
-    if(!ld) return `<div class="stock-card"><div class="card-topbar loading"></div><div class="card-inner"><div class="card-r1"><div><div class="card-ticker">${s.ticker}</div></div></div><div class="card-err">Đang tải...</div></div></div>`;
-    const {price,ref,ceil,floor,change,changePct,vol,intraday}=ld;
-    const up=change>0?true:change<0?false:null;
-    const cls=up===true?'up':up===false?'dn':'nc';
-    const isCeil=ceil&&Math.abs(price-ceil)<ceil*0.001;
-    const isFloor=floor&&Math.abs(price-floor)<floor*0.001;
-    const priceCls=isCeil?'ceil':isFloor?'floor':cls;
-    const band=BANDS[s.exchange||'HOSE'];
-    const flash=prevPx[s.ticker]&&price>prevPx[s.ticker]?' flash-up':prevPx[s.ticker]&&price<prevPx[s.ticker]?' flash-dn':'';
-    const arrow=change>0?'▲':change<0?'▼':'–';
-    return `
-    <div class="stock-card${flash}">
-      <div class="card-topbar ${cls}"></div>
-      <div class="card-inner">
-        <div class="card-r1">
-          <div>
-            <div class="card-ticker">${s.ticker}</div>
-            ${s.name?`<div class="card-co">${s.name}</div>`:''}
-            <div class="card-exch">${s.exchange||'HOSE'} ±${(band*100).toFixed(0)}%</div>
-          </div>
-        </div>
-        <div class="price-row">
-          <span class="price ${priceCls}">${fN(price)}</span>
-          <span class="chg-badge ${cls}">${arrow} ${fP(changePct)}</span>
-          ${isCeil?'<span class="warn-tag warn-ceil">TRẦN</span>':isFloor?'<span class="warn-tag warn-floor">SÀN</span>':''}
-        </div>
-        <div class="levels-row">
-          <div class="lv ref"><div class="lv-lbl">Tham chiếu</div><div class="lv-val">${fN(ref)}</div></div>
-          <div class="lv ceil"><div class="lv-lbl">Trần</div><div class="lv-val">${fN(ceil)}</div></div>
-          <div class="lv floor"><div class="lv-lbl">Sàn</div><div class="lv-val">${fN(floor)}</div></div>
-        </div>
-        <div class="vol-row">
-          <span>Khối lượng</span>
-          <span class="vol-val">${vol>=1e6?(vol/1e6).toFixed(2)+'M':vol>=1000?(vol/1000).toFixed(1)+'K':fN(vol)}</span>
-        </div>
-      </div>
-      <div class="card-chart">${miniSvg(intraday,up)}</div>
-      <div class="card-ts">Cập nhật lúc ${now_()}</div>
-    </div>`;
-  }).join('')}</div>`;
+function renderClosed(){
+  const closed=portfolio.closedPositions||[];
+  if(!closed.length)return'';
+  const sorted=[...closed].sort((a,b)=>b.closeDate?.localeCompare(a.closeDate||'')||0);
+  return`<div class="sec-card">
+    <div class="sec-head"><span class="sec-title">✅ Lãi/Lỗ đã thực hiện · ${closed.length} vị thế</span></div>
+    <div class="tbl-wrap"><table>
+      <thead><tr>
+        <th>Mã CK</th>
+        <th style="text-align:right">Giá TB mua</th>
+        <th style="text-align:right">Giá TB bán</th>
+        <th style="text-align:right">KL</th>
+        <th style="text-align:right">Vốn bỏ ra</th>
+        <th style="text-align:right">Tiền thu về</th>
+        <th style="text-align:right">Lãi/Lỗ</th>
+        <th style="text-align:right">% L/L</th>
+        <th>Ngày mua</th>
+        <th>Ngày đóng</th>
+      </tr></thead>
+      <tbody>
+      ${sorted.map(p=>{
+        const pnlCls=p.realizedPnL>0?'up-cell':p.realizedPnL<0?'dn-cell':'';
+        const pct=p.avgBuy?((p.avgSell-p.avgBuy)/p.avgBuy*100):null;
+        return`<tr>
+          <td><span class="ticker-cell">${p.ticker}</span> <span class="exchange-tag">${p.exchange||'HOSE'}</span></td>
+          <td style="text-align:right">${fN(p.avgBuy)}</td>
+          <td style="text-align:right">${fN(p.avgSell)}</td>
+          <td style="text-align:right">${fN(p.qty)}</td>
+          <td style="text-align:right">${fN((p.avgBuy||0)*p.qty)} đ</td>
+          <td style="text-align:right">${fN((p.avgSell||0)*p.qty)} đ</td>
+          <td style="text-align:right" class="${pnlCls}">${fN(p.realizedPnL)} đ</td>
+          <td style="text-align:right" class="${pnlCls}">${pct!=null?fP(pct):'–'}</td>
+          <td>${fDate(p.buyDate)||'–'}</td>
+          <td>${fDate(p.closeDate)||'–'}</td>
+        </tr>`;
+      }).join('')}
+      </tbody>
+    </table></div>
+  </div>`;
 }
 
-function renderPage(){
+function renderAll(){
   const body=document.getElementById('main-body');
   body.innerHTML=`
     ${renderSummary()}
-    <div class="disclaimer">⚠ Dữ liệu giá chỉ mang tính chất tham khảo, không phải khuyến nghị mua/bán. Nhà đầu tư tự chịu trách nhiệm với quyết định giao dịch của mình.</div>
-    <div class="toolbar">
-      <div><span class="wl-title">Danh sách theo dõi</span> <span class="wl-sub">· ${watchlist.length} mã · Cập nhật tự động mỗi 30 giây</span></div>
-      <div class="sort-row">
-        <span class="sort-label">Sắp xếp:</span>
-        <button class="sort-btn ${sortMode==='custom'?'active':''}" onclick="setSort('custom')">Mặc định</button>
-        <button class="sort-btn ${sortMode==='change_d'?'active':''}" onclick="setSort('change_d')">%▼</button>
-        <button class="sort-btn ${sortMode==='change_a'?'active':''}" onclick="setSort('change_a')">%▲</button>
-        <button class="sort-btn ${sortMode==='az'?'active':''}" onclick="setSort('az')">A–Z</button>
-      </div>
-    </div>
-    ${renderCards()}
+    <div class="disclaimer">⚠ Dữ liệu giá đóng cửa từ SSI FastConnect API · Cập nhật sau mỗi phiên giao dịch · Chỉ mang tính tham khảo</div>
+    ${renderHoldings()}
+    ${renderClosed()}
   `;
 }
 
-function setSort(m){sortMode=m;renderPage();}
-
-/* ─── REFRESH ─── */
-async function refreshAll(cid,cs){
-  setDot('loading');
-  if(!watchlist.length){setDot('ok');return;}
-  prevPx={...Object.fromEntries(Object.entries(live).map(([k,v])=>[k,v?.price]))};
-  const pRes=await Promise.allSettled(watchlist.map(s=>fetchStock(s.ticker,s.exchange||'HOSE',cid,cs)));
-  const cRes=await Promise.allSettled(watchlist.map(s=>fetchIntraday(s.ticker,cid,cs)));
-  watchlist.forEach((s,i)=>{
-    if(pRes[i].status==='fulfilled'&&pRes[i].value){
-      const intraday=cRes[i].status==='fulfilled'?cRes[i].value:[];
-      live[s.ticker]={...pRes[i].value,intraday};
-    }
-  });
-  renderPage();
-  // Indices
-  const iRes=await Promise.allSettled(INDICES_CFG.map(x=>fetchIndex(x.id,cid,cs)));
-  const bar=document.getElementById('market-bar');
-  bar.innerHTML=INDICES_CFG.map((idx,i)=>{
-    if(iRes[i].status!=='fulfilled'||!iRes[i].value) return `<div class="mb-item"><span class="mb-name">${idx.name}</span><span class="mb-val" style="color:var(--g3)">–</span></div>`;
-    const {val,chg,pct}=iRes[i].value;
-    const cls=chg>0?'up':chg<0?'dn':'nc';
-    return `<div class="mb-item"><span class="mb-name">${idx.name}</span><span class="mb-val">${fN(Math.round((val||0)*100)/100)}</span><span class="mb-chg ${cls}">${chg>0?'▲':'▼'} ${fP(pct)}</span></div>`;
-  }).join('<div class="mb-sep"></div>');
-  setDot('ok');
-}
-
-let _cid='',_cs='';
-function forceRefresh(){clearInterval(cdTimer);countdown=REFRESH_SEC;document.getElementById('countdown').textContent=REFRESH_SEC;refreshAll(_cid,_cs).then(startCd);}
-function startCd(){
-  clearInterval(cdTimer);countdown=REFRESH_SEC;
-  cdTimer=setInterval(()=>{
-    countdown--;document.getElementById('countdown').textContent=countdown;
-    if(countdown<=0){countdown=REFRESH_SEC;refreshAll(_cid,_cs);}
-  },1000);
-}
-function setDot(s){const d=document.getElementById('rdot');d.className='rdot '+(s==='loading'?'loading':s==='err'?'err':'ok');}
-
-/* ─── INIT ─── */
 async function init(){
-  const {owner,repo}=getParams();
-  if(!owner||!repo){
-    document.getElementById('main-body').innerHTML=`
-      <div class="setup-notice">
-        <div class="sn-ico">🔗</div>
-        <div class="sn-title">Thiếu tham số truy cập</div>
-        <div class="sn-desc">Trang này cần được mở bằng link đầy đủ do Admin cung cấp. Nếu anh là Admin, vào trang <strong>watchlist.html</strong> → Cài đặt → Sao chép link Public Page.</div>
-        <div class="sn-code">/public-watchlist.html?owner=github-username&repo=ten-repository</div>
-        <a href="/watchlist.html" style="display:inline-block;margin-top:4px;padding:9px 20px;background:var(--navy2);color:var(--white);border-radius:7px;font-size:14px;font-weight:700;">Vào trang Admin</a>
-      </div>`;
-    return;
-  }
-  githubOwner=owner; githubRepo=repo;
-  // Load from GitHub raw
   try{
-    const [wlRes,cfgRes]=await Promise.allSettled([
-      fetch(`${RAW}/${owner}/${repo}/main/watchlist.json`).then(r=>r.ok?r.json():Promise.reject('watchlist not found')),
-      fetch(`${RAW}/${owner}/${repo}/main/ssi-config.json`).then(r=>r.ok?r.json():Promise.reject('ssi-config not found'))
+    const [pfRes, cfgRes]=await Promise.allSettled([
+      fetch(`${RAW}/portfolio.json`).then(r=>r.ok?r.json():Promise.reject('portfolio not found')),
+      fetch(`${RAW}/ssi-config.json`).then(r=>r.ok?r.json():Promise.reject('ssi-config not found'))
     ]);
-    if(wlRes.status!=='fulfilled') throw new Error('Không tải được watchlist.json từ GitHub');
-    if(cfgRes.status!=='fulfilled') throw new Error('Không tải được ssi-config.json. Admin cần cấu hình SSI API trong trang Cài đặt.');
-    watchlist=wlRes.value;
-    const ssiCfg=cfgRes.value;
-    if(!ssiCfg.consumerID||!ssiCfg.consumerSecret) throw new Error('SSI API chưa được cấu hình. Admin vui lòng vào Cài đặt → Lưu SSI config.');
-    _cid=ssiCfg.consumerID; _cs=ssiCfg.consumerSecret;
-    // Render skeleton first
-    document.getElementById('main-body').innerHTML=`
-      ${renderSummary()}
-      <div class="toolbar"><span class="wl-title">Danh sách theo dõi</span></div>
-      <div class="wl-grid">${watchlist.map(s=>`
-        <div class="stock-card">
-          <div class="card-topbar loading"></div>
-          <div class="card-inner"><div class="card-r1"><div><div class="card-ticker">${s.ticker}</div></div></div>
-          <div class="skel" style="height:26px;width:130px;margin-bottom:8px;"></div>
-          <div class="skel" style="height:33px;border-radius:5px;margin-bottom:7px;"></div>
-          <div class="skel" style="height:42px;border-radius:4px;"></div>
-        </div></div>`).join('')}
-      </div>`;
-    await refreshAll(_cid,_cs);
-    startCd();
+    if(pfRes.status!=='fulfilled') throw new Error('Không tải được portfolio.json từ GitHub.');
+    portfolio=pfRes.value;
+    renderAll();
+    if(cfgRes.status==='fulfilled'&&cfgRes.value?.consumerID&&portfolio.holdings?.length){
+      const ssiCfg=cfgRes.value;
+      document.getElementById('pdot').className='pdot stale';
+      document.getElementById('price-date').textContent='Đang tải giá...';
+      await Promise.allSettled(portfolio.holdings.map(h=>
+        fetchDailyPrice(h.ticker,h.exchange||'HOSE',ssiCfg.consumerID,ssiCfg.consumerSecret).then(d=>{if(d)liveData[h.ticker]=d;})
+      ));
+      const dates=Object.values(liveData).map(x=>x.date).filter(Boolean);
+      document.getElementById('pdot').className='pdot';
+      document.getElementById('price-date').textContent=dates.length?`Giá đóng cửa ${dates[0]}`:'Không có dữ liệu';
+      renderAll();
+    }else{
+      document.getElementById('price-date').textContent='Chưa cấu hình giá';
+    }
   }catch(e){
     document.getElementById('main-body').innerHTML=`
       <div class="setup-notice">
@@ -498,11 +341,10 @@ async function init(){
         <div class="sn-desc">${e.message}</div>
         <button onclick="init()" style="margin-top:16px;padding:9px 20px;background:var(--navy2);color:var(--white);border-radius:7px;font-size:14px;font-weight:700;border:none;cursor:pointer;">Thử lại</button>
       </div>`;
-    setDot('err');
   }
 }
 
-window.addEventListener('DOMContentLoaded', init);
+window.addEventListener('DOMContentLoaded',init);
 </script>
 </body>
 </html>
