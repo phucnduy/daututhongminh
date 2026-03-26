@@ -943,46 +943,48 @@ function renderReports() {
     </div>`;
 
   /* Mini grid — Option C strip */
-  document.getElementById('rep-grid').innerHTML = minis.map((r,i) => {
-    const isMarket = r.type === 'market';
-    const icon = isMarket
+  document.getElementById('rep-grid').innerHTML = minis.map(function(r,i) {
+    var isMarket = r.type === 'market';
+    var icon = isMarket
       ? '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#1B4F8A" stroke-width="2.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>'
       : '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#1A7A4A" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>';
-    // Watermark: ngày (thị trường) hoặc mã CK (cổ phiếu)
-    const [dd] = r.date ? r.date.split('-').reverse() : ['–'];
-    const watermark = isMarket ? dd : (r.ticker || '');
-    // Ngày dạng "26 Tháng 3"
-    const months = ['','Tháng 1','Tháng 2','Tháng 3','Tháng 4','Tháng 5','Tháng 6','Tháng 7','Tháng 8','Tháng 9','Tháng 10','Tháng 11','Tháng 12'];
-    const parts = r.date ? r.date.split('-') : [];
-    const stripDate = parts.length === 3 ? `${parseInt(parts[2])} ${months[parseInt(parts[1])]}` : fmt(r.date);
-    return \`
-    <div class="rep-mini fade-in" style="animation-delay:\${(i%PAGE_SIZE)*0.05}s" onclick="openReport('\${r.id}')">
-      <div class="rm-strip \${r.type}">
-        <div class="rm-strip-icon \${r.type}">\${icon}</div>
-        <div class="rm-strip-txt">
-          <div class="rm-strip-type">\${isMarket ? 'Thị trường' : 'Cổ phiếu'}</div>
-          <div class="rm-strip-date">\${isMarket ? stripDate : (r.ticker ? r.ticker + ' · ' + stripDate : stripDate)}</div>
-        </div>
-        <div class="rm-strip-watermark">\${watermark}</div>
-      </div>
-      <div class="rm-body">
-        <div class="rm-top">
-          <div class="rm-left">
-            <span class="rm-badge \${r.type}">\${isMarket ? 'Thị trường' : 'Cổ phiếu'}</span>
-            \${r.ticker ? \`<span class="rm-ticker">\${r.ticker}</span>\` : ''}
-          </div>
-          <span class="rm-date">\${fmt(r.date)}</span>
-        </div>
-        <div class="rm-title">\${r.title}</div>
-        <div class="rm-desc">\${r.desc || ''}</div>
-        <div class="rm-footer">
-          <span class="rm-read">Đọc báo cáo <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
-          <button class="rm-share" onclick="event.stopPropagation();copyLink('\${r.id}',this)" title="Sao chép link">
-            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
-          </button>
-        </div>
-      </div>
-    </div>\`;
+    var months = ['','Tháng 1','Tháng 2','Tháng 3','Tháng 4','Tháng 5','Tháng 6','Tháng 7','Tháng 8','Tháng 9','Tháng 10','Tháng 11','Tháng 12'];
+    var parts = r.date ? r.date.split('-') : [];
+    var dd = parts.length === 3 ? parseInt(parts[2]) : '';
+    var mm = parts.length === 3 ? parseInt(parts[1]) : 0;
+    var stripDate = parts.length === 3 ? dd + ' ' + months[mm] : fmt(r.date);
+    var watermark = isMarket ? String(dd) : (r.ticker || '');
+    var stripDateFull = isMarket ? stripDate : (r.ticker ? r.ticker + ' · ' + stripDate : stripDate);
+    var tickerHtml = r.ticker ? '<span class="rm-ticker">' + r.ticker + '</span>' : '';
+    var delay = (i % PAGE_SIZE) * 0.05;
+    var readColor = isMarket ? 'color:var(--navy3)' : 'color:var(--green)';
+    return '<div class="rep-mini fade-in" style="animation-delay:' + delay + 's" onclick="openReport(\'' + r.id + '\')">' 
+      + '<div class="rm-strip ' + r.type + '">'
+        + '<div class="rm-strip-icon ' + r.type + '">' + icon + '</div>'
+        + '<div class="rm-strip-txt">'
+          + '<div class="rm-strip-type">' + (isMarket ? 'Thị trường' : 'Cổ phiếu') + '</div>'
+          + '<div class="rm-strip-date">' + stripDateFull + '</div>'
+        + '</div>'
+        + '<div class="rm-strip-watermark">' + watermark + '</div>'
+      + '</div>'
+      + '<div class="rm-body">'
+        + '<div class="rm-top">'
+          + '<div class="rm-left">'
+            + '<span class="rm-badge ' + r.type + '">' + (isMarket ? 'Thị trường' : 'Cổ phiếu') + '</span>'
+            + tickerHtml
+          + '</div>'
+          + '<span class="rm-date">' + fmt(r.date) + '</span>'
+        + '</div>'
+        + '<div class="rm-title">' + r.title + '</div>'
+        + '<div class="rm-desc">' + (r.desc || '') + '</div>'
+        + '<div class="rm-footer">'
+          + '<span class="rm-read" style="' + readColor + '">Đọc báo cáo <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>'
+          + '<button class="rm-share" onclick="event.stopPropagation();copyLink(\'' + r.id + '\',this)" title="Sao chép link">'
+            + '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>'
+          + '</button>'
+        + '</div>'
+      + '</div>'
+    + '</div>';
   }).join('');
 
   /* Load more */
