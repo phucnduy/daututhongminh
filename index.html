@@ -188,11 +188,21 @@ img{max-width:100%;display:block;}
 .rm-share:hover{background:var(--g2);color:var(--navy2);}
 .rm-share.copied{color:var(--green);}
 
-/* Load more */
-.load-more-wrap{text-align:center;margin-top:12px;}
-.btn-loadmore{display:inline-flex;align-items:center;gap:8px;background:var(--white);border:1.5px solid var(--g2);border-radius:8px;padding:10px 24px;font-size:13.5px;font-weight:600;color:var(--navy2);cursor:pointer;transition:all .18s;}
-.btn-loadmore:hover{background:var(--g1);border-color:var(--navy2);}
-.list-info{font-size:12px;color:var(--g3);margin-top:6px;}
+/* Slider */
+.slider-outer{position:relative;overflow:hidden;margin:0 -8px;padding:0 8px 4px;}
+.slider-track{display:flex;gap:11px;transition:transform .38s cubic-bezier(.4,0,.2,1);will-change:transform;}
+.slider-arr{position:absolute;top:50%;transform:translateY(-60%);z-index:10;width:32px;height:32px;border-radius:50%;background:var(--white);border:1.5px solid var(--g2);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .18s;box-shadow:0 2px 8px rgba(0,0,0,.08);}
+.slider-arr:hover{background:var(--navy2);border-color:var(--navy2);}
+.slider-arr:hover svg{stroke:#fff;}
+.slider-arr.prev{left:0;}
+.slider-arr.next{right:0;}
+.slider-arr.hidden{opacity:0;pointer-events:none;}
+.slider-dots{display:flex;align-items:center;justify-content:center;gap:6px;padding:10px 0 0;}
+.slider-dot{width:6px;height:6px;border-radius:50%;background:var(--g2);cursor:pointer;transition:all .2s;}
+.slider-dot.active{width:20px;border-radius:3px;background:var(--navy2);}
+.rep-view-all{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:700;color:var(--navy3);padding:7px 14px;border-radius:7px;border:1.5px solid var(--g2);background:var(--white);cursor:pointer;text-decoration:none;transition:all .18s;}
+.rep-view-all:hover{background:var(--navy2);color:var(--white);border-color:var(--navy2);}
+.rep-mini{flex:0 0 calc((100% - 22px) / 3);min-width:0;}
 
 /* ─────────────────────────── ABOUT ─────────────────────────── */
 .about-sec{background:var(--cream);padding-top:24px!important;}
@@ -389,6 +399,7 @@ img{max-width:100%;display:block;}
   </a>
   <nav class="nav">
     <a class="nav-link" href="#reports">Báo cáo</a>
+    <a class="nav-link" href="/reports.html">Tất cả báo cáo</a>
     <a class="nav-link" href="#about">Về chúng tôi</a>
     <a class="nav-link" href="#services">Dịch vụ</a>
     <a class="nav-link" href="#" id="nav-watchlist-link" style="display:none;">
@@ -482,16 +493,24 @@ img{max-width:100%;display:block;}
       <button class="fc active" data-month="all">Tất cả</button>
     </div>
 
-    <!-- Layout C: featured + grid -->
-    <div id="rep-featured-wrap"></div>
-    <div class="rep-grid" id="rep-grid"></div>
-    <div class="load-more-wrap" id="load-more-wrap" style="display:none;">
-      <button class="btn-loadmore" id="btn-loadmore" onclick="loadMore()">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
-        Xem thêm báo cáo
+    <!-- Slider -->
+    <div class="slider-outer" id="slider-outer">
+      <button class="slider-arr prev hidden" id="arr-prev" onclick="slide(-1)">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#0D2B52" stroke-width="2.5"><path d="M15 18l-6-6 6-6"/></svg>
+      </button>
+      <div class="slider-track" id="rep-grid"></div>
+      <button class="slider-arr next hidden" id="arr-next" onclick="slide(1)">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#0D2B52" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>
       </button>
     </div>
-    <div class="list-info" id="list-info"></div>
+    <div class="slider-dots" id="slider-dots"></div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-top:12px;">
+      <div class="list-info" id="list-info"></div>
+      <a href="/reports.html" class="rep-view-all">
+        Xem tất cả báo cáo
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </a>
+    </div>
   </div>
 </section>
 
@@ -895,52 +914,31 @@ function copyModalLink() {
   });
 }
 
-/* Layout C render */
-function renderReports() {
-  const items   = filtered();
-  const total   = items.length;
-  const shown   = items.slice(0, page * PAGE_SIZE);
-  const feat    = shown[0];
-  const minis   = shown.slice(1);
+/* Slider render */
+var sliderCur = 0;
 
-  /* Featured */
-  const featWrap = document.getElementById('rep-featured-wrap');
-  if (!feat) {
-    featWrap.innerHTML = '<div style="padding:40px;text-align:center;color:var(--g3);font-size:14px;">Không tìm thấy báo cáo phù hợp.</div>';
-    document.getElementById('rep-grid').innerHTML = '';
-    document.getElementById('list-info').textContent = '';
-    document.getElementById('load-more-wrap').style.display = 'none';
+function renderReports() {
+  sliderCur = 0;
+  renderSlider();
+}
+
+function renderSlider() {
+  const items = filtered();
+  const track = document.getElementById('rep-grid');
+  const dots  = document.getElementById('slider-dots');
+  const info  = document.getElementById('list-info');
+
+  if (!items.length) {
+    track.innerHTML = '<div style="padding:40px;text-align:center;color:var(--g3);font-size:14px;width:100%;">Không tìm thấy báo cáo phù hợp.</div>';
+    dots.innerHTML = '';
+    info.textContent = '';
+    document.getElementById('arr-prev').classList.add('hidden');
+    document.getElementById('arr-next').classList.add('hidden');
     return;
   }
-  featWrap.innerHTML = `
-    <div class="rep-featured fade-in visible" onclick="openReport('${feat.id}')">
-      <div class="rep-featured-bar ${feat.type}"></div>
-      <div class="rep-featured-body">
-        <div class="rfl">
-          <div class="rfl-top">
-            <span class="rfl-badge ${feat.type}">${feat.type === 'market' ? '📈 Thị trường' : '🔍 Cổ phiếu'}</span>
-            <span class="rfl-new">✦ Mới nhất</span>
-            <span class="rfl-date">${fmt(feat.date)}</span>
-          </div>
-          <div class="rfl-title">${feat.title}</div>
-          <div class="rfl-desc">${feat.desc || ''}</div>
-          <div class="rfl-meta">
-            ${feat.ticker ? `<span class="rfl-ticker">${feat.ticker}</span>` : ''}
-            <span class="rfl-read">Đọc báo cáo <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
-          </div>
-        </div>
-        <div class="rfr">
-          <button class="btn-share" onclick="event.stopPropagation();copyLink('${feat.id}',this)" title="Sao chép link gửi nhà đầu tư">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
-            Sao chép link
-          </button>
-          <button class="btn-view" onclick="event.stopPropagation();openReport('${feat.id}')">
-            Xem báo cáo
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-          </button>
-        </div>
-      </div>
-    </div>`;
+
+  // Build tất cả cards
+  track.innerHTML = '';
 
   /* Mini grid — Option C strip */
   document.getElementById('rep-grid').innerHTML = minis.map(function(r,i) {
@@ -987,19 +985,39 @@ function renderReports() {
     + '</div>';
   }).join('');
 
-  /* Load more */
-  const hasMore = total > page * PAGE_SIZE;
-  document.getElementById('load-more-wrap').style.display = hasMore ? 'block' : 'none';
-  if (hasMore) document.getElementById('btn-loadmore').textContent = `Xem thêm (còn ${total - page * PAGE_SIZE} báo cáo)`;
-  document.getElementById('list-info').textContent = `Hiển thị ${shown.length} / ${total} báo cáo`;
+  // Cập nhật slider position
+  const PER = 3;
+  const pages = Math.max(1, items.length - PER + 1);
+  if (sliderCur >= pages) sliderCur = pages - 1;
+  if (sliderCur < 0) sliderCur = 0;
 
-  /* Trigger fade-in for new cards via IntersectionObserver */
+  // Card width
+  const outer = document.getElementById('slider-outer');
+  const outerW = outer ? outer.offsetWidth : 800;
+  const cardW = (outerW - 16 - 22) / 3; // 16=padding, 22=2 gaps
+  const offset = sliderCur * (cardW + 11);
+  track.style.transform = 'translateX(-' + offset + 'px)';
+
+  // Arrows
+  document.getElementById('arr-prev').className = 'slider-arr prev' + (sliderCur === 0 ? ' hidden' : '');
+  document.getElementById('arr-next').className = 'slider-arr next' + (sliderCur >= pages - 1 ? ' hidden' : '');
+
+  // Dots
+  dots.innerHTML = '';
+  for (var i = 0; i < pages; i++) {
+    var dot = document.createElement('div');
+    dot.className = 'slider-dot' + (i === sliderCur ? ' active' : '');
+    (function(idx){ dot.onclick = function(){ sliderCur = idx; renderSlider(); }; })(i);
+    dots.appendChild(dot);
+  }
+
+  info.textContent = items.length + ' báo cáo';
   observeFadeIn();
 }
 
-function loadMore() {
-  page++;
-  renderReports();
+function slide(dir) {
+  sliderCur += dir;
+  renderSlider();
   // Scroll xuống để thấy báo cáo mới
   setTimeout(() => {
     const grid = document.getElementById('rep-grid');
@@ -1101,6 +1119,19 @@ document.addEventListener('keydown', e => {
 
   /* 4. Kích hoạt scroll fade-in cho các section */
   observeFadeIn();
+})();
+
+/* Slider resize + swipe */
+window.addEventListener('resize', function() { if (typeof renderSlider === 'function') renderSlider(); });
+(function(){
+  var startX = 0;
+  var track = document.getElementById('rep-grid');
+  if (!track) return;
+  track.addEventListener('touchstart', function(e){ startX = e.touches[0].clientX; }, {passive:true});
+  track.addEventListener('touchend', function(e){
+    var dx = e.changedTouches[0].clientX - startX;
+    if (Math.abs(dx) > 40) slide(dx < 0 ? 1 : -1);
+  });
 })();
 </script>
 </body>
