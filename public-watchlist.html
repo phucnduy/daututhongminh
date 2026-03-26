@@ -153,13 +153,20 @@ async function fetchDailyPrice(ticker, exchange, cid, cs){
     const d=new Date(); d.setDate(d.getDate()-5);
     const from=`${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
     const today=`${String(new Date().getDate()).padStart(2,'0')}/${String(new Date().getMonth()+1).padStart(2,'0')}/${new Date().getFullYear()}`;
-    const r=await fetch(`${SSI_BASE}DailyStockPrice?symbol=${ticker}&market=${exchange}&fromDate=${from}&toDate=${today}&pageIndex=1&pageSize=10&ascending=false`,
+    const r=await fetch(`${SSI_BASE}DailyOHLC&symbol=${ticker}&market=${exchange}&fromDate=${from}&toDate=${today}&pageIndex=1&pageSize=10&ascending=false`,
       {headers:{Authorization:`Bearer ${tk}`,Accept:'application/json'},signal:AbortSignal.timeout(7000)});
     if(!r.ok)return null;
     const data=await r.json();
     if(!data?.data?.length)return null;
     const row=data.data[0];
-    return{price:parseFloat(row.ClosePrice)||0,ref:parseFloat(row.RefPrice)||0,ceil:parseFloat(row.CeilingPrice)||0,floor:parseFloat(row.FloorPrice)||0,change:parseFloat(row.PriceChange)||0,changePct:parseFloat(row.PerPriceChange)||0,vol:parseFloat(row.TotalTradedVol)||0,date:row.TradingDate};
+    const prev=data.data[1];
+    const close=parseFloat(row.Close)||0;
+    const prevClose=prev?parseFloat(prev.Close)||close:close;
+    const change=close-prevClose;
+    const changePct=prevClose?(change/prevClose*100):0;
+    const bands={HOSE:0.07,HNX:0.10,UPCOM:0.15};
+    const band=bands[exchange]||0.07;
+    return{price:close,ref:prevClose,ceil:Math.round(prevClose*(1+band)/100)*100,floor:Math.round(prevClose*(1-band)/100)*100,change,changePct,vol:parseFloat(row.Volume)||0,date:row.TradingDate};
   }catch(e){return null;}
 }
 
