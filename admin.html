@@ -79,6 +79,8 @@
     .btn-danger:hover { background: #FACAC6; }
     .btn-ghost { background: var(--gray1); color: var(--gray3); }
     .btn-ghost:hover { background: var(--gray2); color: var(--text); }
+    .btn-secondary { background: var(--navy3); color: var(--white); }
+    .btn-secondary:hover { background: var(--navy2); }
     .btn-sm { padding: 6px 14px; font-size: 12px; }
     .btn-full { width: 100%; justify-content: center; padding: 12px; font-size: 15px; }
 
@@ -424,6 +426,43 @@
   </div><!-- /admin-body -->
 </div><!-- /screen-admin -->
 
+<!-- Edit Modal -->
+<div class="confirm-overlay" id="edit-overlay" style="align-items:center;">
+  <div class="confirm-box" style="max-width:520px;width:95%;padding:0;overflow:hidden;border-radius:10px;">
+    <div style="background:var(--navy);padding:14px 18px;border-bottom:2px solid var(--gold);display:flex;justify-content:space-between;align-items:center;">
+      <span style="font-weight:700;font-size:15px;color:#fff;">✏ Sửa báo cáo</span>
+      <button onclick="closeEdit()" style="background:rgba(255,255,255,.1);border:none;cursor:pointer;width:28px;height:28px;border-radius:5px;color:#fff;font-size:16px;display:flex;align-items:center;justify-content:center;">✕</button>
+    </div>
+    <div style="padding:20px 18px;display:flex;flex-direction:column;gap:12px;">
+      <div><label style="display:block;font-size:12.5px;font-weight:600;color:var(--navy2);margin-bottom:5px;">Tiêu đề *</label>
+        <input type="text" id="e-title" style="width:100%;padding:9px 12px;border:1.5px solid var(--gray2);border-radius:6px;font-family:inherit;font-size:13.5px;outline:none;" /></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+        <div><label style="display:block;font-size:12.5px;font-weight:600;color:var(--navy2);margin-bottom:5px;">Loại</label>
+          <select id="e-type" style="width:100%;padding:9px 12px;border:1.5px solid var(--gray2);border-radius:6px;font-family:inherit;font-size:13.5px;outline:none;">
+            <option value="market">Thị trường</option>
+            <option value="stock">Cổ phiếu</option>
+          </select></div>
+        <div><label style="display:block;font-size:12.5px;font-weight:600;color:var(--navy2);margin-bottom:5px;">Ngày *</label>
+          <input type="date" id="e-date" style="width:100%;padding:9px 12px;border:1.5px solid var(--gray2);border-radius:6px;font-family:inherit;font-size:13.5px;outline:none;" /></div>
+      </div>
+      <div id="e-row-ticker"><label style="display:block;font-size:12.5px;font-weight:600;color:var(--navy2);margin-bottom:5px;">Mã CK</label>
+        <input type="text" id="e-ticker" placeholder="VCB, FPT..." style="width:100%;padding:9px 12px;border:1.5px solid var(--gray2);border-radius:6px;font-family:inherit;font-size:13.5px;outline:none;" /></div>
+      <div><label style="display:block;font-size:12.5px;font-weight:600;color:var(--navy2);margin-bottom:5px;">Mô tả ngắn</label>
+        <input type="text" id="e-desc" placeholder="Tóm tắt nội dung..." style="width:100%;padding:9px 12px;border:1.5px solid var(--gray2);border-radius:6px;font-family:inherit;font-size:13.5px;outline:none;" /></div>
+      <div><label style="display:block;font-size:12.5px;font-weight:600;color:var(--navy2);margin-bottom:5px;">Google Drive ID *</label>
+        <input type="text" id="e-drive" placeholder="ID file Google Drive" style="width:100%;padding:9px 12px;border:1.5px solid var(--gray2);border-radius:6px;font-family:inherit;font-size:13.5px;outline:none;" />
+        <div style="font-size:11.5px;color:var(--gray3);margin-top:4px;">Link Drive: https://drive.google.com/file/d/<strong>ID_Ở_ĐÂY</strong>/view</div></div>
+    </div>
+    <div style="padding:0 18px 18px;display:flex;gap:9px;justify-content:flex-end;">
+      <button class="btn btn-ghost btn-sm" onclick="closeEdit()">Hủy</button>
+      <button class="btn btn-primary btn-sm" id="btn-edit-save" onclick="saveEdit()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/></svg>
+        Lưu thay đổi
+      </button>
+    </div>
+  </div>
+</div>
+
 <!-- Confirm Modal -->
 <div class="confirm-overlay" id="confirm-overlay">
   <div class="confirm-box">
@@ -601,8 +640,9 @@ function renderTable() {
   document.getElementById('table-empty').classList.add('hidden');
 
   const sorted = [...reports].sort((a,b) => b.date.localeCompare(a.date));
+  // Dùng data attribute để tránh bug ký tự đặc biệt trong inline onclick
   tbody.innerHTML = sorted.map(r => `
-    <tr>
+    <tr data-id="${r.id}">
       <td style="max-width:280px; font-weight:500; font-size:13px;">${r.title}</td>
       <td><span class="badge badge-${r.type}">${r.type==='market'?'Thị trường':'Cổ phiếu'}</span></td>
       <td>${r.ticker ? `<span class="ticker-tag">${r.ticker}</span>` : '–'}</td>
@@ -615,11 +655,28 @@ function renderTable() {
       </td>
       <td>
         <div class="actions">
-          <button class="btn btn-danger btn-sm" onclick="confirmDelete('${r.id}', \`${r.title.replace(/`/g,'')}\`)">Xóa</button>
+          <button class="btn btn-secondary btn-sm btn-edit" data-id="${r.id}">✏ Sửa</button>
+          <button class="btn btn-danger btn-sm btn-del" data-id="${r.id}">Xóa</button>
         </div>
       </td>
     </tr>
   `).join('');
+
+  // Gắn event listener sau khi render xong — tránh hoàn toàn vấn đề ký tự đặc biệt
+  tbody.querySelectorAll('.btn-del').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const id = btn.dataset.id;
+      const r = reports.find(x => x.id === id);
+      if (r) confirmDelete(id, r.title);
+    });
+  });
+  tbody.querySelectorAll('.btn-edit').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const id = btn.dataset.id;
+      const r = reports.find(x => x.id === id);
+      if (r) openEditModal(r);
+    });
+  });
 }
 
 /* ===== STATS ===== */
@@ -682,6 +739,65 @@ async function addReport() {
   } finally {
     btn.disabled = false;
     btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg> Thêm & Lưu lên GitHub';
+  }
+}
+
+/* ===== EDIT ===== */
+let editingId = null;
+
+function openEditModal(r) {
+  editingId = r.id;
+  document.getElementById('e-title').value  = r.title || '';
+  document.getElementById('e-type').value   = r.type  || 'market';
+  document.getElementById('e-date').value   = r.date  || '';
+  document.getElementById('e-ticker').value = r.ticker || '';
+  document.getElementById('e-desc').value   = r.desc  || '';
+  document.getElementById('e-drive').value  = r.driveId || '';
+  document.getElementById('e-row-ticker').style.display = r.type === 'stock' ? '' : 'none';
+  document.getElementById('e-type').onchange = function() {
+    document.getElementById('e-row-ticker').style.display = this.value === 'stock' ? '' : 'none';
+  };
+  document.getElementById('edit-overlay').style.display = 'flex';
+}
+
+function closeEdit() {
+  document.getElementById('edit-overlay').style.display = 'none';
+  editingId = null;
+}
+
+async function saveEdit() {
+  const title = document.getElementById('e-title').value.trim();
+  const date  = document.getElementById('e-date').value;
+  const drive = document.getElementById('e-drive').value.trim();
+  if (!title) { showToast('Vui lòng nhập tiêu đề.', 'error'); return; }
+  if (!date)  { showToast('Vui lòng chọn ngày.', 'error'); return; }
+  if (!drive) { showToast('Vui lòng nhập Google Drive ID.', 'error'); return; }
+
+  const btn = document.getElementById('btn-edit-save');
+  btn.disabled = true; btn.textContent = 'Đang lưu...';
+
+  try {
+    const idx = reports.findIndex(x => x.id === editingId);
+    if (idx === -1) throw new Error('Không tìm thấy báo cáo.');
+    reports[idx] = {
+      ...reports[idx],
+      title,
+      type:   document.getElementById('e-type').value,
+      date,
+      ticker: document.getElementById('e-ticker').value.trim().toUpperCase(),
+      desc:   document.getElementById('e-desc').value.trim(),
+      driveId: drive,
+    };
+    await ghPutJson(reports, `[Admin] Sửa báo cáo: ${title}`);
+    renderTable();
+    updateStats();
+    closeEdit();
+    showToast('✅ Đã lưu thay đổi lên GitHub.', 'success');
+  } catch(e) {
+    showToast(e.message, 'error');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Lưu thay đổi';
   }
 }
 
@@ -766,6 +882,10 @@ function showToast(msg, type='success') {
   c.appendChild(t);
   setTimeout(() => { t.style.animation = 'fadeOut 0.3s ease forwards'; setTimeout(() => t.remove(), 300); }, 4000);
 }
+
+document.getElementById('edit-overlay').addEventListener('click', e => {
+  if (e.target.id === 'edit-overlay') closeEdit();
+});
 </script>
 </body>
 </html>
