@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Báo cáo Phân tích – Đầu Tư Thông Minh Group</title>
+  <meta name="description" content="Toàn bộ báo cáo phân tích thị trường và cổ phiếu từ Đầu Tư Thông Minh Group."/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --navy:#08192E;--navy2:#0D2B52;--navy3:#1B4F8A;
+  --gold:#C9A84C;--gold2:#E8C86A;
+  --green:#1A7A4A;--green2:#E8F7EF;--green3:#2ECC71;
+  --g1:#F2F4F7;--g2:#D4D8E1;--g3:#8A94A6;
+  --text:#1A2438;--white:#FFFFFF;--cream:#F8F5EE;
+}
+html,body{font-family:'Inter',system-ui,sans-serif;background:var(--g1);color:var(--text);min-height:100vh;-webkit-font-smoothing:antialiased;}
+a{text-decoration:none;color:inherit;}
+
+/* HEADER */
+.site-header{background:var(--navy);border-bottom:3px solid var(--gold);padding:0 32px;height:58px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(0,0,0,.2);}
+.logo{display:flex;align-items:center;gap:10px;}
+.logo-mark{width:32px;height:32px;background:linear-gradient(135deg,var(--gold),var(--gold2));border-radius:6px;display:flex;align-items:center;justify-content:center;}
+.logo-name{font-size:14px;font-weight:800;color:var(--white);}
+.logo-sub{font-size:10px;color:var(--gold2);letter-spacing:.1em;text-transform:uppercase;}
+.nav{display:flex;align-items:center;gap:6px;}
+.nav-link{color:rgba(255,255,255,.65);font-size:13.5px;font-weight:500;padding:6px 14px;border-radius:6px;transition:all .18s;}
+.nav-link:hover{color:var(--white);background:rgba(255,255,255,.08);}
+.nav-link.active{color:var(--gold2);font-weight:700;}
+.nav-cta{background:var(--gold);color:var(--navy2);font-size:13px;font-weight:700;padding:8px 18px;border-radius:6px;transition:all .18s;}
+.nav-cta:hover{background:var(--gold2);}
+
+/* HERO STRIP */
+.hero-strip{background:linear-gradient(135deg,var(--navy2) 0%,#1a3a6e 100%);padding:32px 32px 28px;position:relative;overflow:hidden;}
+.hero-strip-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.04) 1px,transparent 1px);background-size:28px 28px;pointer-events:none;}
+.hero-strip-glow{position:absolute;top:-40px;right:60px;width:240px;height:240px;border-radius:50%;background:radial-gradient(circle,rgba(201,168,76,.15) 0%,transparent 70%);pointer-events:none;}
+.hero-inner{position:relative;z-index:1;max-width:1180px;margin:0 auto;display:flex;align-items:flex-end;justify-content:space-between;gap:20px;flex-wrap:wrap;}
+.hero-tag{font-size:10.5px;font-weight:700;color:var(--gold);text-transform:uppercase;letter-spacing:.12em;margin-bottom:6px;display:flex;align-items:center;gap:7px;}
+.hero-tag::before{content:'';display:inline-block;width:16px;height:2px;background:var(--gold);border-radius:1px;}
+.hero-title{font-size:26px;font-weight:800;color:var(--white);line-height:1.2;}
+.hero-sub{font-size:13.5px;color:rgba(255,255,255,.45);margin-top:4px;}
+.hero-stats{display:flex;gap:24px;}
+.hs-num{font-size:22px;font-weight:800;color:var(--gold2);line-height:1;}
+.hs-lbl{font-size:10px;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.07em;margin-top:2px;}
+
+/* BODY */
+.body{max-width:1180px;margin:0 auto;padding:24px 32px 60px;}
+
+/* TOOLBAR */
+.toolbar{background:var(--white);border-radius:12px;border:1.5px solid var(--g2);padding:16px 18px;margin-bottom:16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+.search-wrap{display:flex;align-items:center;gap:8px;background:var(--g1);border:1.5px solid var(--g2);border-radius:8px;padding:8px 14px;flex:1;min-width:220px;transition:border-color .18s;}
+.search-wrap:focus-within{border-color:var(--navy3);}
+.search-wrap input{background:none;border:none;outline:none;font-family:inherit;font-size:13.5px;color:var(--text);width:100%;}
+.search-wrap input::placeholder{color:var(--g3);}
+.tab-group{display:flex;border:1.5px solid var(--g2);border-radius:8px;overflow:hidden;}
+.tab-btn{background:var(--white);border:none;font-family:inherit;font-size:12.5px;font-weight:600;color:var(--g3);padding:8px 14px;cursor:pointer;transition:all .15s;white-space:nowrap;}
+.tab-btn:not(:last-child){border-right:1.5px solid var(--g2);}
+.tab-btn.active{background:var(--navy2);color:var(--white);}
+.tab-count{display:inline-flex;align-items:center;justify-content:center;width:17px;height:17px;border-radius:20px;font-size:10px;font-weight:700;margin-left:4px;}
+.tab-btn.active .tab-count{background:rgba(255,255,255,.2);color:var(--white);}
+.tab-btn:not(.active) .tab-count{background:var(--g1);color:var(--g3);}
+.sort-sel{background:var(--white);border:1.5px solid var(--g2);border-radius:8px;padding:8px 12px;font-family:inherit;font-size:13px;color:var(--text);outline:none;cursor:pointer;}
+
+/* FILTER MONTHS */
+.filter-row{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-bottom:14px;}
+.fl{font-size:12px;color:var(--g3);font-weight:500;flex-shrink:0;}
+.fc{background:var(--white);border:1.5px solid var(--g2);border-radius:20px;padding:4px 12px;font-size:12px;font-weight:500;color:var(--g3);cursor:pointer;font-family:inherit;transition:all .15s;}
+.fc.active,.fc:hover{background:var(--navy2);border-color:var(--navy2);color:var(--white);}
+
+/* GRID */
+.rep-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px;}
+
+/* CARD */
+.rep-card{background:var(--white);border-radius:10px;border:1.5px solid var(--g2);overflow:hidden;cursor:pointer;transition:border-color .2s,box-shadow .2s,transform .2s;}
+.rep-card:hover{border-color:var(--navy3);box-shadow:0 5px 18px rgba(13,43,82,.09);transform:translateY(-2px);}
+.rm-strip{height:44px;display:flex;align-items:center;padding:0 13px;gap:10px;position:relative;overflow:hidden;}
+.rm-strip.market{background:#EBF2FC;}
+.rm-strip.stock{background:#E8F7EF;}
+.rm-strip::before{content:'';position:absolute;inset:0;background-image:radial-gradient(circle,rgba(0,0,0,.07) 1px,transparent 1px);background-size:8px 8px;pointer-events:none;}
+.rm-icon{width:26px;height:26px;border-radius:6px;display:flex;align-items:center;justify-content:center;flex-shrink:0;position:relative;z-index:1;}
+.rm-icon.market{background:rgba(27,79,138,.12);}
+.rm-icon.stock{background:rgba(26,122,74,.12);}
+.rm-txt{position:relative;z-index:1;}
+.rm-type{font-size:9.5px;font-weight:700;color:#0D2B52;opacity:.45;text-transform:uppercase;letter-spacing:.07em;}
+.rm-strip.stock .rm-type{color:#14532d;}
+.rm-date-s{font-size:11.5px;font-weight:700;color:#0D2B52;margin-top:1px;}
+.rm-strip.stock .rm-date-s{color:#14532d;}
+.rm-wm{position:absolute;right:10px;bottom:-5px;font-size:30px;font-weight:900;line-height:1;letter-spacing:-.03em;pointer-events:none;user-select:none;}
+.rm-strip.market .rm-wm{color:rgba(13,43,82,.07);}
+.rm-strip.stock .rm-wm{color:rgba(26,122,74,.09);}
+.rm-body{padding:11px 13px 12px;}
+.rm-meta{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;}
+.rm-left{display:flex;align-items:center;gap:5px;}
+.rm-badge{font-size:9.5px;font-weight:700;padding:2px 7px;border-radius:3px;text-transform:uppercase;letter-spacing:.04em;}
+.rm-badge.market{background:#EBF2FC;color:var(--navy3);}
+.rm-badge.stock{background:#E8F7EF;color:var(--green);}
+.rm-ticker{font-size:10px;font-weight:700;color:var(--gold);background:#FBF6EA;padding:2px 7px;border-radius:3px;}
+.rm-date{font-size:11px;color:var(--g3);}
+.rm-title{font-size:13px;font-weight:700;color:var(--navy2);line-height:1.4;margin-bottom:4px;}
+.rm-desc{font-size:11.5px;color:var(--g3);line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+.rm-foot{display:flex;align-items:center;justify-content:space-between;margin-top:8px;padding-top:7px;border-top:1px solid var(--g1);}
+.rm-read{font-size:11px;font-weight:700;display:flex;align-items:center;gap:4px;}
+.rm-read.market{color:var(--navy3);}
+.rm-read.stock{color:var(--green);}
+.rm-share{width:22px;height:22px;border-radius:4px;background:var(--g1);border:none;cursor:pointer;color:var(--g3);display:flex;align-items:center;justify-content:center;transition:all .15s;}
+.rm-share:hover{background:var(--g2);color:var(--navy2);}
+.rm-share.copied{color:var(--green);}
+
+/* PAGINATION */
+.pagination{display:flex;align-items:center;justify-content:center;gap:6px;}
+.pg-btn{width:34px;height:34px;border-radius:7px;border:1.5px solid var(--g2);background:var(--white);font-family:inherit;font-size:13px;font-weight:600;color:var(--g3);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .18s;}
+.pg-btn:hover{border-color:var(--navy2);color:var(--navy2);}
+.pg-btn.active{background:var(--navy2);border-color:var(--navy2);color:var(--white);}
+.pg-btn.disabled{opacity:.35;pointer-events:none;}
+.pg-info{font-size:12.5px;color:var(--g3);text-align:center;margin-top:10px;}
+
+/* EMPTY */
+.empty{text-align:center;padding:60px 20px;color:var(--g3);}
+.empty-title{font-size:16px;font-weight:700;color:var(--navy2);margin-bottom:6px;}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;z-index:500;background:rgba(8,25,46,.72);backdrop-filter:blur(6px);display:none;align-items:center;justify-content:center;padding:20px;}
+.modal-overlay.open{display:flex;}
+.modal{background:var(--white);border-radius:14px;width:100%;max-width:640px;overflow:hidden;box-shadow:0 24px 60px rgba(0,0,0,.25);animation:slideUp .22s ease;}
+@keyframes slideUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+.mh{background:var(--navy);padding:16px 20px;display:flex;align-items:flex-start;justify-content:space-between;gap:12px;border-bottom:2px solid var(--gold);}
+.mh-info{flex:1;}
+.mh-badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:3px;text-transform:uppercase;letter-spacing:.04em;display:inline-block;margin-bottom:6px;}
+.mh-badge.market{background:rgba(255,255,255,.12);color:rgba(255,255,255,.8);}
+.mh-badge.stock{background:rgba(46,204,113,.15);color:#2ECC71;}
+.mh-title{font-size:16px;font-weight:800;color:var(--white);line-height:1.35;}
+.mh-close{background:rgba(255,255,255,.1);border:none;cursor:pointer;width:30px;height:30px;border-radius:6px;display:flex;align-items:center;justify-content:center;color:var(--white);flex-shrink:0;transition:background .15s;}
+.mh-close:hover{background:rgba(255,255,255,.2);}
+.mb{padding:20px;}
+.mb-desc{font-size:14px;color:var(--g3);line-height:1.65;margin-bottom:18px;}
+.mb-meta{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:18px;}
+.mb-tag{font-size:12px;font-weight:600;color:var(--g3);background:var(--g1);padding:5px 12px;border-radius:6px;}
+.mb-btns{display:flex;gap:10px;}
+.btn-primary{display:inline-flex;align-items:center;gap:7px;background:var(--navy2);color:var(--white);border:none;border-radius:8px;padding:11px 22px;font-size:14px;font-weight:700;cursor:pointer;text-decoration:none;transition:background .18s;}
+.btn-primary:hover{background:var(--navy);}
+.btn-ghost{display:inline-flex;align-items:center;gap:7px;background:var(--g1);color:var(--navy2);border:1.5px solid var(--g2);border-radius:8px;padding:10px 18px;font-size:13.5px;font-weight:600;cursor:pointer;transition:all .18s;}
+.btn-ghost:hover{background:var(--g2);}
+.btn-ghost.copied{background:var(--green2);border-color:#B8E6CC;color:var(--green);}
+
+/* TOAST */
+.toast-wrap{position:fixed;bottom:22px;right:22px;z-index:9999;display:flex;flex-direction:column;gap:7px;}
+.toast{background:var(--white);border-radius:8px;padding:11px 16px;box-shadow:0 5px 20px rgba(0,0,0,.12);border-left:3px solid var(--green);font-size:13px;font-weight:500;min-width:200px;animation:slideInR .2s ease;}
+@keyframes slideInR{from{opacity:0;transform:translateX(14px)}to{opacity:1;transform:translateX(0)}}
+
+/* FOOTER */
+.site-footer{background:var(--navy);border-top:2px solid var(--gold);padding:20px 32px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-top:40px;}
+.footer-brand{font-size:14px;font-weight:800;color:var(--white);}
+.footer-links{display:flex;gap:16px;}
+.footer-links a{font-size:12.5px;color:rgba(255,255,255,.5);transition:color .18s;}
+.footer-links a:hover{color:var(--gold2);}
+.footer-copy{font-size:11px;color:rgba(255,255,255,.25);}
+
+@media(max-width:900px){.rep-grid{grid-template-columns:1fr 1fr;} .hero-strip,.body{padding-left:20px;padding-right:20px;} .site-header{padding:0 16px;}}
+@media(max-width:600px){.rep-grid{grid-template-columns:1fr;} .toolbar{gap:8px;} .tab-group{flex-wrap:wrap;} .hero-stats{gap:16px;} .nav{display:none;}}
+  </style>
+</head>
+<body>
+
+<header class="site-header">
+  <a href="/" class="logo">
+    <div class="logo-mark"><svg width="16" height="16" viewBox="0 0 22 22" fill="none"><polyline points="2,16 7,9 12,12 17,5 20,8" stroke="#08192E" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+    <div><div class="logo-name">Đầu Tư Thông Minh</div><div class="logo-sub">Research & Analysis</div></div>
+  </a>
+  <nav class="nav">
+    <a class="nav-link" href="/">Trang chủ</a>
+    <a class="nav-link active" href="/reports.html">Báo cáo</a>
+    <a class="nav-link" href="/#about">Về chúng tôi</a>
+    <a class="nav-link" href="/#services">Dịch vụ</a>
+    <a class="nav-cta" href="https://zalo.me/g/sxshix010" target="_blank" rel="noopener">Nhóm Zalo</a>
+  </nav>
+</header>
+
+<div class="hero-strip">
+  <div class="hero-strip-grid"></div>
+  <div class="hero-strip-glow"></div>
+  <div class="hero-inner">
+    <div>
+      <div class="hero-tag">Báo cáo phân tích</div>
+      <div class="hero-title">Toàn bộ nghiên cứu</div>
+      <div class="hero-sub">Cập nhật hàng ngày · Phân tích chuyên sâu từ chuyên gia</div>
+    </div>
+    <div class="hero-stats">
+      <div><div class="hs-num" id="stat-total">–</div><div class="hs-lbl">Báo cáo</div></div>
+      <div><div class="hs-num" id="stat-market">–</div><div class="hs-lbl">Thị trường</div></div>
+      <div><div class="hs-num" id="stat-stock">–</div><div class="hs-lbl">Cổ phiếu</div></div>
+    </div>
+  </div>
+</div>
+
+<div class="body">
+  <div class="toolbar">
+    <div class="search-wrap">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--g3)" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" id="search-input" placeholder="Tìm kiếm báo cáo, mã CK..." oninput="onSearch()"/>
+    </div>
+    <div class="tab-group">
+      <button class="tab-btn active" data-tab="all" onclick="setTab(this)">Tất cả <span class="tab-count" id="cnt-all">0</span></button>
+      <button class="tab-btn" data-tab="market" onclick="setTab(this)">Thị trường <span class="tab-count" id="cnt-market">0</span></button>
+      <button class="tab-btn" data-tab="stock" onclick="setTab(this)">Cổ phiếu <span class="tab-count" id="cnt-stock">0</span></button>
+    </div>
+    <select class="sort-sel" id="sort-sel" onchange="render()">
+      <option value="date_d">Mới nhất</option>
+      <option value="date_a">Cũ nhất</option>
+    </select>
+  </div>
+
+  <div class="filter-row" id="filter-row">
+    <span class="fl">Tháng:</span>
+    <button class="fc active" data-month="all" onclick="setMonth(this)">Tất cả</button>
+  </div>
+
+  <div class="rep-grid" id="rep-grid"></div>
+  <div class="pagination" id="pagination"></div>
+  <div class="pg-info" id="pg-info"></div>
+</div>
+
+<footer class="site-footer">
+  <div class="footer-brand">Đầu Tư Thông Minh Group</div>
+  <div class="footer-links">
+    <a href="https://zalo.me/g/sxshix010" target="_blank" rel="noopener">Nhóm Zalo</a>
+    <a href="https://www.facebook.com/Smart.Investing.VN" target="_blank" rel="noopener">Facebook</a>
+    <a href="/">Trang chủ</a>
+  </div>
+  <div class="footer-copy">© 2026 Đầu Tư Thông Minh Group</div>
+</footer>
+
+<!-- Modal -->
+<div class="modal-overlay" id="modal-overlay">
+  <div class="modal">
+    <div class="mh">
+      <div class="mh-info">
+        <span class="mh-badge" id="m-badge"></span>
+        <div class="mh-title" id="m-title"></div>
+      </div>
+      <button class="mh-close" onclick="closeModal()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
+    </div>
+    <div class="mb">
+      <div class="mb-desc" id="m-desc"></div>
+      <div class="mb-meta" id="m-meta"></div>
+      <div class="mb-btns">
+        <a class="btn-primary" id="m-open" href="#" target="_blank" rel="noopener">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+          Mở Google Drive
+        </a>
+        <button class="btn-ghost" id="m-copy" onclick="copyModalLink()">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+          Sao chép link chia sẻ
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast-wrap" id="toast-wrap"></div>
+
+<script>
+'use strict';
+const RAW_BASE = 'https://raw.githubusercontent.com/phucnduy/daututhongminh/main';
+const PAGE_SIZE = 9;
+
+let REPORTS = [], tab = 'all', month = 'all', curPage = 1, openId = null;
+
+const fmt = s => { if (!s) return ''; const [y,m,d] = s.split('-'); return d+'/'+m+'/'+y; };
+const gm  = s => s ? s.slice(0,7) : '';
+
+function toast(msg){
+  const t = document.createElement('div');
+  t.className = 'toast'; t.textContent = msg;
+  document.getElementById('toast-wrap').appendChild(t);
+  setTimeout(() => { t.style.opacity='0'; setTimeout(()=>t.remove(),200); }, 3000);
+}
+
+/* ── LOAD ── */
+async function loadReports(){
+  try {
+    const r = await fetch(RAW_BASE + '/reports.json?t=' + Date.now());
+    if (!r.ok) throw new Error();
+    REPORTS = await r.json();
+    REPORTS.sort((a,b) => b.date.localeCompare(a.date));
+  } catch(e) { REPORTS = []; }
+  updateStats();
+  buildMonths();
+  render();
+  // Deep link
+  const rid = new URLSearchParams(location.search).get('r');
+  if (rid) { const rep = REPORTS.find(x=>x.id===rid); if(rep) openModal(rep); }
+}
+
+function updateStats(){
+  document.getElementById('stat-total').textContent  = REPORTS.length;
+  document.getElementById('stat-market').textContent = REPORTS.filter(r=>r.type==='market').length;
+  document.getElementById('stat-stock').textContent  = REPORTS.filter(r=>r.type==='stock').length;
+  document.getElementById('cnt-all').textContent     = REPORTS.length;
+  document.getElementById('cnt-market').textContent  = REPORTS.filter(r=>r.type==='market').length;
+  document.getElementById('cnt-stock').textContent   = REPORTS.filter(r=>r.type==='stock').length;
+}
+
+function buildMonths(){
+  const months = [...new Set(REPORTS.map(r=>gm(r.date)))].sort().reverse();
+  const row = document.getElementById('filter-row');
+  row.innerHTML = '<span class="fl">Tháng:</span><button class="fc active" data-month="all" onclick="setMonth(this)">Tất cả</button>';
+  months.forEach(m => {
+    const [y,mo] = m.split('-');
+    const btn = document.createElement('button');
+    btn.className = 'fc'; btn.dataset.month = m;
+    btn.textContent = mo+'/'+y;
+    btn.onclick = function(){ setMonth(this); };
+    row.appendChild(btn);
+  });
+}
+
+/* ── FILTER ── */
+function filtered(){
+  const q = (document.getElementById('search-input').value || '').toLowerCase().trim();
+  const sort = document.getElementById('sort-sel').value;
+  let list = REPORTS.filter(r => {
+    if (tab !== 'all' && r.type !== tab) return false;
+    if (month !== 'all' && gm(r.date) !== month) return false;
+    if (q && !r.title.toLowerCase().includes(q) && !(r.ticker||'').toLowerCase().includes(q) && !(r.desc||'').toLowerCase().includes(q)) return false;
+    return true;
+  });
+  if (sort === 'date_a') list = list.slice().reverse();
+  return list;
+}
+
+function setTab(el){
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+  tab = el.dataset.tab;
+  curPage = 1; render();
+}
+function setMonth(el){
+  document.querySelectorAll('.fc').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+  month = el.dataset.month;
+  curPage = 1; render();
+}
+function onSearch(){ curPage = 1; render(); }
+
+/* ── RENDER ── */
+function render(){
+  const items = filtered();
+  const total = items.length;
+  const pages = Math.ceil(total / PAGE_SIZE) || 1;
+  if (curPage > pages) curPage = pages;
+  const shown = items.slice((curPage-1)*PAGE_SIZE, curPage*PAGE_SIZE);
+
+  const grid = document.getElementById('rep-grid');
+  if (!shown.length) {
+    grid.innerHTML = '<div class="empty" style="grid-column:1/-1"><div class="empty-title">Không tìm thấy báo cáo</div><div>Thử thay đổi bộ lọc hoặc từ khóa tìm kiếm</div></div>';
+  } else {
+    grid.innerHTML = shown.map(r => buildCard(r)).join('');
+    grid.querySelectorAll('.rm-share').forEach(btn => {
+      btn.addEventListener('click', e => {
+        e.stopPropagation();
+        const id = btn.dataset.id;
+        const url = location.origin + location.pathname + '?r=' + id;
+        navigator.clipboard.writeText(url).then(() => {
+          btn.classList.add('copied');
+          toast('✅ Đã sao chép link');
+          setTimeout(() => btn.classList.remove('copied'), 2000);
+        });
+      });
+    });
+    grid.querySelectorAll('.rep-card').forEach(card => {
+      card.addEventListener('click', () => {
+        const rep = REPORTS.find(x=>x.id===card.dataset.id);
+        if (rep) openModal(rep);
+      });
+    });
+  }
+
+  renderPagination(pages);
+  document.getElementById('pg-info').textContent = 'Hiển thị ' + shown.length + ' / ' + total + ' báo cáo';
+}
+
+function buildCard(r){
+  const isM = r.type === 'market';
+  const icon = isM
+    ? '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#1B4F8A" stroke-width="2.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>'
+    : '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#1A7A4A" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>';
+  const parts = r.date ? r.date.split('-') : [];
+  const dd = parts.length===3 ? parseInt(parts[2]) : '';
+  const mm = parts.length===3 ? parseInt(parts[1]) : 0;
+  const months = ['','Tháng 1','Tháng 2','Tháng 3','Tháng 4','Tháng 5','Tháng 6','Tháng 7','Tháng 8','Tháng 9','Tháng 10','Tháng 11','Tháng 12'];
+  const stripDate = parts.length===3 ? dd+' '+months[mm] : fmt(r.date);
+  const stripDateFull = isM ? stripDate : (r.ticker ? r.ticker+' · '+stripDate : stripDate);
+  const watermark = isM ? String(dd) : (r.ticker||'');
+  const tickerHtml = r.ticker ? '<span class="rm-ticker">'+r.ticker+'</span>' : '';
+  const readCls = isM ? 'market' : 'stock';
+  return '<div class="rep-card" data-id="'+r.id+'">'
+    +'<div class="rm-strip '+r.type+'">'
+      +'<div class="rm-icon '+r.type+'">'+icon+'</div>'
+      +'<div class="rm-txt"><div class="rm-type">'+(isM?'Thị trường':'Cổ phiếu')+'</div><div class="rm-date-s">'+stripDateFull+'</div></div>'
+      +'<div class="rm-wm">'+watermark+'</div>'
+    +'</div>'
+    +'<div class="rm-body">'
+      +'<div class="rm-meta"><div class="rm-left"><span class="rm-badge '+r.type+'">'+(isM?'Thị trường':'Cổ phiếu')+'</span>'+tickerHtml+'</div><span class="rm-date">'+fmt(r.date)+'</span></div>'
+      +'<div class="rm-title">'+r.title+'</div>'
+      +'<div class="rm-desc">'+(r.desc||'')+'</div>'
+      +'<div class="rm-foot">'
+        +'<span class="rm-read '+readCls+'">Xem báo cáo <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>'
+        +'<button class="rm-share" data-id="'+r.id+'" title="Sao chép link"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>'
+      +'</div>'
+    +'</div>'
+  +'</div>';
+}
+
+/* ── PAGINATION ── */
+function renderPagination(pages){
+  const el = document.getElementById('pagination');
+  if (pages <= 1) { el.innerHTML = ''; return; }
+  let html = '';
+  html += '<button class="pg-btn'+(curPage===1?' disabled':'')+'" onclick="goPage('+(curPage-1)+')">'
+    +'<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 18l-6-6 6-6"/></svg></button>';
+  for (let i=1; i<=pages; i++) {
+    if (pages > 7 && i > 2 && i < pages-1 && Math.abs(i-curPage) > 1) {
+      if (i === 3 || i === pages-2) html += '<span class="pg-btn" style="pointer-events:none;border:none">…</span>';
+      continue;
+    }
+    html += '<button class="pg-btn'+(i===curPage?' active':'')+'" onclick="goPage('+i+')">'+i+'</button>';
+  }
+  html += '<button class="pg-btn'+(curPage===pages?' disabled':'')+'" onclick="goPage('+(curPage+1)+')">'
+    +'<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg></button>';
+  el.innerHTML = html;
+}
+
+function goPage(n){ curPage = n; render(); window.scrollTo({top:0,behavior:'smooth'}); }
+
+/* ── MODAL ── */
+function openModal(r){
+  openId = r.id;
+  const isM = r.type === 'market';
+  document.getElementById('m-badge').textContent = isM ? 'Thị trường' : 'Cổ phiếu';
+  document.getElementById('m-badge').className = 'mh-badge '+r.type;
+  document.getElementById('m-title').textContent = r.title;
+  document.getElementById('m-desc').textContent = r.desc || 'Xem chi tiết trong báo cáo đầy đủ.';
+  const meta = document.getElementById('m-meta');
+  meta.innerHTML = '<span class="mb-tag">📅 '+fmt(r.date)+'</span>'
+    + (r.ticker ? '<span class="mb-tag">📈 '+r.ticker+'</span>' : '');
+  const driveUrl = r.driveId ? 'https://drive.google.com/file/d/'+r.driveId+'/view' : '#';
+  document.getElementById('m-open').href = driveUrl;
+  document.getElementById('m-open').style.display = r.driveId ? '' : 'none';
+  document.getElementById('modal-overlay').classList.add('open');
+  history.replaceState(null,'','?r='+r.id);
+}
+
+function closeModal(){
+  document.getElementById('modal-overlay').classList.remove('open');
+  history.replaceState(null,'',location.pathname);
+  openId = null;
+}
+
+function copyModalLink(){
+  const url = location.origin + location.pathname + '?r=' + openId;
+  navigator.clipboard.writeText(url).then(() => {
+    const btn = document.getElementById('m-copy');
+    btn.classList.add('copied'); btn.childNodes[1].textContent = ' Đã sao chép!';
+    toast('✅ Đã sao chép link báo cáo');
+    setTimeout(() => { btn.classList.remove('copied'); btn.childNodes[1].textContent = ' Sao chép link chia sẻ'; }, 2500);
+  });
+}
+
+document.getElementById('modal-overlay').addEventListener('click', e => {
+  if (e.target === document.getElementById('modal-overlay')) closeModal();
+});
+document.addEventListener('keydown', e => { if (e.key==='Escape') closeModal(); });
+
+window.addEventListener('DOMContentLoaded', loadReports);
+</script>
+</body>
+</html>
