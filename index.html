@@ -958,7 +958,7 @@ function renderSlider() {
     var readColor = isM ? 'color:var(--navy3)' : 'color:var(--green)';
 
     var div = document.createElement('div');
-    div.className = 'rep-mini fade-in';
+    div.className = 'rep-mini';
     div.innerHTML =
       '<div class="rm-strip ' + r.type + '">'
         + '<div class="rm-strip-icon ' + r.type + '">' + ICONS[r.type] + '</div>'
@@ -1017,17 +1017,10 @@ function renderSlider() {
   }
 
   info.textContent = items.length + ' báo cáo';
-  observeFadeIn();
 }
 function slide(dir) {
   sliderCur += dir;
   renderSlider();
-  // Scroll xuống để thấy báo cáo mới
-  setTimeout(() => {
-    const grid = document.getElementById('rep-grid');
-    const newCards = grid.querySelectorAll('.rep-mini:not(.visible)');
-    if (newCards[0]) newCards[0].scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-  }, 100);
 }
 
 /* ─────────────────────────── COUNTS ─────────────────────────── */
