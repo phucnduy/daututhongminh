@@ -158,7 +158,27 @@ a{text-decoration:none;color:inherit;}
 
 @media(max-width:900px){.rep-grid{grid-template-columns:1fr 1fr;} .hero-strip,.body{padding-left:20px;padding-right:20px;} .site-header{padding:0 16px;}}
 @media(max-width:600px){.rep-grid{grid-template-columns:1fr;} .toolbar{gap:8px;} .tab-group{flex-wrap:wrap;} .hero-stats{gap:16px;} .nav{display:none;}}
-  </style>
+  
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;z-index:1000;background:rgba(8,25,46,.88);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);display:none;align-items:center;justify-content:center;padding:16px;}
+.modal-overlay.open{display:flex;animation:fadeInM .2s var(--ease);}
+@keyframes fadeInM{from{opacity:0}
+.modal-box{background:var(--white);border-radius:12px;width:100%;max-width:960px;height:90vh;max-height:880px;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 32px 80px rgba(0,0,0,.48);animation:slideUp .22s var(--ease);}
+.modal-header{background:var(--navy);padding:13px 18px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;border-bottom:2px solid var(--gold);}
+.modal-title{font-family:'Inter',system-ui,-apple-system,sans-serif;font-size:15px;font-weight:700;color:var(--white);max-width:70%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.modal-actions-row{display:flex;align-items:center;gap:8px;}
+.modal-share{display:inline-flex;align-items:center;gap:5px;background:rgba(255,255,255,.1);border:none;color:rgba(255,255,255,.78);font-size:12px;font-weight:600;padding:6px 12px;border-radius:6px;cursor:pointer;transition:all .15s;font-family:inherit;white-space:nowrap;}
+.modal-share:hover{background:rgba(255,255,255,.18);}
+.modal-share.copied{background:rgba(46,204,113,.2);color:#2ECC71;}
+.modal-close{background:rgba(255,255,255,.1);border:none;cursor:pointer;width:32px;height:32px;border-radius:6px;display:flex;align-items:center;justify-content:center;color:var(--white);transition:background .15s;flex-shrink:0;}
+.modal-close:hover{background:rgba(255,255,255,.2);}
+.modal-notice{background:#FBF6EA;border-bottom:1px solid #F0E8CF;padding:7px 18px;font-size:11.5px;color:#8A7040;flex-shrink:0;display:flex;align-items:center;gap:7px;}
+.modal-viewer{flex:1;background:#ddd;}
+.modal-viewer iframe{width:100%;height:100%;border:none;display:block;}
+@media(max-width:768px){.modal-box{height:92vh;border-radius:10px;}
+  .modal-title{font-size:13px;max-width:55%;}
+  .modal-share span{display:none;}}
+</style>
 </head>
 <body>
 
@@ -231,30 +251,494 @@ a{text-decoration:none;color:inherit;}
 </footer>
 
 <!-- Modal -->
-<div class="modal-overlay" id="modal-overlay">
-  <div class="modal">
-    <div class="mh">
-      <div class="mh-info">
-        <span class="mh-badge" id="m-badge"></span>
-        <div class="mh-title" id="m-title"></div>
-      </div>
-      <button class="mh-close" onclick="closeModal()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
-    </div>
-    <div class="mb">
-      <div class="mb-desc" id="m-desc"></div>
-      <div class="mb-meta" id="m-meta"></div>
-      <div class="mb-btns">
-        <a class="btn-primary" id="m-open" href="#" target="_blank" rel="noopener">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-          Mở Google Drive
-        </a>
-        <button class="btn-ghost" id="m-copy" onclick="copyModalLink()">
+<div class="modal-overlay" id="modal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <span class="modal-title" id="modal-title"></span>
+      <div class="modal-actions-row">
+        <button class="modal-share" id="modal-share" onclick="copyModalLink()">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
-          Sao chép link chia sẻ
+          <span>Sao chép link</span>
         </button>
+        <button class="modal-close" id="modal-close"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
       </div>
+    </div>
+    <div class="modal-notice"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4m0 4h.01"/></svg> Tài liệu được bảo vệ bản quyền. Vui lòng không sao chép hoặc phát tán.</div>
+    <div class="modal-viewer"><iframe id="modal-iframe" allowfullscreen title="Xem báo cáo" sandbox="allow-same-origin allow-scripts allow-popups"></iframe></div>
+  </div>
+</div>
+
+<!-- FLOAT CHAT -->
+<div class="float-chat">
+  <div class="float-tooltip">💬 Chat ngay với chúng tôi!</div>
+  <a href="https://zalo.me/g/sxshix010" target="_blank" rel="noopener" class="float-chat-btn">
+    <span class="float-pulse"></span>
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.26 2 11.5c0 2.83 1.3 5.37 3.36 7.14L4.5 22l3.5-1.75C9.2 20.73 10.57 21 12 21c5.52 0 10-4.26 10-9.5S17.52 2 12 2z"/></svg>
+    Chat ngay qua Zalo
+  </a>
+</div>
+
+<!-- FOOTER -->
+<footer class="site-footer">
+  <div class="footer-inner">
+    <div class="footer-top">
+      <div>
+        <div class="logo">
+          <div class="logo-mark"><svg width="20" height="20" viewBox="0 0 22 22" fill="none"><polyline points="2,16 7,9 12,12 17,5 20,8" stroke="#08192E" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div><div class="logo-name">Đầu Tư Thông Minh</div><div class="logo-sub">Research &amp; Analysis Group</div></div>
+        </div>
+        <p class="footer-brand-desc">Nhóm nghiên cứu độc lập chuyên phân tích thị trường chứng khoán Việt Nam. Đội ngũ hơn 20 năm kinh nghiệm tại HOSE, HNX và UPCOM.</p>
+      </div>
+      <div><div class="fh">Trang</div><ul class="footer-links"><li><a href="#reports">Báo cáo phân tích</a></li><li><a href="#about">Về chúng tôi</a></li><li><a href="#services">Dịch vụ</a></li></ul></div>
+      <div><div class="fh">Dịch vụ</div><ul class="footer-links"><li><a href="#services">Báo cáo phân tích</a></li><li><a href="#services">Tư vấn đầu tư</a></li><li><a href="#services">Quản lý tài khoản</a></li></ul></div>
+      <div><div class="fh">Kết nối</div><div class="footer-social">
+        <a href="https://zalo.me/g/sxshix010" target="_blank" rel="noopener" class="social-btn"><svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.26 2 11.5c0 2.83 1.3 5.37 3.36 7.14L4.5 22l3.5-1.75C9.2 20.73 10.57 21 12 21c5.52 0 10-4.26 10-9.5S17.52 2 12 2z"/></svg> Nhóm Zalo</a>
+        <a href="https://www.facebook.com/Smart.Investing.VN" target="_blank" rel="noopener" class="social-btn"><svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg> Facebook</a>
+      </div></div>
+    </div>
+    <div class="footer-bottom">
+      <div class="footer-copy">© 2025 Đầu Tư Thông Minh Group. Tất cả quyền được bảo lưu.</div>
+      <div class="footer-disc">Nội dung trên website chỉ mang tính chất tham khảo, không phải khuyến nghị đầu tư chính thức. Nhà đầu tư tự chịu trách nhiệm với mọi quyết định của mình.</div>
     </div>
   </div>
+</footer>
+
+<!-- ════════════════════════════════════════
+     JAVASCRIPT
+════════════════════════════════════════ -->
+<script>
+'use strict';
+
+/* ─── CONFIG ─── */
+// ⚙ Anh nhập GitHub owner/repo của mình vào đây để index.html
+//   tự đọc SSI credentials từ ssi-config.json và lấy link public watchlist
+const SITE_GITHUB_OWNER = 'phucnduy';
+const SITE_GITHUB_REPO  = 'daututhongminh';
+const SSI_BASE  = 'https://daututhongminh-delta.vercel.app/api/ssi?ep=';
+const TICKER_SYMS = ['VCB','HPG','MWG','FPT','VHM','TCB','BID','STB','VIC','GAS','SSI','VND'];
+const PAGE_SIZE   = 9;
+
+/* ─── SSI token cache ─── */
+let _ssiToken=null, _ssiTokenExp=0, _ssiCid='', _ssiCs='';
+async function ssiGetToken(){
+  if(_ssiToken&&Date.now()<_ssiTokenExp) return _ssiToken;
+  if(!_ssiCid||!_ssiCs) return null;
+  try{
+    const r=await fetch(`${SSI_BASE}AccessToken`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({consumerID:_ssiCid,consumerSecret:_ssiCs}),signal:AbortSignal.timeout(7000)});
+    if(!r.ok) return null;
+    const d=await r.json();
+    _ssiToken=d?.data?.accessToken||d?.accessToken;
+    _ssiTokenExp=Date.now()+22*60*1000;
+    return _ssiToken;
+  }catch(e){return null;}
+}
+async function ssiH(){ const tk=await ssiGetToken(); return tk?{Authorization:`Bearer ${tk}`,Accept:'application/json'}:null; }
+async function loadSsiConfig(){
+  if(!SITE_GITHUB_OWNER||!SITE_GITHUB_REPO) return;
+  try{
+    const r=await fetch(`https://raw.githubusercontent.com/${SITE_GITHUB_OWNER}/${SITE_GITHUB_REPO}/main/ssi-config.json`);
+    if(!r.ok) return;
+    const d=await r.json();
+    if(d.consumerID&&d.consumerSecret){_ssiCid=d.consumerID;_ssiCs=d.consumerSecret;}
+    // Show portfolio link in nav
+    if(d.consumerID){
+      const link=document.getElementById('nav-watchlist-link');
+      if(link){link.href=`/public-watchlist.html`;link.style.display='';}
+    }
+  }catch(e){}
+}
+
+/* ─── STATE ─── */
+let REPORTS = [], tab = 'all', mon = 'all', page = 1, openId = null;
+
+/* ─── UTILS ─── */
+const fmt  = s => { const [y,m,d] = s.split('-'); return `${d}/${m}/${y}`; };
+const gm   = s => s.slice(0,7);
+const base = () => location.origin + location.pathname;
+const fmtNum = n => n.toLocaleString('vi-VN');
+const fmtPt  = n => (n >= 0 ? '+' : '') + n.toLocaleString('vi-VN',{minimumFractionDigits:2,maximumFractionDigits:2});
+
+/* ─────────────────────────── SSI API ─────────────────────────── */
+
+async function fetchVNIndex() {
+  const FALLBACK_CHART = [100,98,102,97,105,108,103,110,107,115,112,118];
+  try {
+    const h = await ssiH();
+    if (!h) throw new Error('no-ssi');
+    const today = new Date();
+    const fmt   = d => `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
+
+    // IntradayOhlc cho VNINDEX — lấy được giá realtime trong phiên
+    const r = await fetch(
+      `${SSI_BASE}IntradayOhlc&symbol=VNINDEX&resolution=1&fromDate=${fmt(today)}&toDate=${fmt(today)}&pageIndex=1&pageSize=100&ascending=false`,
+      {headers:h, signal:AbortSignal.timeout(7000)}
+    );
+    if (!r.ok) throw new Error('HTTP '+r.status);
+    const d = await r.json();
+    const rows = d?.data || [];
+    if (!rows.length) throw new Error('empty');
+
+    // Nến gần nhất
+    const last     = rows[0];
+    const val      = parseFloat(last.Close) || 0;
+    // Tính change so với giá mở phiên (nến đầu tiên của ngày)
+    const firstRow = rows[rows.length - 1];
+    const open     = parseFloat(firstRow.Open) || val;
+    const chg      = val - open;
+    const pct      = open ? (chg / open * 100) : 0;
+    const isUp     = chg >= 0;
+
+    document.getElementById('vni-val').textContent = fmtNum(Math.round(val*100)/100);
+    const chgEl = document.getElementById('vni-chg');
+    chgEl.textContent = `${isUp ? '▲' : '▼'} ${fmtPt(chg)} (${fmtPt(pct)}%)`;
+    chgEl.className   = `hc-chg ${isUp ? 'up' : 'dn'}`;
+
+    // Mini chart từ nến 1 phút (đảo ngược vì API trả mới nhất trước)
+    const prices = rows.map(x => parseFloat(x.Close)||0).filter(Boolean).reverse();
+    drawMiniChart(prices.length > 1 ? prices : FALLBACK_CHART, isUp);
+
+  } catch(e) {
+    document.getElementById('vni-val').textContent = '–';
+    document.getElementById('vni-chg').textContent = e.message === 'no-ssi' ? 'Chưa cấu hình SSI' : 'Lỗi tải dữ liệu';
+    document.getElementById('vni-chg').className = 'hc-chg neutral';
+    drawMiniChart(FALLBACK_CHART, true);
+  }
+}
+
+function drawMiniChart(arr, isUp) {
+  const min = Math.min(...arr), max = Math.max(...arr), range = max - min || 1;
+  const W = 260, H = 34;
+  const pts = arr.map((v,i) => {
+    const x = (i / (arr.length - 1)) * W;
+    const y = H - ((v - min) / range) * (H - 4) - 2;
+    return `${x.toFixed(1)},${y.toFixed(1)}`;
+  }).join(' ');
+  const color = isUp ? '#2ECC71' : '#E74C3C';
+  const svg   = document.getElementById('vni-chart');
+  svg.innerHTML = `
+    <defs><linearGradient id="cg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="${color}" stop-opacity=".3"/>
+      <stop offset="100%" stop-color="${color}" stop-opacity="0"/>
+    </linearGradient></defs>
+    <path d="M${pts.split(' ').join(' L')} L260,${H} L0,${H} Z" fill="url(#cg)"/>
+    <polyline points="${pts}" stroke="${color}" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/>`;
+}
+
+async function fetchStockPrices() {
+  const FALLBACK = [
+    {s:'VN-Index',v:'–',c:'–',p:'–',u:1},{s:'VCB',v:'–',c:'–',p:'–',u:0},
+    {s:'HPG',v:'–',c:'–',p:'–',u:1},{s:'FPT',v:'–',c:'–',p:'–',u:1},
+    {s:'MWG',v:'–',c:'–',p:'–',u:1},{s:'TCB',v:'–',c:'–',p:'–',u:1},
+    {s:'SSI',v:'–',c:'–',p:'–',u:1},{s:'BID',v:'–',c:'–',p:'–',u:0},
+  ];
+  try {
+    const h = await ssiH();
+    if (!h) throw new Error('no-ssi');
+    const to   = new Date();
+    const from = new Date(); from.setDate(from.getDate()-5);
+    const fmt  = d => `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
+    // SSI rate limit 1 req/s — gọi tuần tự với delay
+    const items = [];
+    const delay = ms => new Promise(res => setTimeout(res, ms));
+    for (const sym of TICKER_SYMS) {
+      try {
+        const res = await fetch(
+          `${SSI_BASE}DailyOHLC&symbol=${sym}&market=HOSE&fromDate=${fmt(from)}&toDate=${fmt(to)}&pageIndex=1&pageSize=10&ascending=false`,
+          {headers:h, signal:AbortSignal.timeout(6000)}
+        );
+        const d = await res.json();
+        const row  = d?.data?.[0];
+        const prev = d?.data?.[1];
+        if (row) {
+          const price    = parseFloat(row.Close) || 0;
+          const prevClose= prev ? (parseFloat(prev.Close)||price) : price;
+          const change   = price - prevClose;
+          const pct      = prevClose ? (change/prevClose*100) : 0;
+          const isUp     = change >= 0;
+          items.push({
+            s: sym, v: fmtNum(price),
+            c: (isUp?'+':'') + fmtNum(change),
+            p: `${isUp?'+':''}${pct.toFixed(2)}%`,
+            u: isUp ? 1 : 0
+          });
+        }
+      } catch(e) { /* bỏ qua mã lỗi */ }
+      await delay(1100); // tránh rate limit 1 req/s
+    }
+    if (items.length < 2) throw new Error('insufficient');
+    buildTicker(items);
+  } catch(e) {
+    buildTicker(FALLBACK);
+  }
+}
+
+function buildTicker(items) {
+  const doubled = [...items, ...items];
+  const html = doubled.map(t =>
+    `<div class="ti"><span class="sym">${t.s}</span><span>${t.v}</span><span class="${t.u ? 'up' : 'dn'}">${t.c} (${t.p})</span></div>`
+  ).join('');
+  document.getElementById('ticker-track').innerHTML = html;
+}
+
+/* ─────────────────────────── REPORTS ─────────────────────────── */
+
+function filtered() {
+  const q = (document.getElementById('search-input')?.value || '').toLowerCase().trim();
+  return REPORTS
+    .filter(r => {
+      const tOk = tab === 'all' || r.type === tab;
+      const mOk = mon === 'all' || gm(r.date) === mon;
+      const qOk = !q || r.title.toLowerCase().includes(q) || (r.ticker||'').toLowerCase().includes(q) || (r.desc||'').toLowerCase().includes(q);
+      return tOk && mOk && qOk;
+    })
+    .sort((a,b) => b.date.localeCompare(a.date));
+}
+
+function renderChips() {
+  const months = [...new Set(REPORTS.map(r => gm(r.date)))].sort().reverse();
+  const bar = document.getElementById('filter-row');
+  bar.innerHTML = '<span class="fl">Tháng:</span>' +
+    `<button class="fc ${mon==='all'?'active':''}" data-month="all">Tất cả</button>` +
+    months.map(m =>
+      `<button class="fc ${mon===m?'active':''}" data-month="${m}">T.${parseInt(m.split('-')[1])}/${m.split('-')[0]}</button>`
+    ).join('');
+  bar.querySelectorAll('.fc').forEach(b =>
+    b.addEventListener('click', () => { mon = b.dataset.month; page = 1; renderReports(); })
+  );
+}
+
+/* Shareable link helpers */
+function copyLink(id, btnEl) {
+  navigator.clipboard.writeText(`${base()}?r=${id}`).then(() => {
+    const orig = btnEl.innerHTML;
+    btnEl.classList.add('copied');
+    btnEl.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>';
+    setTimeout(() => { btnEl.classList.remove('copied'); btnEl.innerHTML = orig; }, 2200);
+  });
+}
+
+
+
+/* Slider render */
+var sliderCur = 0;
+
+function renderReports() {
+  sliderCur = 0;
+  renderSlider();
+}
+
+function renderSlider() {
+  var items = filtered();
+  var track = document.getElementById('rep-grid');
+  var dots  = document.getElementById('slider-dots');
+  var info  = document.getElementById('list-info');
+
+  if (!items.length) {
+    track.innerHTML = '<div style="padding:40px;text-align:center;color:var(--g3);font-size:14px;width:100%;">Không tìm thấy báo cáo phù hợp.</div>';
+    dots.innerHTML = ''; info.textContent = '';
+    document.getElementById('arr-prev').className = 'slider-arr prev hidden';
+    document.getElementById('arr-next').className = 'slider-arr next hidden';
+    return;
+  }
+
+  // Build cards
+  track.innerHTML = '';
+  var ICONS = {
+    market: '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#1B4F8A" stroke-width="2.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>',
+    stock:  '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#1A7A4A" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>'
+  };
+  var MONTHS = ['','Tháng 1','Tháng 2','Tháng 3','Tháng 4','Tháng 5','Tháng 6','Tháng 7','Tháng 8','Tháng 9','Tháng 10','Tháng 11','Tháng 12'];
+  var SHARE_SVG = '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>';
+  var ARROW_SVG = '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>';
+
+  items.forEach(function(r) {
+    var isM = r.type === 'market';
+    var parts = r.date ? r.date.split('-') : [];
+    var dd = parts.length === 3 ? parseInt(parts[2]) : '';
+    var mo = parts.length === 3 ? parseInt(parts[1]) : 0;
+    var stripDate = dd && mo ? dd + ' ' + MONTHS[mo] : fmt(r.date);
+    var stripFull = isM ? stripDate : (r.ticker ? r.ticker + ' · ' + stripDate : stripDate);
+    var wm = isM ? String(dd) : (r.ticker || '');
+    var ticker = r.ticker ? '<span class="rm-ticker">' + r.ticker + '</span>' : '';
+    var readColor = isM ? 'color:var(--navy3)' : 'color:var(--green)';
+
+    var div = document.createElement('div');
+    div.className = 'rep-mini fade-in';
+    div.innerHTML =
+      '<div class="rm-strip ' + r.type + '">'
+        + '<div class="rm-strip-icon ' + r.type + '">' + ICONS[r.type] + '</div>'
+        + '<div class="rm-strip-txt">'
+          + '<div class="rm-strip-type">' + (isM ? 'Thị trường' : 'Cổ phiếu') + '</div>'
+          + '<div class="rm-strip-date">' + stripFull + '</div>'
+        + '</div>'
+        + '<div class="rm-strip-watermark">' + wm + '</div>'
+      + '</div>'
+      + '<div class="rm-body">'
+        + '<div class="rm-top"><div class="rm-left"><span class="rm-badge ' + r.type + '">' + (isM ? 'Thị trường' : 'Cổ phiếu') + '</span>' + ticker + '</div><span class="rm-date">' + fmt(r.date) + '</span></div>'
+        + '<div class="rm-title">' + r.title + '</div>'
+        + '<div class="rm-desc">' + (r.desc || '') + '</div>'
+        + '<div class="rm-footer">'
+          + '<span class="rm-read" style="' + readColor + '">Đọc báo cáo ' + ARROW_SVG + '</span>'
+          + '<button class="rm-share" data-id="' + r.id + '" title="Sao chép link">' + SHARE_SVG + '</button>'
+        + '</div>'
+      + '</div>';
+
+    div.querySelector('.rep-mini,.rm-body,.rm-title,.rm-strip').addEventListener('click', function(e) {
+      if (!e.target.classList.contains('rm-share')) openReport(r.id);
+    });
+    div.addEventListener('click', function(e) {
+      if (!e.target.closest('.rm-share')) openReport(r.id);
+    });
+    div.querySelector('.rm-share').addEventListener('click', function(e) {
+      e.stopPropagation();
+      copyLink(r.id, this);
+    });
+    track.appendChild(div);
+  });
+
+  // Slider position
+  var PER = 3;
+  var pages = Math.max(1, items.length - PER + 1);
+  if (sliderCur >= pages) sliderCur = pages - 1;
+  if (sliderCur < 0) sliderCur = 0;
+
+  var outer = document.getElementById('slider-outer');
+  var outerW = outer ? outer.offsetWidth : 860;
+  var cardW = (outerW - 16 - 22) / 3;
+  var offset = sliderCur * (cardW + 11);
+  track.style.transform = 'translateX(-' + offset + 'px)';
+
+  // Arrows
+  document.getElementById('arr-prev').className = 'slider-arr prev' + (sliderCur === 0 ? ' hidden' : '');
+  document.getElementById('arr-next').className = 'slider-arr next' + (sliderCur >= pages - 1 ? ' hidden' : '');
+
+  // Dots
+  dots.innerHTML = '';
+  for (var i = 0; i < pages; i++) {
+    var dot = document.createElement('div');
+    dot.className = 'slider-dot' + (i === sliderCur ? ' active' : '');
+    (function(idx){ dot.addEventListener('click', function(){ sliderCur = idx; renderSlider(); }); })(i);
+    dots.appendChild(dot);
+  }
+
+  info.textContent = items.length + ' báo cáo';
+  observeFadeIn();
+}
+function slide(dir) {
+  sliderCur += dir;
+  renderSlider();
+  // Scroll xuống để thấy báo cáo mới
+  setTimeout(() => {
+    const grid = document.getElementById('rep-grid');
+    const newCards = grid.querySelectorAll('.rep-mini:not(.visible)');
+    if (newCards[0]) newCards[0].scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }, 100);
+}
+
+/* ─────────────────────────── COUNTS ─────────────────────────── */
+function updateCounts() {
+  const t = REPORTS.length;
+  const m = REPORTS.filter(r => r.type === 'market').length;
+  const s = REPORTS.filter(r => r.type === 'stock').length;
+  document.getElementById('cnt-all').textContent    = t;
+  document.getElementById('cnt-market').textContent = m;
+  document.getElementById('cnt-stock').textContent  = s;
+  animCount('s-total', t);
+  animCount('s-stocks', s);
+  document.getElementById('rpt-hero').textContent = t;
+}
+function animCount(id, target) {
+  let v = 0; const el = document.getElementById(id);
+  const step = () => { v += Math.ceil((target - v) / 5); el.textContent = v; if (v < target) requestAnimationFrame(step); else el.textContent = target; };
+  requestAnimationFrame(step);
+}
+
+/* ─────────────────────────── TABS ─────────────────────────── */
+function setTab(t) {
+  tab = t; page = 1;
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === t));
+  renderReports();
+}
+document.querySelectorAll('.tab-btn').forEach(b => b.addEventListener('click', () => setTab(b.dataset.tab)));
+
+/* ─────────────────────────── MODAL ─────────────────────────── */
+function openReport(id) {
+  const r = REPORTS.find(x => x.id === id);
+  if (!r) return;
+  openId = id;
+  history.replaceState(null, '', `${location.pathname}?r=${id}`);
+  document.getElementById('modal-title').textContent = r.title;
+  document.getElementById('modal-iframe').src = `https://drive.google.com/file/d/${r.driveId}/preview`;
+  document.getElementById('modal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+document.getElementById('modal-close').addEventListener('click', closeModal);
+document.getElementById('modal').addEventListener('click', e => { if (e.target === document.getElementById('modal')) closeModal(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+/* ─────────────────────────── INTERSECTION OBSERVER ─────────────────────────── */
+let fadeObserver;
+function observeFadeIn() {
+  if (fadeObserver) fadeObserver.disconnect();
+  fadeObserver = new IntersectionObserver((entries) => {
+    entries.forEach(el => { if (el.isIntersecting) { el.target.classList.add('visible'); fadeObserver.unobserve(el.target); } });
+  }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+  document.querySelectorAll('.fade-in:not(.visible)').forEach(el => fadeObserver.observe(el));
+}
+
+/* ─────────────────────────── SCROLL HEADER ─────────────────────────── */
+window.addEventListener('scroll', () => {
+  document.getElementById('site-header').classList.toggle('scrolled', scrollY > 40);
+}, { passive: true });
+
+/* ─────────────────────────── ANTI-DOWNLOAD ─────────────────────────── */
+document.addEventListener('contextmenu', e => e.preventDefault());
+document.addEventListener('keydown', e => {
+  if ((e.ctrlKey || e.metaKey) && ['s','u','p'].includes(e.key.toLowerCase())) e.preventDefault();
+  if (e.key === 'F12') e.preventDefault();
+  if (e.ctrlKey && e.shiftKey && ['i','j','c'].includes(e.key.toLowerCase())) e.preventDefault();
+});
+
+/* ─────────────────────────── INIT ─────────────────────────── */
+(async () => {
+  /* 1. Load reports.json */
+  try {
+    const res = await fetch('./reports.json?v=' + Date.now());
+    REPORTS = await res.json();
+  } catch(e) { REPORTS = []; }
+  updateCounts();
+  renderChips();
+  renderReports();
+
+  /* 2. Auto-open nếu URL có ?r=ID */
+  const rid = new URLSearchParams(location.search).get('r');
+  if (rid && REPORTS.find(x => x.id === rid)) openReport(rid);
+
+  /* 3. Fetch live market data song song */
+  await loadSsiConfig(); // load SSI config + hiện link watchlist nếu có
+  fetchVNIndex();
+  fetchStockPrices();
+
+  /* 4. Kích hoạt scroll fade-in cho các section */
+  observeFadeIn();
+})();
+
+/* Slider resize + swipe */
+window.addEventListener('resize', function() { if (typeof renderSlider === 'function') renderSlider(); });
+(function(){
+  var startX = 0;
+  var track = document.getElementById('rep-grid');
+  if (!track) return;
+  track.addEventListener('touchstart', function(e){ startX = e.touches[0].clientX; }, {passive:true});
+  track.addEventListener('touchend', function(e){
+    var dx = e.changedTouches[0].clientX - startX;
+    if (Math.abs(dx) > 40) slide(dx < 0 ? 1 : -1);
+  });
+})();
+</script>
+</body>
+</html>
 </div>
 
 <div class="toast-wrap" id="toast-wrap"></div>
@@ -292,7 +776,7 @@ async function loadReports(){
   render();
   // Deep link
   const rid = new URLSearchParams(location.search).get('r');
-  if (rid) { const rep = REPORTS.find(x=>x.id===rid); if(rep) openModal(rep); }
+  if (rid && REPORTS.find(x=>x.id===rid)) openReport(rid);
 }
 
 function updateStats(){
@@ -374,7 +858,7 @@ function render(){
     grid.querySelectorAll('.rep-card').forEach(card => {
       card.addEventListener('click', () => {
         const rep = REPORTS.find(x=>x.id===card.dataset.id);
-        if (rep) openModal(rep);
+        if (rep) openReport(rep.id);
       });
     });
   }
@@ -437,22 +921,6 @@ function renderPagination(pages){
 function goPage(n){ curPage = n; render(); window.scrollTo({top:0,behavior:'smooth'}); }
 
 /* ── MODAL ── */
-function openModal(r){
-  openId = r.id;
-  const isM = r.type === 'market';
-  document.getElementById('m-badge').textContent = isM ? 'Thị trường' : 'Cổ phiếu';
-  document.getElementById('m-badge').className = 'mh-badge '+r.type;
-  document.getElementById('m-title').textContent = r.title;
-  document.getElementById('m-desc').textContent = r.desc || 'Xem chi tiết trong báo cáo đầy đủ.';
-  const meta = document.getElementById('m-meta');
-  meta.innerHTML = '<span class="mb-tag">📅 '+fmt(r.date)+'</span>'
-    + (r.ticker ? '<span class="mb-tag">📈 '+r.ticker+'</span>' : '');
-  const driveUrl = r.driveId ? 'https://drive.google.com/file/d/'+r.driveId+'/view' : '#';
-  document.getElementById('m-open').href = driveUrl;
-  document.getElementById('m-open').style.display = r.driveId ? '' : 'none';
-  document.getElementById('modal-overlay').classList.add('open');
-  history.replaceState(null,'','?r='+r.id);
-}
 
 function closeModal(){
   document.getElementById('modal-overlay').classList.remove('open');
@@ -476,6 +944,64 @@ document.getElementById('modal-overlay').addEventListener('click', e => {
 document.addEventListener('keydown', e => { if (e.key==='Escape') closeModal(); });
 
 window.addEventListener('DOMContentLoaded', loadReports);
+
+/* ── Report Modal (same as index) ── */
+function base() { return location.origin + location.pathname; }
+function openReport(id) {
+  const r = REPORTS.find(x => x.id === id);
+  if (!r) return;
+  openId = id;
+  history.replaceState(null, '', `${location.pathname}?r=${id}`);
+  document.getElementById('modal-title').textContent = r.title;
+  document.getElementById('modal-iframe').src = `https://drive.google.com/file/d/${r.driveId}/preview`;
+  document.getElementById('modal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeModal() {
+  document.getElementById('modal').classList.remove('open');
+  document.getElementById('modal-iframe').src = '';
+  document.body.style.overflow = '';
+  openId = null;
+  history.replaceState(null, '', location.pathname);
+}
+document.getElementById('modal-close').addEventListener('click', closeModal);
+document.getElementById('modal').addEventListener('click', e => { if (e.target === document.getElementById('modal')) closeModal(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+function copyLink(id, btnEl) {
+  navigator.clipboard.writeText(`${base()}?r=${id}`).then(() => {
+    const orig = btnEl.innerHTML;
+    btnEl.classList.add('copied');
+    btnEl.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>';
+    setTimeout(() => { btnEl.classList.remove('copied'); btnEl.innerHTML = orig; }, 2200);
+  });
+}
+
+function copyModalLink() {
+  if (!openId) return;
+  navigator.clipboard.writeText(`${base()}?r=${openId}`).then(() => {
+    const btn = document.getElementById('modal-share');
+    btn.classList.add('copied');
+    btn.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> <span>Đã sao chép!</span>';
+    setTimeout(() => {
+      btn.classList.remove('copied');
+      btn.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg> <span>Sao chép link</span>';
+    }, 2500);
+  });
+}
+
+document.getElementById('modal-close').addEventListener('click', closeModal);
+document.getElementById('modal').addEventListener('click', e => { if (e.target === document.getElementById('modal')) closeModal(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+/* ─────────────────────────── ANTI-DOWNLOAD ─────────────────────────── */
+document.addEventListener('contextmenu', e => e.preventDefault());
+document.addEventListener('keydown', e => {
+  if ((e.ctrlKey || e.metaKey) && ['s','u','p'].includes(e.key.toLowerCase())) e.preventDefault();
+  if (e.key === 'F12') e.preventDefault();
+  if (e.ctrlKey && e.shiftKey && ['i','j','c'].includes(e.key.toLowerCase())) e.preventDefault();
+});
 </script>
 </body>
 </html>
