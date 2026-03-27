@@ -562,7 +562,7 @@ function calcNAV(){
     unrealized+=(price-h.avgCost)*h.qty;
   });
   const realized=portfolio.closedPositions?.reduce((s,p)=>s+(p.realizedPnL||0),0)||0;
-  const nav=(portfolio.cash||0)+stockVal+realized;
+  const nav=(portfolio.cash||0)+stockVal; // cash đã bao gồm tiền thu từ bán (realized nằm trong cash)
   return{nav,stockVal,unrealized,realized};
 }
 

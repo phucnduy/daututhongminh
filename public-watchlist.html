@@ -193,7 +193,7 @@ function calcNAV(){
     unrealized+=(price-h.avgCost)*h.qty;
   });
   const realized=(portfolio.closedPositions||[]).reduce((s,p)=>s+(p.realizedPnL||0),0);
-  return{nav:(portfolio.cash||0)+stockVal+realized,stockVal,unrealized,realized};
+  return{nav:(portfolio.cash||0)+stockVal,stockVal,unrealized,realized}; // cash đã bao gồm tiền bán (realized nằm trong cash)
 }
 
 function renderSummary(){
