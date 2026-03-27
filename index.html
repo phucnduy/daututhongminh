@@ -9,6 +9,10 @@
   <meta property="og:title" content="Đầu Tư Thông Minh Group"/>
   <meta property="og:description" content="Báo cáo phân tích chứng khoán Việt Nam từ chuyên gia 20 năm kinh nghiệm."/>
   <meta property="og:type" content="website"/>
+  <meta property="og:image" content="https://daututhongminh-delta.vercel.app/og-default.png"/>
+  <meta property="og:image:width" content="1200"/>
+  <meta property="og:image:height" content="630"/>
+  <meta name="twitter:image" content="https://daututhongminh-delta.vercel.app/og-default.png"/>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
@@ -200,8 +204,8 @@ img{max-width:100%;display:block;}
 .slider-dots{display:flex;align-items:center;justify-content:center;gap:6px;padding:10px 0 0;}
 .slider-dot{width:6px;height:6px;border-radius:50%;background:var(--g2);cursor:pointer;transition:all .2s;}
 .slider-dot.active{width:20px;border-radius:3px;background:var(--navy2);}
-.rep-view-all{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:700;color:var(--navy3);padding:7px 14px;border-radius:7px;border:1.5px solid var(--g2);background:var(--white);cursor:pointer;text-decoration:none;transition:all .18s;}
-.rep-view-all:hover{background:var(--navy2);color:var(--white);border-color:var(--navy2);}
+.rep-view-all{display:inline-flex;align-items:center;gap:7px;font-size:13px;font-weight:700;color:var(--white);padding:9px 18px;border-radius:7px;border:none;background:var(--navy2);cursor:pointer;text-decoration:none;transition:all .18s;}
+.rep-view-all:hover{background:var(--navy3);transform:translateY(-1px);}
 .rep-mini{flex:0 0 calc((100% - 22px) / 3);min-width:0;}
 
 /* ─────────────────────────── ABOUT ─────────────────────────── */
@@ -374,6 +378,7 @@ img{max-width:100%;display:block;}
   .si:nth-child(odd){border-right:1px solid rgba(255,255,255,.1);}
 }
   </style>
+  <script defer src="/_vercel/insights/script.js"></script>
 </head>
 <body>
 
@@ -399,7 +404,7 @@ img{max-width:100%;display:block;}
   </a>
   <nav class="nav">
     <a class="nav-link" href="#reports">Báo cáo</a>
-    <a class="nav-link" href="/reports.html">Tất cả báo cáo</a>
+    <a class="nav-link" href="/reports">Báo cáo</a>
     <a class="nav-link" href="#about">Về chúng tôi</a>
     <a class="nav-link" href="#services">Dịch vụ</a>
     <a class="nav-link" href="#" id="nav-watchlist-link" style="display:none;">
@@ -506,7 +511,7 @@ img{max-width:100%;display:block;}
     <div class="slider-dots" id="slider-dots"></div>
     <div style="display:flex;align-items:center;justify-content:space-between;margin-top:12px;">
       <div class="list-info" id="list-info"></div>
-      <a href="/reports.html" class="rep-view-all">
+      <a href="/reports" class="rep-view-all">
         Xem tất cả báo cáo
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
       </a>

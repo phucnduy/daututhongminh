@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Không tìm thấy trang – Đầu Tư Thông Minh Group</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet"/>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'Inter',system-ui,sans-serif;background:#0D2B52;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;padding:24px;text-align:center}
+    .logo{width:72px;height:72px;background:linear-gradient(135deg,#C9A84C,#E8C86A);border-radius:16px;display:flex;align-items:center;justify-content:center;margin:0 auto 24px}
+    .code{font-size:96px;font-weight:800;color:#1B4F8A;line-height:1;margin-bottom:8px;letter-spacing:-4px}
+    .title{font-size:24px;font-weight:700;color:#fff;margin-bottom:10px}
+    .desc{font-size:15px;color:rgba(255,255,255,.45);max-width:360px;line-height:1.7;margin-bottom:36px}
+    .btns{display:flex;gap:12px;flex-wrap:wrap;justify-content:center}
+    .btn-home{background:#C9A84C;color:#0D2B52;font-family:inherit;font-size:14px;font-weight:700;padding:12px 28px;border-radius:8px;border:none;cursor:pointer;text-decoration:none;transition:background .18s}
+    .btn-home:hover{background:#E8C86A}
+    .btn-report{background:rgba(255,255,255,.08);color:rgba(255,255,255,.8);font-family:inherit;font-size:14px;font-weight:600;padding:12px 28px;border-radius:8px;border:1.5px solid rgba(255,255,255,.15);cursor:pointer;text-decoration:none;transition:all .18s}
+    .btn-report:hover{background:rgba(255,255,255,.14)}
+    .gold-bar{position:fixed;top:0;left:0;right:0;height:4px;background:#C9A84C}
+    .timer{font-size:12px;color:rgba(255,255,255,.25);margin-top:20px}
+  </style>
+</head>
+<body>
+  <div class="gold-bar"></div>
+  <div class="logo">
+    <svg width="32" height="32" viewBox="0 0 22 22" fill="none"><polyline points="2,16 7,9 12,12 17,5 20,8" stroke="#0D2B52" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </div>
+  <div class="code">404</div>
+  <div class="title">Không tìm thấy trang</div>
+  <div class="desc">Trang bạn đang tìm không tồn tại hoặc đã bị di chuyển. Hãy quay về trang chủ hoặc xem danh sách báo cáo.</div>
+  <div class="btns">
+    <a href="/" class="btn-home">← Về trang chủ</a>
+    <a href="/reports" class="btn-report">Xem báo cáo</a>
+  </div>
+  <div class="timer" id="timer">Tự động chuyển hướng sau 8 giây...</div>
+  <script>
+    var t = 8;
+    var iv = setInterval(function(){
+      t--;
+      document.getElementById('timer').textContent = 'Tự động chuyển hướng sau ' + t + ' giây...';
+      if(t<=0){ clearInterval(iv); location.href='/'; }
+    }, 1000);
+  </script>
+</body>
+</html>

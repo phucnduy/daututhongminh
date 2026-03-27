@@ -1,110 +1,20 @@
 [
   {
-    "id": "rpt-1774519331547",
-    "title": "Báo cáo ngành Điện 2026",
-    "type": "market",
-    "date": "2026-03-26",
-    "desc": "Năm 2025–2026 đánh dấu bước ngoặt lịch sử của ngành điện Việt Nam sau giai đoạn đình trệ 2018–2023 do chưa có quy hoạch điện VIII",
-    "ticker": "",
-    "driveId": "12k6yAsQvsGvLxACEyQzGHGCtykswt-CV"
-  },
-  {
-    "id": "rpt-1774519274578",
-    "title": "CTI - Hưởng lợi từ chính sách BOT",
-    "type": "stock",
-    "date": "2026-03-11",
-    "desc": "Bồi thường ~1.800 tỷ cho QL91 → ghi nhận LNST đột biến 300–400 tỷ và giảm chi phí tài chính ~140 tỷ/năm về sau",
-    "ticker": "CTI",
-    "driveId": "1gvTjLkwx2y7XG9G85C9XrpRxLPCU3VOp"
-  },
-  {
-    "id": "rpt-1774519120274",
-    "title": "DHC - Tăng trưởng mạnh mẽ từ 2026",
-    "type": "stock",
-    "date": "2026-02-26",
-    "desc": "Khả năng duy trì lợi nhuận ổn định, cấu trúc ngành đang cải thiện và bộ máy sản xuất đang được nhân đôi công suất",
-    "ticker": "DHC",
-    "driveId": "1w1q65WFSSaEQvxC3cae56scFwvQ86v_D"
-  },
-  {
-    "id": "rpt-1774519037656",
-    "title": "DRI - Giá cao su lập đỉnh - Lợi nhuận kỷ lục",
-    "type": "stock",
-    "date": "2026-02-28",
-    "desc": "Giá cao su thế giới về mức đỉnh 9 năm — xu hướng tiếp tục được hỗ trợ bởi nhu cầu xe điện bùng nổ và nhập khẩu Trung Quốc tăng mạnh.",
-    "ticker": "DRI",
-    "driveId": "1CC7DoMtWs81pYpql3PeUymrvynbV1eHY"
-  },
-  {
-    "id": "rpt-1774518924206",
-    "title": "NTP - Vị thế số 1, bước ngoặt thoái vốn",
-    "type": "stock",
-    "date": "2026-02-18",
-    "desc": "KQKD 2025 đạt mức kỷ lục, dự kiến duy trì tăng trưởng hai chữ số 2026–2028.",
-    "ticker": "NTP",
-    "driveId": "15FBWcKXqzIaIfPk_-9fK1ZjA-PsGE7kt"
-  },
-  {
-    "id": "rpt-1774518852488",
-    "title": "VGT - Phục hồi mạnh mẽ, chinh phục các kỷ lục mới",
-    "type": "stock",
-    "date": "2026-03-09",
-    "desc": "Đơn hàng đã kín đến hết tháng 7/2026 — tín hiệu rõ nét nhất về KQKD nửa đầu năm 2026.",
-    "ticker": "VGT",
-    "driveId": "1mz3xW3VM36P9eygmiZhxmW6lKhgMcqFZ"
-  },
-  {
-    "id": "rpt-1774518761841",
-    "title": "PC1 - Thiên thời gọi tên !",
-    "type": "stock",
-    "date": "2026-02-04",
-    "desc": "Doanh thu lợi nhuận 2025 cao nhất từ trước đến nay, backlog kỷ lục",
-    "ticker": "PC1",
-    "driveId": "1x4vojoqqBdIq95xE_5jqTZN-J3FOUeX1"
-  },
-  {
-    "id": "rpt-1774512423398",
-    "title": "QTP - Cổ Phiếu Phòng Thủ Chất Lượng Cao — Lợi Suất Cổ Tức Đầu Ngành",
-    "type": "stock",
-    "date": "2026-03-26",
-    "desc": "Định giá thấp nhất ngành: P/E trailing chỉ ~5,6x so với bình quân ngành 12–14x.",
-    "ticker": "QTP",
-    "driveId": "1MnMRgKuJ_Q9CJQ-1PRqoh9qdV8r4T0AK"
-  },
-  {
-    "id": "rpt-1774511244098",
-    "title": "TV2 - Vươn mình trở thành nhà thầu EPC số 1 ngành điện",
-    "type": "stock",
-    "date": "2026-02-23",
-    "desc": "Chúng tôi đã khuyến nghị mua TV2 ở giá 33.x-35.x liên tục, hiện tại chúng tôi khuyến nghị NẮM GIỮ với\ngiá mục tiêu 2026 là 45.000/cp.",
-    "ticker": "TV2",
-    "driveId": "1X_5nJA7Xsb-2t1lplNELVzRGd3fIFUom"
-  },
-  {
-    "id": "rpt-1774510745965",
-    "title": "TV1 - Bứt phá tăng trưởng - Định giá hấp dẫn !",
-    "type": "stock",
-    "date": "2026-02-12",
-    "desc": "P/E siêu hấp dẫn; hưởng lợi trực tiếp từ backlog kỷ lục",
-    "ticker": "TV1",
-    "driveId": "1Sd0bPQpvCb77nykpor7rylZLeP6WVsAT"
-  },
-  {
     "id": "rpt-001",
-    "title": "Báo cáo Thị trường – Phiên 04/03/2025",
+    "title": "Báo cáo Thị trường – Phiên 25/03/2025",
     "type": "market",
-    "date": "2026-03-04",
+    "date": "2025-03-25",
     "desc": "VN-Index hồi phục nhẹ sau phiên giảm kỹ thuật, thanh khoản cải thiện. Nhóm ngân hàng và bất động sản dẫn dắt.",
     "ticker": "",
-    "driveId": "https://drive.google.com/file/d/1YcV5RM_UPqSjHLgYRRk-VD8MHax768zv/view?usp=sharing"
+    "driveId": "NHAP_ID_GOOGLE_DRIVE_VAO_DAY"
   },
   {
     "id": "rpt-002",
     "title": "Phân tích Cổ phiếu MWG – Khuyến nghị MUA",
     "type": "stock",
-    "date": "2026-02-22",
+    "date": "2025-03-22",
     "desc": "Triển vọng phục hồi biên lợi nhuận gộp Q1/2025, chu kỳ tăng trưởng mới từ Bách Hóa Xanh.",
     "ticker": "MWG",
-    "driveId": "1EgWLc7WtIhxIgGevCBXadGgjPrQA__Oz"
+    "driveId": "NHAP_ID_GOOGLE_DRIVE_VAO_DAY"
   }
 ]

@@ -2,5 +2,9 @@
   "cleanUrls": true,
   "rewrites": [
     { "source": "/api/ssi/:path*", "destination": "/api/ssi" }
+  ],
+  "routes": [
+    { "handle": "filesystem" },
+    { "src": "/(.*)", "dest": "/404.html", "status": 404 }
   ]
 }

@@ -4,7 +4,17 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Báo cáo Phân tích – Đầu Tư Thông Minh Group</title>
+    <meta property="og:image" content="https://daututhongminh-delta.vercel.app/og-default.png"/>
+  <meta property="og:image:width" content="1200"/>
+  <meta property="og:image:height" content="630"/>
+  <meta name="twitter:image" content="https://daututhongminh-delta.vercel.app/og-default.png"/>
   <meta name="description" content="Toàn bộ báo cáo phân tích thị trường và cổ phiếu từ Đầu Tư Thông Minh Group."/>
+  <meta property="og:title" content="Báo cáo Phân tích – Đầu Tư Thông Minh Group"/>
+  <meta property="og:description" content="Báo cáo phân tích chứng khoán Việt Nam từ chuyên gia 20 năm kinh nghiệm."/>
+  <meta property="og:type" content="website"/>
+  <meta property="og:url" content="https://daututhongminh-delta.vercel.app/reports"/>
+  <meta property="og:site_name" content="Đầu Tư Thông Minh Group"/>
+  <meta name="twitter:card" content="summary_large_image"/>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
   <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
@@ -157,6 +167,7 @@ a{text-decoration:none;color:inherit;}
   .modal-title{font-size:13px;max-width:55%;}
   .modal-share span{display:none;}}
 </style>
+  <script defer src="/_vercel/insights/script.js"></script>
 </head>
 <body>
 
@@ -167,7 +178,7 @@ a{text-decoration:none;color:inherit;}
   </a>
   <nav class="nav">
     <a class="nav-link" href="/">Trang chủ</a>
-    <a class="nav-link active" href="/reports.html">Báo cáo</a>
+    <a class="nav-link active" href="/reports">Báo cáo</a>
     <a class="nav-link" href="/#about">Về chúng tôi</a>
     <a class="nav-link" href="/#services">Dịch vụ</a>
     <a class="nav-cta" href="https://zalo.me/g/sxshix010" target="_blank" rel="noopener">Nhóm Zalo</a>
@@ -232,6 +243,7 @@ a{text-decoration:none;color:inherit;}
 <div class="modal-overlay" id="modal">
   <div class="modal-box">
     <div class="modal-header">
+      <a href="/reports" style="display:inline-flex;align-items:center;gap:5px;font-size:11.5px;color:rgba(255,255,255,.45);text-decoration:none;margin-bottom:6px;flex-shrink:0;padding-right:12px;border-right:1px solid rgba(255,255,255,.1);" onclick="event.preventDefault();closeModal()"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 18l-6-6 6-6"/></svg> Báo cáo</a>
       <span class="modal-title" id="modal-title"></span>
       <div class="modal-actions-row">
         <button class="modal-share" id="modal-share" onclick="copyModalLink()">
@@ -253,7 +265,7 @@ a{text-decoration:none;color:inherit;}
 const RAW_BASE = 'https://raw.githubusercontent.com/phucnduy/daututhongminh/main';
 const PAGE_SIZE = 9;
 
-let REPORTS = [], tab = 'all', month = 'all', curPage = 1, openId = null;
+let REPORTS = [], tab = 'all', month = 'all', curPage = 1, openId = null, _searchTimer = null;
 
 const fmt = s => { if (!s) return ''; const [y,m,d] = s.split('-'); return d+'/'+m+'/'+y; };
 const gm  = s => s ? s.slice(0,7) : '';
@@ -333,7 +345,10 @@ function setMonth(el){
   month = el.dataset.month;
   curPage = 1; render();
 }
-function onSearch(){ curPage = 1; render(); }
+function onSearch(){
+  clearTimeout(_searchTimer);
+  _searchTimer = setTimeout(function(){ curPage = 1; render(); }, 220);
+}
 
 /* ── RENDER ── */
 function render(){
