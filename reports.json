@@ -1,5 +1,14 @@
 [
   {
+    "id": "rpt-1775026967054",
+    "title": "MSR - Khoáng sản Việt đẳng cấp thế giới",
+    "type": "stock",
+    "date": "2026-04-01",
+    "desc": "MSR là nhà cung cấp vonfram tích hợp duy nhất có thể giao dịch với quy mô lớn ngoài Trung Quốc. Mô hình từ mỏ đến nhà máy luyện, chiếm ~21% nguồn cung cấp vonfram toàn cầu ngoài Trung Quốc",
+    "ticker": "MSR",
+    "driveId": "1qOaF-S0j9oV9BWlz1HXtpvbw-BVZxpGw"
+  },
+  {
     "id": "rpt-1774519331547",
     "title": "Báo cáo ngành Điện 2026",
     "type": "market",
