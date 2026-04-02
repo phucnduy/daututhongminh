@@ -442,8 +442,8 @@ img{max-width:100%;display:block;}
 // ─────────────────────────────────────────────────────────────────────────────
 // CONFIG — thay YOUR_RAILWAY_URL bằng URL thực sau khi deploy Railway
 // ─────────────────────────────────────────────────────────────────────────────
-const API_BASE = 'https://vnstock-agent-production.up.railway.app';
-```
+const API_BASE = 'YOUR_RAILWAY_URL'; // ví dụ: https://vnstock-agent-production.up.railway.app
+
 // ─── STATE ───────────────────────────────────────────────────────────────────
 let currentSymbol = '';
 let currentInterval = '1D';
@@ -936,51 +936,34 @@ const NUM_FIELDS = new Set(['open','high','low','close','price','match_price','r
 
 function makeTable(data, cols, maxRows = 50) {
   const rows = data.slice(0, maxRows);
-  const th = cols.map(c => `<th>${COL_LABELS[c] || c.replace(/_/g,' ')}</th>`).join('');
-  const trs = rows.map(row => {
-    const tds = cols.map(c => {
+  const th = cols.map(c => '<th>' + (COL_LABELS[c] || c.replace(/_/g,' ')) + '</th>').join('');
+  const tbody = rows.map(function(row) {
+    const tds = cols.map(function(c) {
       let v = row[c];
       const isNum = NUM_FIELDS.has(c) || typeof v === 'number';
-      if (v == null || v === '') v = '—';
-      else if (typeof v === 'number') {
-        if (['percent_change','roe','roa','owner_percent','foreign_percent'].includes(c)) v = fmtNum(v) + '%';
-        else if (['volume','match_vol','quantity','outstanding_share','issue_share','market_cap'].includes(c)) v = fmtVolume(v);
-        else if (['open','high','low','close','price','match_price','ref','ceil','floor','net_change'].includes(c)) v = fmtPrice(v);
-        else v = fmtNum(v);
-      }
-      let cls = 'num';
-      if (c === 'percent_change' || c === 'net_change') {
-        const raw = row[c];
-        if (raw > 0) cls += ' up';
-        else if (raw < 0) cls += ' dn';
-      }
-      return `<td class="${isNum ? cls : ''}">${v}</td>`;
-    }).join('');
-    return `<tr>${trs}</tr>`;
-  }).join('').replace(/\<tr\>(.+?)\<\/tr\>/gs, m => m.replace('<tr>', '<tr>').replace('${trs}', tds));
-
-  // Rebuild properly
-  const tbody = rows.map(row => {
-    const tds = cols.map(c => {
-      let v = row[c];
-      const isNum = NUM_FIELDS.has(c) || typeof v === 'number';
-      if (v == null || v === '') v = '—';
-      else if (typeof v === 'number') {
-        if (['percent_change','roe','roa','owner_percent','foreign_percent'].includes(c)) v = fmtNum(v) + '%';
-        else if (['volume','match_vol','quantity','outstanding_share','issue_share','market_cap'].includes(c)) v = fmtVolume(v);
-        else if (['open','high','low','close','price','match_price','ref','ceil','floor','net_change'].includes(c)) v = fmtPrice(v);
-        else v = fmtNum(v);
+      if (v == null || v === '') {
+        v = '—';
+      } else if (typeof v === 'number') {
+        if (['percent_change','roe','roa','owner_percent','foreign_percent'].includes(c)) {
+          v = fmtNum(v) + '%';
+        } else if (['volume','match_vol','quantity','outstanding_share','issue_share','market_cap'].includes(c)) {
+          v = fmtVolume(v);
+        } else if (['open','high','low','close','price','match_price','ref','ceil','floor','net_change'].includes(c)) {
+          v = fmtPrice(v);
+        } else {
+          v = fmtNum(v);
+        }
       }
       let cls = isNum ? 'num' : '';
       if (['percent_change','net_change'].includes(c) && typeof row[c] === 'number') {
-        cls += row[c] > 0 ? ' up' : row[c] < 0 ? ' dn' : '';
+        if (row[c] > 0) cls += ' up';
+        else if (row[c] < 0) cls += ' dn';
       }
-      return `<td class="${cls}">${v}</td>`;
+      return '<td class="' + cls + '">' + v + '</td>';
     }).join('');
-    return `<tr>${tds}</tr>`;
+    return '<tr>' + tds + '</tr>';
   }).join('');
-
-  return `<div class="data-table-wrap"><table class="data-table"><thead><tr>${th}</tr></thead><tbody>${tbody}</tbody></table></div>`;
+  return '<div class="data-table-wrap"><table class="data-table"><thead><tr>' + th + '</tr></thead><tbody>' + tbody + '</tbody></table></div>';
 }
 
 // ─── FORMAT HELPERS ───────────────────────────────────────────────────────────
