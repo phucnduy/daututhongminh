@@ -439,10 +439,7 @@ img{max-width:100%;display:block;}
 </footer>
 
 <script>
-// ─── CONFIG ───────────────────────────────────────────────────────────────────
 var RENDER = 'http://180.93.3.14:8000';
-
-// ─── STATE ────────────────────────────────────────────────────────────────────
 var currentSymbol = '';
 var currentInterval = '1D';
 var currentMonths = 6;
@@ -453,30 +450,22 @@ var volumeChart = null;
 var finDataCache = {};
 var activeTab = 'price';
 
-// ─── SEARCH ───────────────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', function() {
   document.getElementById('symbolInput').addEventListener('keydown', function(e) {
     if (e.key === 'Enter') doSearch();
   });
-  var params = new URLSearchParams(window.location.search);
-  var sym = params.get('symbol') || params.get('s');
-  if (sym) {
-    document.getElementById('symbolInput').value = sym.toUpperCase();
-    setTimeout(doSearch, 200);
-  }
+  var p = new URLSearchParams(window.location.search);
+  var s = p.get('symbol') || p.get('s');
+  if (s) { document.getElementById('symbolInput').value = s.toUpperCase(); setTimeout(doSearch, 200); }
 });
 
-function quickSearch(sym) {
-  document.getElementById('symbolInput').value = sym;
-  doSearch();
-}
+function quickSearch(sym) { document.getElementById('symbolInput').value = sym; doSearch(); }
 
 function doSearch() {
   var raw = document.getElementById('symbolInput').value.trim().toUpperCase();
   if (!raw) return;
   currentSymbol = raw;
   finDataCache = {};
-
   document.getElementById('mainContent').style.display = 'block';
   document.getElementById('emptyState').style.display = 'none';
   document.getElementById('stockHeader').classList.add('visible');
@@ -486,27 +475,20 @@ function doSearch() {
   document.getElementById('hName').textContent = '...';
   document.getElementById('hPrice').textContent = '...';
   document.getElementById('boardInput').value = currentSymbol;
-
   switchTab(activeTab, true);
   loadOverviewCard();
   loadIntradayForHeader();
 }
 
-// ─── TABS ─────────────────────────────────────────────────────────────────────
 function switchTab(tab, force) {
   if (!currentSymbol && !force) return;
   activeTab = tab;
-  var tabNames = ['price', 'overview', 'finance', 'company', 'news'];
+  var names = ['price','overview','finance','company','news'];
   var btns = document.querySelectorAll('.tab-btn');
-  for (var i = 0; i < btns.length; i++) {
-    btns[i].classList.toggle('active', tabNames[i] === tab);
-  }
+  for (var i = 0; i < btns.length; i++) btns[i].classList.toggle('active', names[i] === tab);
   var panels = document.querySelectorAll('.tab-panel');
-  for (var j = 0; j < panels.length; j++) {
-    panels[j].classList.remove('active');
-  }
+  for (var j = 0; j < panels.length; j++) panels[j].classList.remove('active');
   document.getElementById('panel-' + tab).classList.add('active');
-
   if (!currentSymbol) return;
   if (tab === 'price')    { loadChart(); loadIntradayDepthPanel(); }
   if (tab === 'overview') { loadOverview(); }
@@ -515,416 +497,254 @@ function switchTab(tab, force) {
   if (tab === 'news')     { loadNews(); }
 }
 
-// ─── API ──────────────────────────────────────────────────────────────────────
-function apiFetch(path) {
-  return fetch(API_BASE + path)
-    .then(function(res) {
-      if (!res.ok) throw new Error('HTTP ' + res.status);
-      return res.json();
-    })
-    .then(function(json) {
-      if (!json.success) throw new Error(json.error || 'Loi API');
-      return json.data;
-    });
+function callAPI(path) {
+  var url = RENDER + path;
+  return fetch(url)
+    .then(function(r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+    .then(function(j) { if (!j.success) throw new Error(j.error || 'Loi'); return j.data; });
 }
 
-// ─── HEADER CARD ──────────────────────────────────────────────────────────────
 function loadOverviewCard() {
-  apiFetch('/api/stock/' + currentSymbol + '/overview')
+  callAPI('/api/stock/' + currentSymbol + '/overview')
     .then(function(data) {
-      var d = Array.isArray(data) ? data[0] : data;
-      if (!d) return;
+      var d = Array.isArray(data) ? data[0] : data; if (!d) return;
       document.getElementById('hName').textContent = d.company_name || d.short_name || currentSymbol;
-      var exch = (d.exchange || '') + (d.industry_name ? ' · ' + d.industry_name : '');
-      document.getElementById('hExchange').textContent = exch;
+      document.getElementById('hExchange').textContent = (d.exchange||'') + (d.industry_name ? ' - '+d.industry_name : '');
       document.getElementById('hUpdated').textContent = new Date().toLocaleString('vi-VN');
-      var metas = [
-        {label: 'Von hoa', value: fmtBillion(d.market_cap)},
-        {label: 'P/E', value: fmtNum(d.pe)},
-        {label: 'P/B', value: fmtNum(d.pb)},
-        {label: 'Room NN', value: d.foreign_percent != null ? fmtNum(d.foreign_percent) + '%' : null},
-        {label: 'San', value: d.exchange || null},
-      ].filter(function(m) { return m.value && m.value !== '—'; });
-      document.getElementById('hMetaRow').innerHTML = metas.map(function(m) {
-        return '<div class="meta-item"><div class="meta-label">' + m.label + '</div><div class="meta-value">' + m.value + '</div></div>';
+      var metas = [{l:'Von hoa',v:fmtB(d.market_cap)},{l:'P/E',v:fmtN(d.pe)},{l:'P/B',v:fmtN(d.pb)},{l:'San',v:d.exchange}];
+      document.getElementById('hMetaRow').innerHTML = metas.filter(function(m){return m.v&&m.v!=='—';}).map(function(m){
+        return '<div class="meta-item"><div class="meta-label">'+m.l+'</div><div class="meta-value">'+m.v+'</div></div>';
       }).join('');
-    })
-    .catch(function() {});
+    }).catch(function(){});
 }
 
 function loadIntradayForHeader() {
-  apiFetch('/api/stock/' + currentSymbol + '/intraday?page_size=50')
+  callAPI('/api/stock/' + currentSymbol + '/intraday?page_size=50')
     .then(function(data) {
-      if (!data || !data.length) return;
-      var latest = data[data.length - 1];
-      var price = latest.price || latest.close || latest.match_price;
-      var ref = data[0].ref || data[0].reference_price;
-      if (!price) return;
-      document.getElementById('hPrice').textContent = fmtPrice(price);
+      if (!data||!data.length) return;
+      var last = data[data.length-1];
+      var price = last.price||last.close||last.match_price; if (!price) return;
+      document.getElementById('hPrice').textContent = fmtP(price);
+      var ref = data[0].ref||data[0].reference_price;
       if (ref) {
-        var chg = price - ref;
-        var pct = ref ? (chg / ref * 100) : 0;
-        var cEl = document.getElementById('hChange');
-        var cls = chg > 0 ? 'up' : chg < 0 ? 'dn' : 'flat';
-        cEl.className = 'stock-change ' + cls;
-        var sign = chg > 0 ? '+' : '';
-        cEl.textContent = sign + fmtPrice(chg) + ' (' + sign + pct.toFixed(2) + '%)';
+        var chg = price-ref; var pct = ref?(chg/ref*100):0;
+        var el = document.getElementById('hChange');
+        el.className = 'stock-change '+(chg>0?'up':chg<0?'dn':'flat');
+        el.textContent = (chg>0?'+':'')+fmtP(chg)+' ('+(pct>0?'+':'')+pct.toFixed(2)+'%)';
       }
-    })
-    .catch(function() {});
+    }).catch(function(){});
 }
 
-// ─── CHART ────────────────────────────────────────────────────────────────────
 function loadChart() {
-  var end = new Date();
-  var start = new Date();
-  start.setMonth(start.getMonth() - currentMonths);
-  var startStr = start.toISOString().split('T')[0];
-  var endStr = end.toISOString().split('T')[0];
-
-  document.getElementById('priceChart').innerHTML = '<div class="loading-box"><div class="spinner"></div><div class="loading-text">Dang tai bieu do...</div></div>';
+  var ed = new Date(); var st = new Date(); st.setMonth(st.getMonth()-currentMonths);
+  var startStr = st.toISOString().split('T')[0]; var endStr = ed.toISOString().split('T')[0];
+  document.getElementById('priceChart').innerHTML = spinner();
   document.getElementById('volumeChart').innerHTML = '';
-
-  apiFetch('/api/stock/' + currentSymbol + '/history?start=' + startStr + '&end=' + endStr + '&interval=' + currentInterval)
+  callAPI('/api/stock/'+currentSymbol+'/history?start='+startStr+'&end='+endStr+'&interval='+currentInterval)
     .then(function(data) {
-      if (!data || !data.length) {
-        document.getElementById('priceChart').innerHTML = '<div class="no-data">Khong co du lieu</div>';
-        return;
-      }
-      renderChart(data);
-    })
-    .catch(function(e) {
-      document.getElementById('priceChart').innerHTML = '<div class="no-data">Loi: ' + e.message + '</div>';
-    });
+      if (!data||!data.length) { document.getElementById('priceChart').innerHTML = nodata(); return; }
+      renderCharts(data);
+    }).catch(function(e) { document.getElementById('priceChart').innerHTML = nodata(e.message); });
 }
 
-function renderChart(data) {
-  var ohlc = data.map(function(d) {
-    return {
-      x: new Date(d.time || d.date || d.tradingDate),
-      y: [parseFloat(d.open||0), parseFloat(d.high||0), parseFloat(d.low||0), parseFloat(d.close||0)]
-    };
-  });
-  var vol = data.map(function(d) {
-    return { x: new Date(d.time || d.date || d.tradingDate), y: parseFloat(d.volume||0) };
-  });
-
-  if (priceChart) { priceChart.destroy(); priceChart = null; }
-  if (volumeChart) { volumeChart.destroy(); volumeChart = null; }
-
-  priceChart = new ApexCharts(document.getElementById('priceChart'), {
-    series: [{ name: currentSymbol, data: ohlc }],
-    chart: { type: 'candlestick', height: 360, id: 'candles', animations: { enabled: false },
-      toolbar: { show: true }, background: 'transparent' },
-    xaxis: { type: 'datetime', labels: { style: { colors: '#8A94A6', fontSize: '11px' } } },
-    yaxis: { opposite: true, labels: { style: { colors: '#8A94A6', fontSize: '11px' },
-      formatter: function(v) { return (v/1000).toFixed(1) + 'k'; } }, tooltip: { enabled: true } },
-    plotOptions: { candlestick: { colors: { upward: '#1A7A4A', downward: '#c0392b' }, wick: { useFillColor: true } } },
-    tooltip: { theme: 'dark', x: { format: 'dd/MM/yyyy' } },
-    grid: { borderColor: '#F2F4F7' },
+function renderCharts(data) {
+  var ohlc = data.map(function(d){return{x:new Date(d.time||d.date||d.tradingDate),y:[+d.open||0,+d.high||0,+d.low||0,+d.close||0]};});
+  var vol  = data.map(function(d){return{x:new Date(d.time||d.date||d.tradingDate),y:+d.volume||0};});
+  if (priceChart){priceChart.destroy();priceChart=null;}
+  if (volumeChart){volumeChart.destroy();volumeChart=null;}
+  priceChart = new ApexCharts(document.getElementById('priceChart'),{
+    series:[{name:currentSymbol,data:ohlc}],
+    chart:{type:'candlestick',height:360,id:'cv',animations:{enabled:false},toolbar:{show:true},background:'transparent'},
+    xaxis:{type:'datetime',labels:{style:{colors:'#8A94A6',fontSize:'11px'}}},
+    yaxis:{opposite:true,tooltip:{enabled:true},labels:{style:{colors:'#8A94A6',fontSize:'11px'},formatter:function(v){return (v/1000).toFixed(1)+'k';}}},
+    plotOptions:{candlestick:{colors:{upward:'#1A7A4A',downward:'#c0392b'},wick:{useFillColor:true}}},
+    tooltip:{theme:'dark',x:{format:'dd/MM/yyyy'}},
+    grid:{borderColor:'#F2F4F7'},
   });
   priceChart.render();
-
-  volumeChart = new ApexCharts(document.getElementById('volumeChart'), {
-    series: [{ name: 'KL', data: vol, color: '#1B4F8A' }],
-    chart: { type: 'bar', height: 120, brush: { enabled: true, target: 'candles' },
-      selection: { enabled: true }, animations: { enabled: false }, background: 'transparent', toolbar: { show: false } },
-    xaxis: { type: 'datetime', labels: { style: { colors: '#8A94A6', fontSize: '10px' } } },
-    yaxis: { opposite: true, labels: { style: { colors: '#8A94A6', fontSize: '10px' },
-      formatter: function(v) { return fmtVolume(v); } } },
-    dataLabels: { enabled: false },
-    plotOptions: { bar: { columnWidth: '80%' } },
-    grid: { borderColor: '#F2F4F7' },
+  volumeChart = new ApexCharts(document.getElementById('volumeChart'),{
+    series:[{name:'KL',data:vol,color:'#1B4F8A'}],
+    chart:{type:'bar',height:120,brush:{enabled:true,target:'cv'},selection:{enabled:true},animations:{enabled:false},background:'transparent',toolbar:{show:false}},
+    xaxis:{type:'datetime',labels:{style:{colors:'#8A94A6',fontSize:'10px'}}},
+    yaxis:{opposite:true,labels:{style:{colors:'#8A94A6',fontSize:'10px'},formatter:function(v){return fmtV(v);}}},
+    dataLabels:{enabled:false},plotOptions:{bar:{columnWidth:'80%'}},grid:{borderColor:'#F2F4F7'},
   });
   volumeChart.render();
 }
 
-function setInterval_(interval) {
-  currentInterval = interval;
-  document.querySelectorAll('.interval-btn').forEach(function(b) { b.classList.remove('active'); });
+function setInterval_(intv) {
+  currentInterval=intv;
+  document.querySelectorAll('.interval-btn').forEach(function(b){b.classList.remove('active');});
+  event.target.classList.add('active');
+  if (currentSymbol) loadChart();
+}
+function setRange(m) {
+  currentMonths=m;
+  document.querySelectorAll('.period-btn').forEach(function(b){b.classList.remove('active');});
   event.target.classList.add('active');
   if (currentSymbol) loadChart();
 }
 
-function setRange(months) {
-  currentMonths = months;
-  document.querySelectorAll('.period-btn').forEach(function(b) { b.classList.remove('active'); });
-  event.target.classList.add('active');
-  if (currentSymbol) loadChart();
-}
-
-// ─── INTRADAY + DEPTH ─────────────────────────────────────────────────────────
 function loadIntradayDepthPanel() {
-  var el = document.getElementById('intradayContent');
-  el.innerHTML = spinner();
-  apiFetch('/api/stock/' + currentSymbol + '/intraday?page_size=30')
-    .then(function(data) {
-      el.innerHTML = data && data.length ? makeTable(data, Object.keys(data[0]), 30) : '<div class="no-data">Khong co du lieu</div>';
-    })
-    .catch(function(e) { el.innerHTML = '<div class="no-data">Loi: ' + e.message + '</div>'; });
-
-  var el2 = document.getElementById('depthContent');
-  el2.innerHTML = spinner();
-  apiFetch('/api/stock/' + currentSymbol + '/depth')
-    .then(function(data) {
-      el2.innerHTML = data && data.length ? makeTable(data, Object.keys(data[0])) : '<div class="no-data">Khong co du lieu</div>';
-    })
-    .catch(function(e) { el2.innerHTML = '<div class="no-data">Loi: ' + e.message + '</div>'; });
+  var e1=document.getElementById('intradayContent'); e1.innerHTML=spinner();
+  callAPI('/api/stock/'+currentSymbol+'/intraday?page_size=30')
+    .then(function(d){e1.innerHTML=d&&d.length?mkTable(d,Object.keys(d[0]),30):nodata();})
+    .catch(function(e){e1.innerHTML=nodata(e.message);});
+  var e2=document.getElementById('depthContent'); e2.innerHTML=spinner();
+  callAPI('/api/stock/'+currentSymbol+'/depth')
+    .then(function(d){e2.innerHTML=d&&d.length?mkTable(d,Object.keys(d[0])):nodata();})
+    .catch(function(e){e2.innerHTML=nodata(e.message);});
 }
 
-// ─── OVERVIEW ─────────────────────────────────────────────────────────────────
 function loadOverview() {
-  var el = document.getElementById('overviewContent');
-  el.innerHTML = spinner();
-  apiFetch('/api/stock/' + currentSymbol + '/overview')
-    .then(function(data) {
-      var d = Array.isArray(data) ? data[0] : data;
-      el.innerHTML = d ? makeKvCards(d) : '<div class="no-data">Khong co du lieu</div>';
-    })
-    .catch(function(e) { el.innerHTML = '<div class="no-data">Loi: ' + e.message + '</div>'; });
-
-  var el2 = document.getElementById('ratioOverviewContent');
-  el2.innerHTML = spinner();
-  apiFetch('/api/stock/' + currentSymbol + '/ratio?period=quarter')
-    .then(function(data) {
-      el2.innerHTML = data && data.length ? makeTable(data, Object.keys(data[0]), 8) : '<div class="no-data">Khong co du lieu</div>';
-    })
-    .catch(function(e) { el2.innerHTML = '<div class="no-data">Loi: ' + e.message + '</div>'; });
+  var e1=document.getElementById('overviewContent'); e1.innerHTML=spinner();
+  callAPI('/api/stock/'+currentSymbol+'/overview')
+    .then(function(data){var d=Array.isArray(data)?data[0]:data; e1.innerHTML=d?mkCards(d):nodata();})
+    .catch(function(e){e1.innerHTML=nodata(e.message);});
+  var e2=document.getElementById('ratioOverviewContent'); e2.innerHTML=spinner();
+  callAPI('/api/stock/'+currentSymbol+'/ratio?period=quarter')
+    .then(function(d){e2.innerHTML=d&&d.length?mkTable(d,Object.keys(d[0]),8):nodata();})
+    .catch(function(e){e2.innerHTML=nodata(e.message);});
 }
 
-function makeKvCards(obj) {
-  var labels = {
-    company_name:'Ten cong ty', short_name:'Ten viet tat', exchange:'San',
-    industry_name:'Nganh', established_year:'Nam thanh lap', listing_date:'Ngay niem yet',
-    outstanding_share:'Co phieu luu hanh', issue_share:'Co phieu phat hanh',
-    pe:'P/E', pb:'P/B', ps:'P/S', eps:'EPS', roe:'ROE (%)', roa:'ROA (%)',
-    market_cap:'Von hoa (ty)', foreign_percent:'Room nuoc ngoai (%)',
-    website:'Website', address:'Dia chi',
-  };
-  var html = '<div class="overview-grid">';
-  var entries = Object.entries(obj).filter(function(kv) {
-    return kv[1] != null && kv[1] !== '' && kv[1] !== 0;
+function mkCards(obj) {
+  var lb={company_name:'Ten cong ty',short_name:'Ten viet tat',exchange:'San',industry_name:'Nganh',
+    established_year:'Nam TL',listing_date:'Ngay NY',outstanding_share:'CP luu hanh',
+    pe:'P/E',pb:'P/B',eps:'EPS',roe:'ROE(%)',roa:'ROA(%)',market_cap:'Von hoa',
+    foreign_percent:'Room NN(%)',website:'Website',address:'Dia chi'};
+  var html='<div class="overview-grid">';
+  Object.entries(obj).forEach(function(kv){
+    var k=kv[0],v=kv[1];
+    if(v==null||v===''||v===0) return;
+    html+='<div class="ov-card"><div class="ov-label">'+(lb[k]||k.replace(/_/g,' '))+'</div><div class="ov-value">'+(typeof v==='number'?fmtN(v):v)+'</div></div>';
   });
-  entries.forEach(function(kv) {
-    var k = kv[0], v = kv[1];
-    var label = labels[k] || k.replace(/_/g, ' ');
-    var display = typeof v === 'number' ? fmtNum(v) : v;
-    html += '<div class="ov-card"><div class="ov-label">' + label + '</div><div class="ov-value">' + display + '</div></div>';
-  });
-  html += '</div>';
-  return html;
+  return html+'</div>';
 }
 
-// ─── TÀI CHÍNH ────────────────────────────────────────────────────────────────
-var FIN_ENDPOINTS = { ratio: 'ratio', income: 'income', balance: 'balance-sheet', cashflow: 'cashflow' };
-var FIN_PANELS = { ratio: 'finRatioContent', income: 'finIncomeContent', balance: 'finBalanceContent', cashflow: 'finCashflowContent' };
+var FEP={ratio:'ratio',income:'income',balance:'balance-sheet',cashflow:'cashflow'};
+var FPN={ratio:'finRatioContent',income:'finIncomeContent',balance:'finBalanceContent',cashflow:'finCashflowContent'};
 
-function loadFinance(period, tab) {
-  var cacheKey = period + '_' + tab;
-  if (finDataCache[cacheKey]) { renderFinContent(tab, finDataCache[cacheKey]); return; }
-  var panelId = FIN_PANELS[tab];
-  document.getElementById(panelId).innerHTML = spinner();
-  apiFetch('/api/stock/' + currentSymbol + '/' + FIN_ENDPOINTS[tab] + '?period=' + period)
-    .then(function(data) {
-      finDataCache[cacheKey] = data;
-      renderFinContent(tab, data);
-    })
-    .catch(function(e) {
-      document.getElementById(panelId).innerHTML = '<div class="no-data">Loi: ' + e.message + '</div>';
-    });
+function loadFinance(period,tab) {
+  var ck=period+'_'+tab;
+  if (finDataCache[ck]){renderFin(tab,finDataCache[ck]);return;}
+  document.getElementById(FPN[tab]).innerHTML=spinner();
+  callAPI('/api/stock/'+currentSymbol+'/'+FEP[tab]+'?period='+period)
+    .then(function(d){finDataCache[ck]=d;renderFin(tab,d);})
+    .catch(function(e){document.getElementById(FPN[tab]).innerHTML=nodata(e.message);});
 }
-
-function renderFinContent(tab, data) {
-  var panelId = FIN_PANELS[tab];
-  if (!data || !data.length) { document.getElementById(panelId).innerHTML = '<div class="no-data">Khong co du lieu</div>'; return; }
-  document.getElementById(panelId).innerHTML = makeTable(data, Object.keys(data[0]));
+function renderFin(tab,d) {
+  document.getElementById(FPN[tab]).innerHTML=d&&d.length?mkTable(d,Object.keys(d[0])):nodata();
 }
-
-function setFinPeriod(period) {
-  currentFinPeriod = period;
-  finDataCache = {};
-  document.querySelectorAll('.period-btn').forEach(function(b) { b.classList.remove('active'); });
-  event.target.classList.add('active');
-  if (currentSymbol) loadFinance(period, currentFinTab);
+function setFinPeriod(p) {
+  currentFinPeriod=p; finDataCache={};
+  document.querySelectorAll('.period-btn').forEach(function(b){b.classList.remove('active');}); event.target.classList.add('active');
+  if(currentSymbol) loadFinance(p,currentFinTab);
 }
-
 function setFinTab(tab) {
-  currentFinTab = tab;
-  document.querySelectorAll('.interval-btn').forEach(function(b) { b.classList.remove('active'); });
-  event.target.classList.add('active');
-  Object.values(FIN_PANELS).forEach(function(pid) {
-    document.getElementById(pid).style.display = 'none';
-  });
-  document.getElementById(FIN_PANELS[tab]).style.display = 'block';
-  if (currentSymbol) loadFinance(currentFinPeriod, tab);
+  currentFinTab=tab;
+  document.querySelectorAll('.interval-btn').forEach(function(b){b.classList.remove('active');}); event.target.classList.add('active');
+  Object.values(FPN).forEach(function(id){document.getElementById(id).style.display='none';});
+  document.getElementById(FPN[tab]).style.display='block';
+  if(currentSymbol) loadFinance(currentFinPeriod,tab);
 }
 
-// ─── CÔNG TY ──────────────────────────────────────────────────────────────────
 function loadCompany() {
-  var els = { shareholders: 'shareholdersContent', officers: 'officersContent' };
-  Object.entries(els).forEach(function(kv) {
-    var ep = kv[0], elId = kv[1];
-    document.getElementById(elId).innerHTML = spinner();
-    apiFetch('/api/stock/' + currentSymbol + '/' + ep)
-      .then(function(data) {
-        document.getElementById(elId).innerHTML = data && data.length ? makeTable(data, Object.keys(data[0])) : '<div class="no-data">Khong co du lieu</div>';
-      })
-      .catch(function(e) { document.getElementById(elId).innerHTML = '<div class="no-data">Loi: ' + e.message + '</div>'; });
+  [{ep:'shareholders',el:'shareholdersContent'},{ep:'officers',el:'officersContent'}].forEach(function(x){
+    document.getElementById(x.el).innerHTML=spinner();
+    callAPI('/api/stock/'+currentSymbol+'/'+x.ep)
+      .then(function(d){document.getElementById(x.el).innerHTML=d&&d.length?mkTable(d,Object.keys(d[0])):nodata();})
+      .catch(function(e){document.getElementById(x.el).innerHTML=nodata(e.message);});
   });
 }
 
-// ─── TIN TỨC ──────────────────────────────────────────────────────────────────
 function loadNews() {
-  var el = document.getElementById('newsContent');
-  el.innerHTML = spinner();
-  apiFetch('/api/stock/' + currentSymbol + '/news')
-    .then(function(data) {
-      if (!data || !data.length) { el.innerHTML = '<div class="no-data">Khong co du lieu</div>'; return; }
-      var html = '<div class="news-list">';
-      data.slice(0, 20).forEach(function(n) {
-        var title = n.title || n.headline || '—';
-        var linked = n.url ? '<a href="' + n.url + '" target="_blank" rel="noopener">' + title + '</a>' : title;
-        var meta = (n.published_date || n.date || '') + (n.source ? ' · ' + n.source : '');
-        html += '<div class="news-item"><div class="news-title">' + linked + '</div><div class="news-meta">' + meta + '</div></div>';
+  var e1=document.getElementById('newsContent'); e1.innerHTML=spinner();
+  callAPI('/api/stock/'+currentSymbol+'/news')
+    .then(function(data){
+      if(!data||!data.length){e1.innerHTML=nodata();return;}
+      var h='<div class="news-list">';
+      data.slice(0,20).forEach(function(n){
+        var t=n.title||n.headline||'—';
+        var linked=n.url?'<a href="'+n.url+'" target="_blank" rel="noopener">'+t+'</a>':t;
+        var m=(n.published_date||n.date||'')+(n.source?' - '+n.source:'');
+        h+='<div class="news-item"><div class="news-title">'+linked+'</div><div class="news-meta">'+m+'</div></div>';
       });
-      html += '</div>';
-      el.innerHTML = html;
-    })
-    .catch(function(e) { el.innerHTML = '<div class="no-data">Loi: ' + e.message + '</div>'; });
-
-  var el2 = document.getElementById('eventsContent');
-  el2.innerHTML = spinner();
-  apiFetch('/api/stock/' + currentSymbol + '/events')
-    .then(function(data) {
-      el2.innerHTML = data && data.length ? makeTable(data, Object.keys(data[0])) : '<div class="no-data">Khong co du lieu</div>';
-    })
-    .catch(function(e) { el2.innerHTML = '<div class="no-data">Loi: ' + e.message + '</div>'; });
+      e1.innerHTML=h+'</div>';
+    }).catch(function(e){e1.innerHTML=nodata(e.message);});
+  var e2=document.getElementById('eventsContent'); e2.innerHTML=spinner();
+  callAPI('/api/stock/'+currentSymbol+'/events')
+    .then(function(d){e2.innerHTML=d&&d.length?mkTable(d,Object.keys(d[0])):nodata();})
+    .catch(function(e){e2.innerHTML=nodata(e.message);});
 }
 
-// ─── BẢNG GIÁ ─────────────────────────────────────────────────────────────────
 function fetchBoard() {
-  var symbols = document.getElementById('boardInput').value.trim();
-  if (!symbols) return;
-  document.getElementById('boardContent').innerHTML = spinner();
-  apiFetch('/api/board?symbols=' + encodeURIComponent(symbols))
-    .then(function(data) {
-      document.getElementById('boardContent').innerHTML = data && data.length ? makeTable(data, Object.keys(data[0])) : '<div class="no-data">Khong co du lieu</div>';
-    })
-    .catch(function(e) { document.getElementById('boardContent').innerHTML = '<div class="no-data">Loi: ' + e.message + '</div>'; });
+  var s=document.getElementById('boardInput').value.trim(); if(!s) return;
+  document.getElementById('boardContent').innerHTML=spinner();
+  callAPI('/api/board?symbols='+encodeURIComponent(s))
+    .then(function(d){document.getElementById('boardContent').innerHTML=d&&d.length?mkTable(d,Object.keys(d[0])):nodata();})
+    .catch(function(e){document.getElementById('boardContent').innerHTML=nodata(e.message);});
 }
 
-// ─── THỊ TRƯỜNG QUỐC TẾ ───────────────────────────────────────────────────────
-function fetchFx() { fetchMarket('fx', document.getElementById('fxInput').value.trim().toUpperCase(), 'fxResult'); }
-function fetchCrypto() { fetchMarket('crypto', document.getElementById('cryptoInput').value.trim().toUpperCase(), 'cryptoResult'); }
-function fetchWorldIndex() { fetchMarket('world-index', document.getElementById('indexInput').value.trim().toUpperCase(), 'indexResult'); }
+function fetchFx(){mkMarket('fx',document.getElementById('fxInput').value.trim().toUpperCase(),'fxResult');}
+function fetchCrypto(){mkMarket('crypto',document.getElementById('cryptoInput').value.trim().toUpperCase(),'cryptoResult');}
+function fetchWorldIndex(){mkMarket('world-index',document.getElementById('indexInput').value.trim().toUpperCase(),'indexResult');}
 
-function fetchMarket(type, sym, resultId) {
-  document.getElementById(resultId).innerHTML = '<div class="spinner" style="width:18px;height:18px;border-width:2px;"></div>';
-  var end = new Date().toISOString().split('T')[0];
-  var s = new Date(Date.now() - 30 * 86400000).toISOString().split('T')[0];
-  apiFetch('/api/' + type + '/' + sym + '/history?start=' + s + '&end=' + end)
-    .then(function(data) {
-      if (!data || !data.length) { document.getElementById(resultId).textContent = 'Khong co du lieu'; return; }
-      var last = data[data.length - 1];
-      var prev = data.length > 1 ? (data[data.length - 2].close || 0) : 0;
-      var close = last.close || last.price || 0;
-      var chg = prev ? ((close - prev) / prev * 100) : 0;
-      var color = chg > 0 ? '#2ECC71' : chg < 0 ? '#E74C3C' : 'rgba(255,255,255,.5)';
-      var sign = chg >= 0 ? '+' : '';
-      var date = last.time || last.date || '';
-      document.getElementById(resultId).innerHTML =
-        '<div style="color:var(--white)">' +
-        '<span style="font-size:18px;font-weight:700;">' + fmtNum(close) + '</span>' +
-        '<span style="color:' + color + ';font-size:13px;margin-left:8px;">' + sign + chg.toFixed(2) + '%</span><br>' +
-        '<span style="font-size:11px;color:rgba(255,255,255,.35);">' + sym + ' · ' + date + '</span>' +
-        '</div>';
-    })
-    .catch(function(e) { document.getElementById(resultId).textContent = 'Loi: ' + e.message; });
+function mkMarket(type,sym,elId) {
+  document.getElementById(elId).innerHTML='<div class="spinner" style="width:18px;height:18px;border-width:2px;margin:auto;"></div>';
+  var ed=new Date().toISOString().split('T')[0];
+  var st=new Date(Date.now()-30*86400000).toISOString().split('T')[0];
+  callAPI('/api/'+type+'/'+sym+'/history?start='+st+'&end='+ed)
+    .then(function(data){
+      if(!data||!data.length){document.getElementById(elId).textContent='Khong co du lieu';return;}
+      var last=data[data.length-1]; var prev=data.length>1?(data[data.length-2].close||0):0;
+      var close=last.close||last.price||0; var chg=prev?((close-prev)/prev*100):0;
+      var color=chg>0?'#2ECC71':chg<0?'#E74C3C':'rgba(255,255,255,.5)';
+      document.getElementById(elId).innerHTML='<div style="color:var(--white)"><span style="font-size:18px;font-weight:700;">'+fmtN(close)+'</span><span style="color:'+color+';font-size:13px;margin-left:8px;">'+(chg>=0?'+':'')+chg.toFixed(2)+'%</span><br><span style="font-size:11px;color:rgba(255,255,255,.35);">'+sym+' - '+(last.time||last.date||'')+'</span></div>';
+    }).catch(function(e){document.getElementById(elId).textContent='Loi: '+e.message;});
 }
 
-// ─── TABLE BUILDER ────────────────────────────────────────────────────────────
-var COL_LABELS = {
-  symbol:'Ma', open:'Mo cua', high:'Cao nhat', low:'Thap nhat', close:'Dong cua',
-  volume:'KL', time:'Thoi gian', date:'Ngay', price:'Gia',
-  company_name:'Ten cong ty', exchange:'San', industry_name:'Nganh',
-  pe:'P/E', pb:'P/B', roe:'ROE', roa:'ROA', eps:'EPS',
-  market_cap:'Von hoa', outstanding_share:'CP luu hanh',
-  owner_percent:'Ty le so huu', quantity:'So luong',
-  full_name:'Ho ten', position:'Chuc vu',
-  title:'Tieu de', published_date:'Ngay dang', source:'Nguon',
-  event_name:'Su kien', event_date:'Ngay', exercise_date:'Ngay TH',
-  match_price:'Gia khop', match_vol:'KL khop', ref:'Tham chieu',
-  ceil:'Tran', floor:'San', foreign_buy:'NN mua', foreign_sell:'NN ban',
-  net_change:'Thay doi', percent_change:'% Thay doi',
-};
+var CL={symbol:'Ma',open:'Mo cua',high:'Cao nhat',low:'Thap nhat',close:'Dong cua',
+  volume:'KL',time:'Thoi gian',date:'Ngay',price:'Gia',company_name:'Ten cong ty',
+  exchange:'San',industry_name:'Nganh',pe:'P/E',pb:'P/B',roe:'ROE',roa:'ROA',eps:'EPS',
+  market_cap:'Von hoa',outstanding_share:'CP luu hanh',owner_percent:'Ty le SH',
+  full_name:'Ho ten',position:'Chuc vu',title:'Tieu de',published_date:'Ngay dang',
+  source:'Nguon',event_name:'Su kien',match_price:'Gia khop',match_vol:'KL khop',
+  ref:'Tham chieu',ceil:'Tran',floor:'San',foreign_buy:'NN mua',foreign_sell:'NN ban',
+  net_change:'Thay doi',percent_change:'% Thay doi'};
+var VF=['volume','match_vol','quantity','outstanding_share','issue_share','market_cap'];
+var PF=['open','high','low','close','price','match_price','ref','ceil','floor','net_change'];
+var PCF=['percent_change','roe','roa','owner_percent','foreign_percent'];
+var NF=['pe','pb','ps','eps','net_asset','book_value','foreign_buy','foreign_sell'].concat(VF,PF,PCF);
 
-var NUM_FIELDS = ['open','high','low','close','price','match_price','ref','ceil','floor',
-  'pe','pb','ps','roe','roa','eps','market_cap','net_asset','book_value',
-  'volume','match_vol','quantity','outstanding_share','issue_share',
-  'foreign_buy','foreign_sell','percent_change','net_change',
-  'owner_percent','foreign_percent','revenue','profit','equity',
-  'total_asset','total_debt','gross_profit','operating_profit','net_profit'];
-
-var PCT_FIELDS = ['percent_change','roe','roa','owner_percent','foreign_percent'];
-var VOL_FIELDS = ['volume','match_vol','quantity','outstanding_share','issue_share','market_cap'];
-var PRC_FIELDS = ['open','high','low','close','price','match_price','ref','ceil','floor','net_change'];
-
-function makeTable(data, cols, maxRows) {
-  if (!maxRows) maxRows = 50;
-  var rows = data.slice(0, maxRows);
-  var th = cols.map(function(c) {
-    return '<th>' + (COL_LABELS[c] || c.replace(/_/g, ' ')) + '</th>';
-  }).join('');
-
-  var tbody = rows.map(function(row) {
-    var tds = cols.map(function(c) {
-      var v = row[c];
-      var isNum = NUM_FIELDS.indexOf(c) >= 0 || typeof v === 'number';
-      if (v == null || v === '') {
-        v = '—';
-      } else if (typeof v === 'number') {
-        if (PCT_FIELDS.indexOf(c) >= 0) v = fmtNum(v) + '%';
-        else if (VOL_FIELDS.indexOf(c) >= 0) v = fmtVolume(v);
-        else if (PRC_FIELDS.indexOf(c) >= 0) v = fmtPrice(v);
-        else v = fmtNum(v);
+function mkTable(data,cols,maxR) {
+  if(!maxR) maxR=50;
+  var rows=data.slice(0,maxR);
+  var th=cols.map(function(c){return '<th>'+(CL[c]||c.replace(/_/g,' '))+'</th>';}).join('');
+  var tb=rows.map(function(row){
+    var tds=cols.map(function(c){
+      var v=row[c]; var isN=NF.indexOf(c)>=0||typeof v==='number';
+      if(v==null||v==='') v='—';
+      else if(typeof v==='number'){
+        if(PCF.indexOf(c)>=0) v=fmtN(v)+'%';
+        else if(VF.indexOf(c)>=0) v=fmtV(v);
+        else if(PF.indexOf(c)>=0) v=fmtP(v);
+        else v=fmtN(v);
       }
-      var cls = isNum ? 'num' : '';
-      if (['percent_change','net_change'].indexOf(c) >= 0 && typeof row[c] === 'number') {
-        cls += row[c] > 0 ? ' up' : row[c] < 0 ? ' dn' : '';
-      }
-      return '<td class="' + cls + '">' + v + '</td>';
+      var cls=isN?'num':'';
+      if(['percent_change','net_change'].indexOf(c)>=0&&typeof row[c]==='number') cls+=row[c]>0?' up':row[c]<0?' dn':'';
+      return '<td class="'+cls+'">'+v+'</td>';
     }).join('');
-    return '<tr>' + tds + '</tr>';
+    return '<tr>'+tds+'</tr>';
   }).join('');
-
-  return '<div class="data-table-wrap"><table class="data-table"><thead><tr>' + th + '</tr></thead><tbody>' + tbody + '</tbody></table></div>';
+  return '<div class="data-table-wrap"><table class="data-table"><thead><tr>'+th+'</tr></thead><tbody>'+tb+'</tbody></table></div>';
 }
 
-// ─── FORMAT ───────────────────────────────────────────────────────────────────
-function fmtNum(n) {
-  if (n == null || isNaN(n)) return '—';
-  return Number(n).toLocaleString('vi-VN', { maximumFractionDigits: 2 });
-}
-function fmtPrice(n) {
-  if (n == null || isNaN(n)) return '—';
-  return Number(n).toLocaleString('vi-VN', { maximumFractionDigits: 0 });
-}
-function fmtVolume(n) {
-  if (n == null || isNaN(n)) return '—';
-  if (n >= 1e9) return (n / 1e9).toFixed(1) + ' ty';
-  if (n >= 1e6) return (n / 1e6).toFixed(1) + ' tr';
-  if (n >= 1e3) return (n / 1e3).toFixed(0) + 'k';
-  return Number(n).toLocaleString('vi-VN');
-}
-function fmtBillion(n) {
-  if (n == null || isNaN(n)) return '—';
-  if (n >= 1e12) return (n / 1e12).toFixed(1) + ' nghin ty';
-  if (n >= 1e9) return (n / 1e9).toFixed(0) + ' ty';
-  return fmtNum(n);
-}
-function spinner() {
-  return '<div class="loading-box"><div class="spinner"></div><div class="loading-text">Dang tai...</div></div>';
-}
+function fmtN(n){if(n==null||isNaN(n))return '—';return Number(n).toLocaleString('vi-VN',{maximumFractionDigits:2});}
+function fmtP(n){if(n==null||isNaN(n))return '—';return Number(n).toLocaleString('vi-VN',{maximumFractionDigits:0});}
+function fmtV(n){if(n==null||isNaN(n))return '—';if(n>=1e9)return(n/1e9).toFixed(1)+' ty';if(n>=1e6)return(n/1e6).toFixed(1)+' tr';if(n>=1e3)return(n/1e3).toFixed(0)+'k';return Number(n).toLocaleString('vi-VN');}
+function fmtB(n){if(n==null||isNaN(n))return '—';if(n>=1e12)return(n/1e12).toFixed(1)+' nghin ty';if(n>=1e9)return(n/1e9).toFixed(0)+' ty';return fmtN(n);}
+function spinner(){return '<div class="loading-box"><div class="spinner"></div><div class="loading-text">Dang tai...</div></div>';}
+function nodata(msg){return '<div class="no-data">'+(msg?'Loi: '+msg:'Khong co du lieu')+'</div>';}
 </script>
 </body>
 </html>
