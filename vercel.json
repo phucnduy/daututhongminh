@@ -1,7 +1,8 @@
 {
   "cleanUrls": true,
   "rewrites": [
-    { "source": "/api/ssi/:path*", "destination": "/api/ssi" }
+    { "source": "/api/ssi/:path*", "destination": "/api/ssi" },
+    { "source": "/api/vnstock", "destination": "/api/vnstock" }
   ],
   "redirects": [],
   "headers": [

@@ -440,7 +440,7 @@ img{max-width:100%;display:block;}
 
 <script>
 // ─── CONFIG ───────────────────────────────────────────────────────────────────
-var API_BASE = 'https://vnstock-agent-production.up.railway.app';
+// API chay tren cung Vercel domain, khong can base URL
 
 // ─── STATE ────────────────────────────────────────────────────────────────────
 var currentSymbol = '';
@@ -516,8 +516,47 @@ function switchTab(tab, force) {
 }
 
 // ─── API ──────────────────────────────────────────────────────────────────────
+// Chuyen path /api/stock/VNM/overview -> /api/vnstock?action=overview&symbol=VNM
+function pathToQuery(path) {
+  // /api/stock/VNM/overview
+  // /api/stock/VNM/history?start=...
+  // /api/board?symbols=...
+  // /api/fx/EURUSD/history
+  // /api/crypto/BTC/history
+  // /api/world-index/DJI/history
+  var qIndex = path.indexOf('?');
+  var base = qIndex >= 0 ? path.slice(0, qIndex) : path;
+  var qs = qIndex >= 0 ? path.slice(qIndex + 1) : '';
+  var extra = qs ? ('&' + qs) : '';
+  var parts = base.split('/').filter(function(p) { return p !== ''; });
+  // parts[0] = 'api'
+  var type = parts[1]; // 'stock', 'board', 'fx', 'crypto', 'world-index', 'listing'
+
+  if (type === 'stock') {
+    var symbol = parts[2] || '';
+    var action = parts[3] || 'overview';
+    return '/api/vnstock?action=' + action + '&symbol=' + symbol + extra;
+  }
+  if (type === 'board') {
+    return '/api/vnstock?action=board' + extra;
+  }
+  if (type === 'fx' || type === 'crypto' || type === 'world-index') {
+    var symbol = parts[2] || '';
+    return '/api/vnstock?action=' + type + '&symbol=' + symbol + extra;
+  }
+  if (type === 'listing') {
+    var sub = parts[2] || 'symbols';
+    if (sub === 'symbols') return '/api/vnstock?action=all-symbols' + extra;
+    if (sub === 'group') return '/api/vnstock?action=group-symbols&group=' + (parts[3]||'VN30') + extra;
+    if (sub === 'industries') return '/api/vnstock?action=industries' + extra;
+  }
+  if (type === 'funds') return '/api/vnstock?action=funds';
+  return '/api/vnstock?action=health';
+}
+
 function apiFetch(path) {
-  return fetch(API_BASE + path)
+  var url = pathToQuery(path);
+  return fetch(url)
     .then(function(res) {
       if (!res.ok) throw new Error('HTTP ' + res.status);
       return res.json();
