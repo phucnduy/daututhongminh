@@ -1,18 +1,48 @@
 {
   "cleanUrls": true,
+  "functions": {
+    "api/vnstock.py": {
+      "runtime": "python3.9",
+      "maxDuration": 30
+    }
+  },
   "rewrites": [
-    { "source": "/api/ssi/:path*", "destination": "/api/ssi" },
-    { "source": "/api/vnstock", "destination": "/api/vnstock" }
+    { "source": "/api/ssi/:path*", "destination": "/api/ssi" }
   ],
-  "redirects": [],
   "headers": [
     {
       "source": "/api/(.*)",
       "headers": [
         { "key": "Access-Control-Allow-Origin", "value": "*" },
-        { "key": "Access-Control-Allow-Methods", "value": "GET, POST, OPTIONS" },
-        { "key": "Access-Control-Allow-Headers", "value": "Content-Type, Authorization, Accept" }
+        { "key": "Access-Control-Allow-Methods", "value": "GET, OPTIONS" },
+        { "key": "Access-Control-Allow-Headers", "value": "Content-Type" }
       ]
     }
   ]
 }
+```
+
+**Commit changes.**
+
+---
+
+## Fix 2 — Chuyển `requirements.txt` lên thư mục gốc
+
+Vercel tìm `requirements.txt` ở **root repo**, không phải trong `api/`.
+
+1. Vào repo → **Add file → Create new file**
+2. Tên file: **`requirements.txt`** *(ở root, không phải trong api/)*
+3. Nội dung:
+```
+   vnstock>=3.5.0
+   pandas>=1.5.0
+```
+4. **Commit changes**
+
+---
+
+Vercel sẽ tự redeploy sau 2 commit đó. Chờ khoảng **3–5 phút** (lần đầu cài pandas + vnstock lâu hơn bình thường).
+
+Test lại:
+```
+https://daututhongminh-delta.vercel.app/api/vnstock?action=health
