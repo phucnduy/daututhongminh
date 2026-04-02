@@ -273,7 +273,8 @@ img{max-width:100%;display:block;}
 <!-- TABS BAR -->
 <div class="tabs-bar" id="tabsBar">
   <div class="tabs-inner">
-    <button class="tab-btn active" onclick="switchTab('price')">📈 Giá & Biểu đồ</button>
+    <button class="tab-btn active" onclick="switchTab('analysis')">🤖 Phân tích AI</button>
+    <button class="tab-btn" onclick="switchTab('price')">📈 Giá & Biểu đồ</button>
     <button class="tab-btn" onclick="switchTab('overview')">🏢 Tổng quan</button>
     <button class="tab-btn" onclick="switchTab('finance')">💰 Tài chính</button>
     <button class="tab-btn" onclick="switchTab('company')">👥 Cổ đông & Ban lãnh đạo</button>
@@ -291,8 +292,38 @@ img{max-width:100%;display:block;}
     <div class="empty-sub">Tìm kiếm bất kỳ mã niêm yết trên HOSE, HNX, UPCOM</div>
   </div>
 
+  <!-- ── TAB: PHÂN TÍCH AI ── -->
+  <div class="tab-panel active" id="panel-analysis">
+
+    <!-- API Key setup -->
+    <div id="apiKeySetup" style="background:var(--white);border:1px solid var(--g2);border-radius:10px;padding:20px 24px;margin-bottom:24px;display:none;">
+      <div style="font-size:13px;font-weight:600;color:var(--navy);margin-bottom:10px;">🔑 Cài đặt Gemini API Key</div>
+      <div style="font-size:12px;color:var(--g3);margin-bottom:12px;">Lấy miễn phí tại <a href="https://aistudio.google.com" target="_blank" style="color:var(--navy3);">aistudio.google.com</a> · Key lưu trong trình duyệt, không gửi đi đâu</div>
+      <div style="display:flex;gap:8px;">
+        <input type="password" id="geminiKeyInput" placeholder="AIzaSy..." style="flex:1;padding:8px 14px;border:1.5px solid var(--g2);border-radius:7px;font-size:13px;outline:none;"/>
+        <button onclick="saveGeminiKey()" style="background:var(--navy3);color:var(--white);border:none;border-radius:7px;padding:8px 18px;font-size:13px;font-weight:600;cursor:pointer;">Lưu</button>
+        <button onclick="clearGeminiKey()" style="background:var(--g1);color:var(--g3);border:1px solid var(--g2);border-radius:7px;padding:8px 14px;font-size:12px;cursor:pointer;">Xóa key</button>
+      </div>
+    </div>
+
+    <!-- Analysis trigger -->
+    <div id="analysisStatus" style="margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <div id="keyStatus" style="font-size:12px;"></div>
+        <button onclick="document.getElementById('apiKeySetup').style.display=document.getElementById('apiKeySetup').style.display==='none'?'block':'none'" style="font-size:11px;color:var(--navy3);background:none;border:none;cursor:pointer;text-decoration:underline;">⚙ Đổi API Key</button>
+      </div>
+      <button id="runAnalysisBtn" onclick="runGeminiAnalysis()" style="background:linear-gradient(135deg,#1B4F8A,#0D2B52);color:var(--white);border:none;border-radius:8px;padding:10px 22px;font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:8px;">
+        <span>🤖</span><span>Chạy phân tích AI</span>
+      </button>
+    </div>
+
+    <!-- Analysis result -->
+    <div id="analysisResult"></div>
+
+  </div><!-- /panel-analysis -->
+
   <!-- ── TAB: GIÁ & BIỂU ĐỒ ── -->
-  <div class="tab-panel active" id="panel-price">
+  <div class="tab-panel" id="panel-price">
     <div class="section-block">
       <div class="section-title">Biểu đồ giá lịch sử</div>
       <div class="chart-box">
@@ -612,6 +643,7 @@ function doSearch() {
   document.getElementById('hName').textContent = '...';
   document.getElementById('hPrice').textContent = '...';
   document.getElementById('boardInput').value = currentSymbol;
+  activeTab = 'analysis';
   switchTab(activeTab, true);
   loadOverviewCard();
   loadIntradayForHeader();
@@ -620,13 +652,14 @@ function doSearch() {
 function switchTab(tab, force) {
   if (!currentSymbol && !force) return;
   activeTab = tab;
-  var names = ['price','overview','finance','company','news'];
+  var names = ['analysis','price','overview','finance','company','news'];
   var btns = document.querySelectorAll('.tab-btn');
   for (var i = 0; i < btns.length; i++) btns[i].classList.toggle('active', names[i] === tab);
   var panels = document.querySelectorAll('.tab-panel');
   for (var j = 0; j < panels.length; j++) panels[j].classList.remove('active');
   document.getElementById('panel-' + tab).classList.add('active');
   if (!currentSymbol) return;
+  if (tab === 'analysis') { initAnalysisTab(); }
   if (tab === 'price')    { loadChart(); loadIntradayDepthPanel(); }
   if (tab === 'overview') { loadOverview(); }
   if (tab === 'finance')  { loadFinance(currentFinPeriod, currentFinTab); }
@@ -1051,6 +1084,287 @@ function fmtV(n){if(n==null||isNaN(n))return '—';if(n>=1e9)return(n/1e9).toFix
 function fmtB(n){if(n==null||isNaN(n))return '—';if(n>=1e12)return(n/1e12).toFixed(1)+' nghìn tỷ';if(n>=1e9)return(n/1e9).toFixed(0)+' tỷ';return fmtN(n);}
 function spinner(){return '<div class="loading-box"><div class="spinner"></div><div class="loading-text">Đang tải...</div></div>';}
 function nodata(msg){return '<div class="no-data">'+(msg?'Lỗi: '+msg:'Không có dữ liệu')+'</div>';}
+
+// ─── GEMINI PHÂN TÍCH ────────────────────────────────────────────────────────
+var GEMINI_KEY_STORAGE = 'dtm_gemini_key';
+var analysisCache = {};
+
+function getGeminiKey() {
+  try { return localStorage.getItem(GEMINI_KEY_STORAGE) || ''; } catch(e) { return ''; }
+}
+function saveGeminiKey() {
+  var k = document.getElementById('geminiKeyInput').value.trim();
+  if (!k) { alert('Vui lòng nhập API key'); return; }
+  try { localStorage.setItem(GEMINI_KEY_STORAGE, k); } catch(e) {}
+  document.getElementById('apiKeySetup').style.display = 'none';
+  updateKeyStatus();
+  alert('Đã lưu API key!');
+}
+function clearGeminiKey() {
+  try { localStorage.removeItem(GEMINI_KEY_STORAGE); } catch(e) {}
+  updateKeyStatus();
+}
+function updateKeyStatus() {
+  var k = getGeminiKey();
+  var el = document.getElementById('keyStatus');
+  if (!el) return;
+  el.innerHTML = k
+    ? '<span style="color:#1A7A4A;font-size:12px;">✓ API Key đã cài đặt ('+k.slice(0,8)+'...)</span>'
+    : '<span style="color:#c0392b;font-size:12px;">⚠ Chưa có API Key</span>';
+}
+
+function initAnalysisTab() {
+  updateKeyStatus();
+  if (!getGeminiKey()) {
+    document.getElementById('apiKeySetup').style.display = 'block';
+  }
+  // Neu da co cache thi hien thi luon
+  if (analysisCache[currentSymbol]) {
+    renderAnalysis(analysisCache[currentSymbol]);
+  }
+}
+
+async function runGeminiAnalysis() {
+  var key = getGeminiKey();
+  if (!key) {
+    document.getElementById('apiKeySetup').style.display = 'block';
+    return;
+  }
+  var btn = document.getElementById('runAnalysisBtn');
+  var resultEl = document.getElementById('analysisResult');
+  btn.disabled = true;
+  btn.innerHTML = '<span>⏳</span><span>Đang phân tích...</span>';
+  resultEl.innerHTML = spinner();
+
+  // Thu thap data song song
+  var sym = currentSymbol;
+  try {
+    var results = await Promise.allSettled([
+      callAPI('/api/stock/'+sym+'/overview'),
+      callAPI('/api/stock/'+sym+'/history?start='+dateBefore(180)+'&end='+today()+'&interval=1D'),
+      callAPI('/api/stock/'+sym+'/ratio?period=quarter'),
+      callAPI('/api/stock/'+sym+'/income?period=quarter'),
+      callAPI('/api/stock/'+sym+'/balance-sheet?period=quarter'),
+      callAPI('/api/stock/'+sym+'/cashflow?period=quarter'),
+      callAPI('/api/stock/'+sym+'/shareholders'),
+    ]);
+
+    var ov  = results[0].status==='fulfilled' ? (Array.isArray(results[0].value)?results[0].value[0]:results[0].value) : {};
+    var his = results[1].status==='fulfilled' ? results[1].value : [];
+    var rat = results[2].status==='fulfilled' ? results[2].value : [];
+    var inc = results[3].status==='fulfilled' ? results[3].value : [];
+    var bal = results[4].status==='fulfilled' ? results[4].value : [];
+    var cf  = results[5].status==='fulfilled' ? results[5].value : [];
+    var sh  = results[6].status==='fulfilled' ? results[6].value : [];
+
+    // Tinh toan ky thuat
+    var prices  = his.map(function(d){return d.close||0;}).filter(function(v){return v>0;});
+    var volumes = his.map(function(d){return d.volume||0;});
+    var latestP = prices.length ? prices[prices.length-1] : 0;
+    var ma20    = avgArr(prices.slice(-20));
+    var ma50    = avgArr(prices.slice(-50));
+    var ma200   = avgArr(prices.slice(-200));
+    var maxH6m  = prices.length ? Math.max.apply(null,prices) : 0;
+    var minL6m  = prices.length ? Math.min.apply(null,prices) : 0;
+    var avgVol20= avgArr(volumes.slice(-20));
+    var rsi14   = calcRSI(prices, 14);
+    var priceChg1m = prices.length>20 ? ((latestP-prices[prices.length-21])/prices[prices.length-21]*100) : 0;
+    var priceChg6m = prices.length>2  ? ((latestP-prices[0])/prices[0]*100) : 0;
+
+    // Lay ratio gan nhat
+    var r0 = rat && rat.length ? rat[0] : {};
+    var r1 = rat && rat.length>1 ? rat[1] : {};
+    var i0 = inc && inc.length ? inc[0] : {};
+    var i1 = inc && inc.length>1 ? inc[1] : {};
+    var b0 = bal && bal.length ? bal[0] : {};
+    var c0 = cf  && cf.length  ? cf[0]  : {};
+
+    // Top co dong
+    var topSH = sh.slice(0,5).map(function(s){return (s.share_holder||'')+'('+fmtN(s.share_own_percent*100,1)+'%)';}).join(', ');
+
+    // Xay dung context cho Gemini
+    var ctx = buildContext(sym, ov, latestP, priceChg1m, priceChg6m, ma20, ma50, ma200, maxH6m, minL6m, avgVol20, rsi14, r0, r1, i0, i1, b0, c0, topSH);
+
+    // Goi Gemini API
+    var SYS = 'Ban la chuyen gia phan tich chung khoan Viet Nam 20 nam kinh nghiem. Phan tich toan dien, thuc chat, bang tieng Viet.';
+    var REQ = [
+      'Viet bao cao phan tich toan dien gom cac muc:',
+      '1. TOM TAT DIEU HANH (2-3 cau)',
+      '2. PHAN TICH CO BAN: doanh thu, loi nhuan, tang truong, bien LN, no, dong tien',
+      '3. PHAN TICH DINH GIA: P/E, P/B nhan xet re/hop ly/dat',
+      '4. PHAN TICH KY THUAT: xu huong, MA20/50/200, RSI, ho tro/khang cu, volume',
+      '5. DIEM MANH (3-5 y)',
+      '6. RUI RO (3-5 y)',
+      '7. KHUYEN NGHI: MUA/GIU/CHO + gia muc tieu ngan han, dai han, stop-loss',
+      'Chi dung data duoc cung cap. Dung markdown de dinh dang.'
+    ].join('\n');
+    var prompt = SYS + '\n\nDATA:\n' + ctx + '\n\nYEU CAU:\n' + REQ;
+
+    var gemResp = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key='+key, {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({
+        contents: [{parts:[{text: prompt}]}],
+        generationConfig: {maxOutputTokens: 2000, temperature: 0.3}
+      })
+    });
+
+    if (!gemResp.ok) {
+      var errText = await gemResp.text();
+      throw new Error('Gemini API lỗi: ' + gemResp.status + ' - ' + errText.slice(0,200));
+    }
+
+    var gemJson = await gemResp.json();
+    var aiText = gemJson.candidates && gemJson.candidates[0] && gemJson.candidates[0].content && gemJson.candidates[0].content.parts
+      ? gemJson.candidates[0].content.parts[0].text : 'Không có kết quả';
+
+    var result = {sym:sym, ov:ov, latestP:latestP, priceChg1m:priceChg1m, priceChg6m:priceChg6m,
+      ma20:ma20, ma50:ma50, ma200:ma200, maxH6m:maxH6m, minL6m:minL6m,
+      rsi14:rsi14, avgVol20:avgVol20, r0:r0, i0:i0, aiText:aiText, ts:new Date()};
+    analysisCache[sym] = result;
+    renderAnalysis(result);
+
+  } catch(err) {
+    resultEl.innerHTML = '<div style="background:#fcebeb;border:1px solid #f09595;border-radius:8px;padding:16px;color:#791F1F;font-size:13px;">⚠ Lỗi: '+err.message+'</div>';
+  }
+  btn.disabled = false;
+  btn.innerHTML = '<span>🔄</span><span>Phân tích lại</span>';
+}
+
+function buildContext(sym, ov, price, chg1m, chg6m, ma20, ma50, ma200, hi, lo, vol, rsi, r0, r1, i0, i1, b0, c0, topSH) {
+  function g(obj, key) { var v=obj[key]; return (v==null||v===''||isNaN(parseFloat(v))) ? 'N/A' : fmtN(parseFloat(v),2); }
+  var lines = [];
+  lines.push('=== THONG TIN DOANH NGHIEP ===');
+  lines.push('Ma: '+sym+' | Ten: '+(ov.company_name||sym)+' | San: '+(ov.exchange||'')+' | Nganh: '+(ov.icb_name3||ov.industry_name||''));
+  lines.push('Von hoa: '+fmtB(ov.market_cap)+' | Room NN: '+g(ov,'foreign_percent')+'%');
+  lines.push('Co dong lon: '+topSH);
+  lines.push('=== GIA & KY THUAT ===');
+  lines.push('Gia hien tai: '+fmtP(price)+' d | Thay doi 1T: '+chg1m.toFixed(1)+'% | 6T: '+chg6m.toFixed(1)+'%');
+  lines.push('MA20: '+fmtP(ma20)+' | MA50: '+fmtP(ma50)+' | MA200: '+fmtP(ma200));
+  lines.push('Gia vs MA20: '+(price>ma20?'Tren':'Duoi')+' | vs MA50: '+(price>ma50?'Tren':'Duoi')+' | vs MA200: '+(price>ma200?'Tren':'Duoi'));
+  lines.push('Dinh 6T: '+fmtP(hi)+' | Day 6T: '+fmtP(lo)+' | Khoang cach dinh: '+((hi>0?((price-hi)/hi*100):0).toFixed(1))+'%');
+  lines.push('RSI(14): '+fmtN(rsi,1)+' ('+(rsi>70?'Qua mua':rsi<30?'Qua ban':'Trung tinh')+')');
+  lines.push('Volume TB 20 phien: '+fmtV(vol));
+  lines.push('=== DINH GIA ===');
+  lines.push('P/E: '+g(ov,'pe')+' | P/B: '+g(ov,'pb'));
+  lines.push('EPS: '+g(r0,'Chỉ tiêu định giá_EPS (VND)')+' d | BVPS: '+g(r0,'Chỉ tiêu định giá_BVPS (VND)')+' d');
+  lines.push('EV/EBITDA: '+g(r0,'Chỉ tiêu định giá_EV/EBITDA'));
+  lines.push('=== KHA NANG SINH LOI ===');
+  lines.push('ROE: '+g(r0,'Chỉ tiêu khả năng sinh lợi_ROE (%)')+'% | ROA: '+g(r0,'Chỉ tiêu khả năng sinh lợi_ROA (%)')+'%');
+  lines.push('Bien LN gop: '+g(r0,'Chỉ tiêu khả năng sinh lợi_Gross Profit Margin (%)')+'% | LN rong: '+g(r0,'Chỉ tiêu khả năng sinh lợi_Net Profit Margin (%)')+'%');
+  lines.push('Ty suat co tuc: '+g(r0,'Chỉ tiêu khả năng sinh lợi_Dividend yield (%)')+'%');
+  lines.push('=== KET QUA KINH DOANH (quy gan nhat) ===');
+  lines.push('Doanh thu: '+g(i0,'Revenue (Bn. VND)')+' ty | Tang truong YoY: '+g(i0,'Revenue YoY (%)')+'%');
+  lines.push('LN gop: '+g(i0,'Gross Profit')+' ty | LN HD KD: '+g(i0,'Operating Profit/Loss')+' ty');
+  lines.push('LN truoc thue: '+g(i0,'Profit before tax')+' ty | LNST: '+g(i0,'Net Profit For the Year')+' ty');
+  lines.push('LNST CDTS: '+g(i0,'Attributable to parent company')+' ty | Tang truong: '+g(i0,'Attribute to parent company YoY (%)')+'%');
+  lines.push('=== CAN DOI KE TOAN ===');
+  lines.push('Tong TS: '+g(b0,'TOTAL ASSETS (Bn. VND)')+' ty | No phai tra: '+g(b0,'LIABILITIES (Bn. VND)')+' ty');
+  lines.push('VCSH: '+g(b0,"OWNER'S EQUITY(Bn.VND)")+' ty | D/E: '+g(r0,'Chỉ tiêu cơ cấu nguồn vốn_Debt/Equity'));
+  lines.push('Tien mat: '+g(b0,'Cash and cash equivalents (Bn. VND)')+' ty');
+  lines.push('Thanh toan hien hanh: '+g(r0,'Chỉ tiêu thanh khoản_Current Ratio')+' | Nhanh: '+g(r0,'Chỉ tiêu thanh khoản_Quick Ratio'));
+  lines.push('=== DONG TIEN ===');
+  lines.push('CF HDKD: '+g(c0,'Net cash inflows/outflows from operating activities')+' ty');
+  lines.push('CF HDDT: '+g(c0,'Net Cash Flows from Investing Activities')+' ty');
+  lines.push('CF HDTC: '+g(c0,'Cash flows from financial activities')+' ty');
+  return lines.join(' | ');
+}
+
+function renderAnalysis(r) {
+  var el = document.getElementById('analysisResult');
+
+  // KPI bar
+  var kpis = [
+    {l:'Giá', v: fmtP(r.latestP)+'đ', c:''},
+    {l:'1 tháng', v: (r.priceChg1m>0?'+':'')+r.priceChg1m.toFixed(1)+'%', c: r.priceChg1m>0?'up':'dn'},
+    {l:'6 tháng', v: (r.priceChg6m>0?'+':'')+r.priceChg6m.toFixed(1)+'%', c: r.priceChg6m>0?'up':'dn'},
+    {l:'RSI(14)', v: fmtN(r.rsi14,1), c: r.rsi14>70?'dn':r.rsi14<30?'up':''},
+    {l:'MA20', v: fmtP(r.ma20)+'đ', c: r.latestP>r.ma20?'up':'dn'},
+    {l:'MA50', v: fmtP(r.ma50)+'đ', c: r.latestP>r.ma50?'up':'dn'},
+    {l:'P/E', v: fmtN(r.ov.pe), c:''},
+    {l:'P/B', v: fmtN(r.ov.pb), c:''},
+  ];
+  var kpiHtml = '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:10px;margin-bottom:20px;">' +
+    kpis.map(function(k){
+      return '<div style="background:var(--g1);border-radius:8px;padding:12px 14px;">'+
+        '<div style="font-size:10px;color:var(--g3);font-weight:600;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;">'+k.l+'</div>'+
+        '<div style="font-size:16px;font-weight:700;color:'+(k.c==='up'?'#1A7A4A':k.c==='dn'?'#c0392b':'var(--navy)')+'">'+k.v+'</div>'+
+        '</div>';
+    }).join('') + '</div>';
+
+  // Xu huong ky thuat
+  var trend = r.latestP > r.ma20 && r.latestP > r.ma50 ? '📈 Tăng' : r.latestP < r.ma20 && r.latestP < r.ma50 ? '📉 Giảm' : '↔ Sideway';
+  var trendColor = trend.includes('Tăng') ? '#1A7A4A' : trend.includes('Giảm') ? '#c0392b' : '#8A94A6';
+
+  var techBar = '<div style="background:var(--white);border:1px solid var(--g2);border-radius:8px;padding:14px 18px;margin-bottom:20px;display:flex;align-items:center;gap:24px;flex-wrap:wrap;">' +
+    '<div><span style="font-size:11px;color:var(--g3);display:block;">XU HƯỚNG</span><span style="font-weight:700;color:'+trendColor+'">'+trend+'</span></div>' +
+    '<div><span style="font-size:11px;color:var(--g3);display:block;">HỖ TRỢ</span><span style="font-weight:600;color:var(--navy);">'+fmtP(r.minL6m)+' đ</span></div>' +
+    '<div><span style="font-size:11px;color:var(--g3);display:block;">KHÁNG CỰ</span><span style="font-weight:600;color:var(--navy);">'+fmtP(r.maxH6m)+' đ</span></div>' +
+    '<div><span style="font-size:11px;color:var(--g3);display:block;">RSI(14)</span><span style="font-weight:600;color:'+(r.rsi14>70?'#c0392b':r.rsi14<30?'#1A7A4A':'var(--navy)')+'">'+fmtN(r.rsi14,0)+(r.rsi14>70?' - Quá mua':r.rsi14<30?' - Quá bán':' - Trung tính')+'</span></div>' +
+    '<div style="margin-left:auto;font-size:11px;color:var(--g3);">Cập nhật: '+r.ts.toLocaleTimeString('vi-VN')+'</div>' +
+    '</div>';
+
+  // AI analysis - convert markdown-ish to HTML
+  var aiHtml = '<div style="background:var(--white);border:1px solid var(--g2);border-radius:10px;padding:24px;line-height:1.8;font-size:14px;">' +
+    convertAIText(r.aiText) + '</div>';
+
+  el.innerHTML = kpiHtml + techBar + aiHtml;
+}
+
+function convertAIText(text) {
+  // Xu ly markdown va HTML mix
+  text = text.replace(/```html/gi,'').replace(/```/g,'');
+  // Neu da la HTML thi dung luon
+  if (text.includes('<h') || text.includes('<div') || text.includes('<p')) {
+    // Clean style inline de phu hop voi theme
+    return '<div style="color:var(--text);">' + text + '</div>';
+  }
+  // Convert markdown
+  var lines = text.split('\n');
+  var html = '';
+  for (var i = 0; i < lines.length; i++) {
+    var line = lines[i].trim();
+    if (!line) { html += '<div style="height:.5rem;"></div>'; continue; }
+    if (line.startsWith('## ') || line.startsWith('**') && line.endsWith('**')) {
+      var t = line.replace(/^##\s*/,'').replace(/^\*\*/,'').replace(/\*\*$/,'');
+      html += '<div style="font-weight:700;font-size:15px;color:var(--navy);margin:1.2rem 0 .5rem;padding-bottom:6px;border-bottom:2px solid var(--gold);">'+t+'</div>';
+    } else if (line.startsWith('### ')) {
+      html += '<div style="font-weight:700;font-size:13px;color:var(--navy3);margin:.8rem 0 .3rem;text-transform:uppercase;letter-spacing:.05em;">'+line.slice(4)+'</div>';
+    } else if (line.startsWith('- ') || line.startsWith('* ')) {
+      var content = line.slice(2).replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>');
+      html += '<div style="padding:.2rem 0 .2rem 1rem;display:flex;gap:6px;"><span style="color:var(--gold);flex-shrink:0;">▪</span><span>'+content+'</span></div>';
+    } else if (line.match(/^\d+\./)) {
+      var content = line.replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>');
+      html += '<div style="padding:.2rem 0 .2rem .5rem;">'+content+'</div>';
+    } else {
+      var content = line.replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>').replace(/\*(.+?)\*/g,'<em>$1</em>');
+      html += '<div style="margin:.15rem 0;">'+content+'</div>';
+    }
+  }
+  return html;
+}
+
+// ─── UTILITY ──────────────────────────────────────────────────────────────────
+function avgArr(arr) {
+  if (!arr || !arr.length) return 0;
+  var sum = 0; for (var i=0;i<arr.length;i++) sum+=arr[i];
+  return sum/arr.length;
+}
+function calcRSI(prices, period) {
+  if (!prices || prices.length < period+1) return 50;
+  var gains=0, losses=0;
+  for (var i=prices.length-period; i<prices.length; i++) {
+    var diff = prices[i]-prices[i-1];
+    if (diff>0) gains+=diff; else losses+=Math.abs(diff);
+  }
+  var avgG=gains/period, avgL=losses/period;
+  if (avgL===0) return 100;
+  var rs=avgG/avgL;
+  return 100-(100/(1+rs));
+}
+function today() { return new Date().toISOString().split('T')[0]; }
+function dateBefore(days) { return new Date(Date.now()-days*86400000).toISOString().split('T')[0]; }
+
 </script>
 </body>
 </html>
