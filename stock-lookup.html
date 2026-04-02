@@ -498,20 +498,25 @@ function switchTab(tab, force) {
 }
 
 function callAPI(path) {
-  var url = RENDER + path;
-  return fetch(url)
+  return fetch(RENDER + path)
     .then(function(r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
     .then(function(j) { if (!j.success) throw new Error(j.error || 'Loi'); return j.data; });
 }
 
+// ─── HEADER CARD ─────────────────────────────────────────────────────────────
 function loadOverviewCard() {
   callAPI('/api/stock/' + currentSymbol + '/overview')
     .then(function(data) {
       var d = Array.isArray(data) ? data[0] : data; if (!d) return;
       document.getElementById('hName').textContent = d.company_name || d.short_name || currentSymbol;
-      document.getElementById('hExchange').textContent = (d.exchange||'') + (d.industry_name ? ' - '+d.industry_name : '');
+      document.getElementById('hExchange').textContent = (d.exchange||'') + (d.industry_name||d.icb_name3 ? ' - '+(d.industry_name||d.icb_name3) : '');
       document.getElementById('hUpdated').textContent = new Date().toLocaleString('vi-VN');
-      var metas = [{l:'Von hoa',v:fmtB(d.market_cap)},{l:'P/E',v:fmtN(d.pe)},{l:'P/B',v:fmtN(d.pb)},{l:'San',v:d.exchange}];
+      var metas = [
+        {l:'Von hoa', v: fmtB(d.market_cap)},
+        {l:'P/E',     v: fmtN(d.pe)},
+        {l:'P/B',     v: fmtN(d.pb)},
+        {l:'San',     v: d.exchange||null},
+      ];
       document.getElementById('hMetaRow').innerHTML = metas.filter(function(m){return m.v&&m.v!=='—';}).map(function(m){
         return '<div class="meta-item"><div class="meta-label">'+m.l+'</div><div class="meta-value">'+m.v+'</div></div>';
       }).join('');
@@ -535,12 +540,13 @@ function loadIntradayForHeader() {
     }).catch(function(){});
 }
 
+// ─── BIỂU ĐỒ ─────────────────────────────────────────────────────────────────
 function loadChart() {
   var ed = new Date(); var st = new Date(); st.setMonth(st.getMonth()-currentMonths);
-  var startStr = st.toISOString().split('T')[0]; var endStr = ed.toISOString().split('T')[0];
+  var s = st.toISOString().split('T')[0]; var e = ed.toISOString().split('T')[0];
   document.getElementById('priceChart').innerHTML = spinner();
   document.getElementById('volumeChart').innerHTML = '';
-  callAPI('/api/stock/'+currentSymbol+'/history?start='+startStr+'&end='+endStr+'&interval='+currentInterval)
+  callAPI('/api/stock/'+currentSymbol+'/history?start='+s+'&end='+e+'&interval='+currentInterval)
     .then(function(data) {
       if (!data||!data.length) { document.getElementById('priceChart').innerHTML = nodata(); return; }
       renderCharts(data);
@@ -558,8 +564,7 @@ function renderCharts(data) {
     xaxis:{type:'datetime',labels:{style:{colors:'#8A94A6',fontSize:'11px'}}},
     yaxis:{opposite:true,tooltip:{enabled:true},labels:{style:{colors:'#8A94A6',fontSize:'11px'},formatter:function(v){return (v/1000).toFixed(1)+'k';}}},
     plotOptions:{candlestick:{colors:{upward:'#1A7A4A',downward:'#c0392b'},wick:{useFillColor:true}}},
-    tooltip:{theme:'dark',x:{format:'dd/MM/yyyy'}},
-    grid:{borderColor:'#F2F4F7'},
+    tooltip:{theme:'dark',x:{format:'dd/MM/yyyy'}},grid:{borderColor:'#F2F4F7'},
   });
   priceChart.render();
   volumeChart = new ApexCharts(document.getElementById('volumeChart'),{
@@ -585,56 +590,200 @@ function setRange(m) {
   if (currentSymbol) loadChart();
 }
 
+// ─── INTRADAY + DEPTH ─────────────────────────────────────────────────────────
 function loadIntradayDepthPanel() {
   var e1=document.getElementById('intradayContent'); e1.innerHTML=spinner();
   callAPI('/api/stock/'+currentSymbol+'/intraday?page_size=30')
-    .then(function(d){e1.innerHTML=d&&d.length?mkTable(d,Object.keys(d[0]),30):nodata();})
+    .then(function(d){e1.innerHTML=d&&d.length?mkSimpleTable(d,30):nodata();})
     .catch(function(e){e1.innerHTML=nodata(e.message);});
-  var e2=document.getElementById('depthContent'); e2.innerHTML=spinner();
-  callAPI('/api/stock/'+currentSymbol+'/depth')
-    .then(function(d){e2.innerHTML=d&&d.length?mkTable(d,Object.keys(d[0])):nodata();})
-    .catch(function(e){e2.innerHTML=nodata(e.message);});
+
+  // Depth: vnstock thường không hỗ trợ realtime
+  document.getElementById('depthContent').innerHTML =
+    '<div class="no-data" style="padding:24px;">Dữ liệu độ sâu lệnh không khả dụng từ nguồn dữ liệu hiện tại.</div>';
 }
 
+// ─── TỔNG QUAN ────────────────────────────────────────────────────────────────
 function loadOverview() {
   var e1=document.getElementById('overviewContent'); e1.innerHTML=spinner();
   callAPI('/api/stock/'+currentSymbol+'/overview')
-    .then(function(data){var d=Array.isArray(data)?data[0]:data; e1.innerHTML=d?mkCards(d):nodata();})
+    .then(function(data){
+      var d=Array.isArray(data)?data[0]:data;
+      e1.innerHTML=d?mkOverviewVertical(d):nodata();
+    })
     .catch(function(e){e1.innerHTML=nodata(e.message);});
+
   var e2=document.getElementById('ratioOverviewContent'); e2.innerHTML=spinner();
   callAPI('/api/stock/'+currentSymbol+'/ratio?period=quarter')
-    .then(function(d){e2.innerHTML=d&&d.length?mkTable(d,Object.keys(d[0]),8):nodata();})
+    .then(function(d){e2.innerHTML=d&&d.length?mkFinTable(d,'ratio',8):nodata();})
     .catch(function(e){e2.innerHTML=nodata(e.message);});
 }
 
-function mkCards(obj) {
-  var lb={company_name:'Ten cong ty',short_name:'Ten viet tat',exchange:'San',industry_name:'Nganh',
-    established_year:'Nam TL',listing_date:'Ngay NY',outstanding_share:'CP luu hanh',
-    pe:'P/E',pb:'P/B',eps:'EPS',roe:'ROE(%)',roa:'ROA(%)',market_cap:'Von hoa',
-    foreign_percent:'Room NN(%)',website:'Website',address:'Dia chi'};
-  var html='<div class="overview-grid">';
-  Object.entries(obj).forEach(function(kv){
-    var k=kv[0],v=kv[1];
-    if(v==null||v===''||v===0) return;
-    html+='<div class="ov-card"><div class="ov-label">'+(lb[k]||k.replace(/_/g,' '))+'</div><div class="ov-value">'+(typeof v==='number'?fmtN(v):v)+'</div></div>';
-  });
-  return html+'</div>';
+// Layout dọc cho thông tin doanh nghiệp
+function mkOverviewVertical(obj) {
+  var fields = [
+    {k:'company_name',      l:'Tên công ty'},
+    {k:'short_name',        l:'Tên viết tắt'},
+    {k:'exchange',          l:'Sàn niêm yết'},
+    {k:'icb_name2',         l:'Ngành cấp 2'},
+    {k:'icb_name3',         l:'Ngành cấp 3'},
+    {k:'established_year',  l:'Năm thành lập'},
+    {k:'listing_date',      l:'Ngày niêm yết'},
+    {k:'issue_share',       l:'CP phát hành'},
+    {k:'outstanding_share', l:'CP lưu hành'},
+    {k:'charter_capital',   l:'Vốn điều lệ (VND)'},
+    {k:'market_cap',        l:'Vốn hóa'},
+    {k:'pe',                l:'P/E'},
+    {k:'pb',                l:'P/B'},
+    {k:'eps',               l:'EPS'},
+    {k:'roe',               l:'ROE (%)'},
+    {k:'roa',               l:'ROA (%)'},
+    {k:'foreign_percent',   l:'Room NN (%)'},
+    {k:'website',           l:'Website'},
+    {k:'address',           l:'Địa chỉ'},
+  ];
+
+  // Thêm company_profile nếu có
+  var profileHtml = '';
+  if (obj.company_profile) {
+    profileHtml = '<div style="background:var(--g1);border-radius:8px;padding:16px;margin-bottom:16px;font-size:13px;line-height:1.7;color:var(--text);">' +
+      '<div style="font-weight:700;color:var(--navy);margin-bottom:8px;font-size:14px;">Giới thiệu công ty</div>' +
+      obj.company_profile + '</div>';
+  }
+
+  var rows = fields.filter(function(f){
+    var v=obj[f.k]; return v!=null&&v!==''&&v!==0;
+  }).map(function(f){
+    var v = obj[f.k];
+    if (typeof v === 'number') {
+      if (['pe','pb','eps','roe','roa','foreign_percent'].indexOf(f.k)>=0) v=fmtN(v)+(f.k==='foreign_percent'||f.k==='roe'||f.k==='roa'?'%':'');
+      else if (['market_cap','charter_capital','issue_share','outstanding_share'].indexOf(f.k)>=0) v=fmtB(v);
+      else v=fmtN(v);
+    }
+    if (f.k==='website' && v && v!=='—') v='<a href="'+v+'" target="_blank" rel="noopener" style="color:var(--navy3);">'+v+'</a>';
+    return '<tr><td style="padding:9px 14px;font-size:13px;font-weight:600;color:var(--g3);white-space:nowrap;border-bottom:1px solid var(--g1);width:200px;">'+f.l+'</td>'+
+           '<td style="padding:9px 14px;font-size:13px;color:var(--text);border-bottom:1px solid var(--g1);">'+v+'</td></tr>';
+  }).join('');
+
+  return profileHtml +
+    '<div class="data-table-wrap"><table style="width:100%;border-collapse:collapse;"><tbody>'+rows+'</tbody></table></div>';
 }
 
-var FEP={ratio:'ratio',income:'income',balance:'balance-sheet',cashflow:'cashflow'};
-var FPN={ratio:'finRatioContent',income:'finIncomeContent',balance:'finBalanceContent',cashflow:'finCashflowContent'};
+// ─── TÀI CHÍNH ────────────────────────────────────────────────────────────────
+var FEP = {ratio:'ratio', income:'income', balance:'balance-sheet', cashflow:'cashflow'};
+var FPN = {ratio:'finRatioContent', income:'finIncomeContent', balance:'finBalanceContent', cashflow:'finCashflowContent'};
 
-function loadFinance(period,tab) {
+function loadFinance(period, tab) {
   var ck=period+'_'+tab;
   if (finDataCache[ck]){renderFin(tab,finDataCache[ck]);return;}
   document.getElementById(FPN[tab]).innerHTML=spinner();
   callAPI('/api/stock/'+currentSymbol+'/'+FEP[tab]+'?period='+period)
-    .then(function(d){finDataCache[ck]=d;renderFin(tab,d);})
+    .then(function(d){finDataCache[ck]=d; renderFin(tab,d);})
     .catch(function(e){document.getElementById(FPN[tab]).innerHTML=nodata(e.message);});
 }
-function renderFin(tab,d) {
-  document.getElementById(FPN[tab]).innerHTML=d&&d.length?mkTable(d,Object.keys(d[0])):nodata();
+
+function renderFin(tab, d) {
+  var el = document.getElementById(FPN[tab]);
+  if (!d||!d.length){el.innerHTML=nodata();return;}
+  el.innerHTML = mkFinTable(d, tab);
 }
+
+// Render bảng tài chính dạng chuẩn: chỉ tiêu = hàng, kỳ = cột
+function mkFinTable(data, tab, maxPeriods) {
+  if (!maxPeriods) maxPeriods = 12;
+
+  // Xác định cột kỳ (tối đa maxPeriods kỳ gần nhất)
+  var periods = data.slice(0, maxPeriods).map(function(row) {
+    var y = row.yearReport || row.Meta_yearReport || '';
+    var q = row.lengthReport || row.Meta_lengthReport || '';
+    if (q) return 'Q' + q + '/' + y;
+    return String(y);
+  });
+
+  // Lấy danh sách chỉ tiêu (bỏ các cột meta)
+  var metaCols = ['ticker','yearReport','lengthReport','Meta_ticker','Meta_yearReport','Meta_lengthReport'];
+  var allCols = Object.keys(data[0]).filter(function(k){ return metaCols.indexOf(k) < 0; });
+
+  // Với ratio: parse nhóm từ format "Nhóm_ChiTieu"
+  if (tab === 'ratio') {
+    return mkRatioTable(data, allCols, periods, maxPeriods);
+  }
+
+  // Income, Balance, Cashflow: transpose thông thường
+  var html = '<div class="data-table-wrap"><table class="data-table">';
+  html += '<thead><tr><th style="min-width:260px;position:sticky;left:0;background:var(--navy);">Chỉ tiêu</th>';
+  periods.forEach(function(p){ html += '<th style="text-align:right;">'+p+'</th>'; });
+  html += '</tr></thead><tbody>';
+
+  allCols.forEach(function(col) {
+    var isHeader = col === col.toUpperCase() && col.length > 4;
+    var label = col.replace(/ \(Bn\. VND\)/g,'').replace(/ \(VND\)/g,'');
+    var rowStyle = isHeader ? 'background:var(--g1);font-weight:700;color:var(--navy);' : '';
+    html += '<tr><td style="padding:8px 14px;font-size:12.5px;border-bottom:1px solid var(--g1);position:sticky;left:0;background:'+(isHeader?'var(--g1)':'var(--white)')+';'+rowStyle+'">'+label+'</td>';
+    data.slice(0, maxPeriods).forEach(function(row) {
+      var v = row[col];
+      var display = '—';
+      if (v != null && v !== '') {
+        var num = typeof v === 'number' ? v : parseFloat(v);
+        if (!isNaN(num)) {
+          // Nếu tên cột có Bn. VND → chia 1e9 để hiện tỷ, ngược lại chia 1e9 vì đơn vị gốc là VND
+          var colHasBn = col.indexOf('Bn.') >= 0;
+          var val = colHasBn ? num : (Math.abs(num) > 1e8 ? num/1e9 : num);
+          var suffix = (Math.abs(num) > 1e8 || colHasBn) ? ' tỷ' : '';
+          var cls = num < 0 ? ' dn' : '';
+          display = '<span class="'+cls+'">' + fmtN(val) + suffix + '</span>';
+        } else {
+          display = String(v);
+        }
+      }
+      html += '<td style="text-align:right;padding:8px 14px;font-size:12.5px;border-bottom:1px solid var(--g1);white-space:nowrap;">'+display+'</td>';
+    });
+    html += '</tr>';
+  });
+
+  html += '</tbody></table></div>';
+  return html;
+}
+
+function mkRatioTable(data, cols, periods, maxPeriods) {
+  // Parse nhóm: "Chỉ tiêu cơ cấu nguồn vốn_Debt/Equity" → {group, metric}
+  var groups = {};
+  var groupOrder = [];
+  cols.forEach(function(col) {
+    var sep = col.indexOf('_');
+    var group = sep > 0 ? col.slice(0, sep) : 'Khác';
+    var metric = sep > 0 ? col.slice(sep+1) : col;
+    if (!groups[group]) { groups[group] = []; groupOrder.push(group); }
+    groups[group].push({col:col, metric:metric});
+  });
+
+  var html = '<div class="data-table-wrap"><table class="data-table">';
+  html += '<thead><tr><th style="min-width:280px;position:sticky;left:0;background:var(--navy);">Chỉ tiêu</th>';
+  periods.forEach(function(p){ html += '<th style="text-align:right;">'+p+'</th>'; });
+  html += '</tr></thead><tbody>';
+
+  groupOrder.forEach(function(group) {
+    // Header nhóm
+    html += '<tr><td colspan="'+(periods.length+1)+'" style="background:var(--navy2);color:var(--gold2);font-weight:700;font-size:12px;padding:6px 14px;letter-spacing:.05em;">'+group+'</td></tr>';
+    groups[group].forEach(function(item) {
+      html += '<tr><td style="padding:8px 14px 8px 20px;font-size:12.5px;border-bottom:1px solid var(--g1);position:sticky;left:0;background:var(--white);">'+item.metric+'</td>';
+      data.slice(0, maxPeriods).forEach(function(row) {
+        var v = row[item.col];
+        var display = '—';
+        if (v != null && !isNaN(parseFloat(v))) {
+          var num = parseFloat(v);
+          var cls = num < 0 ? ' class="dn"' : '';
+          display = '<span'+cls+'>'+fmtN(num)+'</span>';
+        }
+        html += '<td style="text-align:right;padding:8px 14px;font-size:12.5px;border-bottom:1px solid var(--g1);white-space:nowrap;">'+display+'</td>';
+      });
+      html += '</tr>';
+    });
+  });
+
+  html += '</tbody></table></div>';
+  return html;
+}
+
 function setFinPeriod(p) {
   currentFinPeriod=p; finDataCache={};
   document.querySelectorAll('.period-btn').forEach(function(b){b.classList.remove('active');}); event.target.classList.add('active');
@@ -648,15 +797,21 @@ function setFinTab(tab) {
   if(currentSymbol) loadFinance(currentFinPeriod,tab);
 }
 
+// ─── CỔ ĐÔNG & BAN LÃNH ĐẠO ──────────────────────────────────────────────────
 function loadCompany() {
-  [{ep:'shareholders',el:'shareholdersContent'},{ep:'officers',el:'officersContent'}].forEach(function(x){
+  var cfg = [
+    {ep:'shareholders', el:'shareholdersContent'},
+    {ep:'officers',     el:'officersContent'},
+  ];
+  cfg.forEach(function(x){
     document.getElementById(x.el).innerHTML=spinner();
     callAPI('/api/stock/'+currentSymbol+'/'+x.ep)
-      .then(function(d){document.getElementById(x.el).innerHTML=d&&d.length?mkTable(d,Object.keys(d[0])):nodata();})
+      .then(function(d){document.getElementById(x.el).innerHTML=d&&d.length?mkSimpleTable(d):nodata();})
       .catch(function(e){document.getElementById(x.el).innerHTML=nodata(e.message);});
   });
 }
 
+// ─── TIN TỨC & SỰ KIỆN ───────────────────────────────────────────────────────
 function loadNews() {
   var e1=document.getElementById('newsContent'); e1.innerHTML=spinner();
   callAPI('/api/stock/'+currentSymbol+'/news')
@@ -664,27 +819,36 @@ function loadNews() {
       if(!data||!data.length){e1.innerHTML=nodata();return;}
       var h='<div class="news-list">';
       data.slice(0,20).forEach(function(n){
-        var t=n.title||n.headline||'—';
-        var linked=n.url?'<a href="'+n.url+'" target="_blank" rel="noopener">'+t+'</a>':t;
-        var m=(n.published_date||n.date||'')+(n.source?' - '+n.source:'');
-        h+='<div class="news-item"><div class="news-title">'+linked+'</div><div class="news-meta">'+m+'</div></div>';
+        // vnstock trả về news_title, news_source_link
+        var title = n.news_title || n.title || n.headline || '—';
+        var url   = n.news_source_link || n.url || '';
+        var date  = n.published_date || n.news_date || n.date || '';
+        var src   = n.source || n.news_sub_title || '';
+        var linked= url ? '<a href="'+url+'" target="_blank" rel="noopener">'+title+'</a>' : title;
+        h+='<div class="news-item"><div class="news-title">'+linked+'</div><div class="news-meta">'+date+(src?' · '+src:'')+'</div></div>';
       });
       e1.innerHTML=h+'</div>';
     }).catch(function(e){e1.innerHTML=nodata(e.message);});
+
   var e2=document.getElementById('eventsContent'); e2.innerHTML=spinner();
   callAPI('/api/stock/'+currentSymbol+'/events')
-    .then(function(d){e2.innerHTML=d&&d.length?mkTable(d,Object.keys(d[0])):nodata();})
-    .catch(function(e){e2.innerHTML=nodata(e.message);});
+    .then(function(d){e2.innerHTML=d&&d.length?mkSimpleTable(d):nodata();})
+    .catch(function(e){
+      // Events thường 500 do vnstock không có data
+      e2.innerHTML='<div class="no-data">Chưa có dữ liệu sự kiện.</div>';
+    });
 }
 
+// ─── BẢNG GIÁ ─────────────────────────────────────────────────────────────────
 function fetchBoard() {
   var s=document.getElementById('boardInput').value.trim(); if(!s) return;
   document.getElementById('boardContent').innerHTML=spinner();
   callAPI('/api/board?symbols='+encodeURIComponent(s))
-    .then(function(d){document.getElementById('boardContent').innerHTML=d&&d.length?mkTable(d,Object.keys(d[0])):nodata();})
+    .then(function(d){document.getElementById('boardContent').innerHTML=d&&d.length?mkSimpleTable(d):nodata();})
     .catch(function(e){document.getElementById('boardContent').innerHTML=nodata(e.message);});
 }
 
+// ─── QUỐC TẾ ─────────────────────────────────────────────────────────────────
 function fetchFx(){mkMarket('fx',document.getElementById('fxInput').value.trim().toUpperCase(),'fxResult');}
 function fetchCrypto(){mkMarket('crypto',document.getElementById('cryptoInput').value.trim().toUpperCase(),'cryptoResult');}
 function fetchWorldIndex(){mkMarket('world-index',document.getElementById('indexInput').value.trim().toUpperCase(),'indexResult');}
@@ -699,52 +863,57 @@ function mkMarket(type,sym,elId) {
       var last=data[data.length-1]; var prev=data.length>1?(data[data.length-2].close||0):0;
       var close=last.close||last.price||0; var chg=prev?((close-prev)/prev*100):0;
       var color=chg>0?'#2ECC71':chg<0?'#E74C3C':'rgba(255,255,255,.5)';
-      document.getElementById(elId).innerHTML='<div style="color:var(--white)"><span style="font-size:18px;font-weight:700;">'+fmtN(close)+'</span><span style="color:'+color+';font-size:13px;margin-left:8px;">'+(chg>=0?'+':'')+chg.toFixed(2)+'%</span><br><span style="font-size:11px;color:rgba(255,255,255,.35);">'+sym+' - '+(last.time||last.date||'')+'</span></div>';
+      document.getElementById(elId).innerHTML='<div style="color:var(--white)"><span style="font-size:18px;font-weight:700;">'+fmtN(close)+'</span><span style="color:'+color+';font-size:13px;margin-left:8px;">'+(chg>=0?'+':'')+chg.toFixed(2)+'%</span><br><span style="font-size:11px;color:rgba(255,255,255,.35);">'+sym+' · '+(last.time||last.date||'')+'</span></div>';
     }).catch(function(e){document.getElementById(elId).textContent='Loi: '+e.message;});
 }
 
-var CL={symbol:'Ma',open:'Mo cua',high:'Cao nhat',low:'Thap nhat',close:'Dong cua',
-  volume:'KL',time:'Thoi gian',date:'Ngay',price:'Gia',company_name:'Ten cong ty',
-  exchange:'San',industry_name:'Nganh',pe:'P/E',pb:'P/B',roe:'ROE',roa:'ROA',eps:'EPS',
-  market_cap:'Von hoa',outstanding_share:'CP luu hanh',owner_percent:'Ty le SH',
-  full_name:'Ho ten',position:'Chuc vu',title:'Tieu de',published_date:'Ngay dang',
-  source:'Nguon',event_name:'Su kien',match_price:'Gia khop',match_vol:'KL khop',
-  ref:'Tham chieu',ceil:'Tran',floor:'San',foreign_buy:'NN mua',foreign_sell:'NN ban',
-  net_change:'Thay doi',percent_change:'% Thay doi'};
-var VF=['volume','match_vol','quantity','outstanding_share','issue_share','market_cap'];
-var PF=['open','high','low','close','price','match_price','ref','ceil','floor','net_change'];
-var PCF=['percent_change','roe','roa','owner_percent','foreign_percent'];
-var NF=['pe','pb','ps','eps','net_asset','book_value','foreign_buy','foreign_sell'].concat(VF,PF,PCF);
+// ─── TABLE HELPERS ────────────────────────────────────────────────────────────
+var COL_LABELS = {
+  symbol:'Mã', open:'Mở cửa', high:'Cao nhất', low:'Thấp nhất', close:'Đóng cửa',
+  volume:'KL giao dịch', time:'Thời gian', date:'Ngày', price:'Giá khớp',
+  match_price:'Giá khớp', match_vol:'KL khớp', ref:'Tham chiếu',
+  ceil:'Trần', floor:'Sàn', foreign_buy:'NN mua', foreign_sell:'NN bán',
+  net_change:'Thay đổi', percent_change:'% Thay đổi',
+  share_holder:'Cổ đông', quantity:'Số lượng CP', share_own_percent:'Tỷ lệ SH (%)', update_date:'Cập nhật',
+  full_name:'Họ tên', position:'Chức vụ', officer_own_percent:'Tỷ lệ SH (%)',
+};
+var PRC_F=['open','high','low','close','price','match_price','ref','ceil','floor','net_change'];
+var VOL_F=['volume','match_vol','quantity','foreign_buy','foreign_sell'];
+var PCT_F=['percent_change','share_own_percent','officer_own_percent'];
 
-function mkTable(data,cols,maxR) {
+function mkSimpleTable(data, maxR) {
   if(!maxR) maxR=50;
-  var rows=data.slice(0,maxR);
-  var th=cols.map(function(c){return '<th>'+(CL[c]||c.replace(/_/g,' '))+'</th>';}).join('');
-  var tb=rows.map(function(row){
-    var tds=cols.map(function(c){
-      var v=row[c]; var isN=NF.indexOf(c)>=0||typeof v==='number';
-      if(v==null||v==='') v='—';
-      else if(typeof v==='number'){
-        if(PCF.indexOf(c)>=0) v=fmtN(v)+'%';
-        else if(VF.indexOf(c)>=0) v=fmtV(v);
-        else if(PF.indexOf(c)>=0) v=fmtP(v);
-        else v=fmtN(v);
+  var rows = data.slice(0, maxR);
+  var cols = Object.keys(rows[0]).filter(function(k){ return ['id','news_image_url','friendly_sub_title'].indexOf(k)<0; });
+  var th = cols.map(function(c){ return '<th>'+(COL_LABELS[c]||c.replace(/_/g,' '))+'</th>'; }).join('');
+  var tb = rows.map(function(row){
+    var tds = cols.map(function(c){
+      var v=row[c];
+      if(v==null||v==='') return '<td>—</td>';
+      var isNum = typeof v==='number';
+      if(isNum){
+        var cls='num'; var display;
+        if(PCT_F.indexOf(c)>=0) display=fmtN(v)+'%';
+        else if(VOL_F.indexOf(c)>=0) display=fmtV(v);
+        else if(PRC_F.indexOf(c)>=0) display=fmtP(v);
+        else display=fmtN(v);
+        if(['percent_change','net_change'].indexOf(c)>=0) cls+=v>0?' up':v<0?' dn':'';
+        return '<td class="'+cls+'">'+display+'</td>';
       }
-      var cls=isN?'num':'';
-      if(['percent_change','net_change'].indexOf(c)>=0&&typeof row[c]==='number') cls+=row[c]>0?' up':row[c]<0?' dn':'';
-      return '<td class="'+cls+'">'+v+'</td>';
+      return '<td>'+v+'</td>';
     }).join('');
     return '<tr>'+tds+'</tr>';
   }).join('');
   return '<div class="data-table-wrap"><table class="data-table"><thead><tr>'+th+'</tr></thead><tbody>'+tb+'</tbody></table></div>';
 }
 
+// ─── FORMAT ───────────────────────────────────────────────────────────────────
 function fmtN(n){if(n==null||isNaN(n))return '—';return Number(n).toLocaleString('vi-VN',{maximumFractionDigits:2});}
 function fmtP(n){if(n==null||isNaN(n))return '—';return Number(n).toLocaleString('vi-VN',{maximumFractionDigits:0});}
-function fmtV(n){if(n==null||isNaN(n))return '—';if(n>=1e9)return(n/1e9).toFixed(1)+' ty';if(n>=1e6)return(n/1e6).toFixed(1)+' tr';if(n>=1e3)return(n/1e3).toFixed(0)+'k';return Number(n).toLocaleString('vi-VN');}
-function fmtB(n){if(n==null||isNaN(n))return '—';if(n>=1e12)return(n/1e12).toFixed(1)+' nghin ty';if(n>=1e9)return(n/1e9).toFixed(0)+' ty';return fmtN(n);}
-function spinner(){return '<div class="loading-box"><div class="spinner"></div><div class="loading-text">Dang tai...</div></div>';}
-function nodata(msg){return '<div class="no-data">'+(msg?'Loi: '+msg:'Khong co du lieu')+'</div>';}
+function fmtV(n){if(n==null||isNaN(n))return '—';if(n>=1e9)return(n/1e9).toFixed(2)+' tỷ';if(n>=1e6)return(n/1e6).toFixed(1)+' tr';if(n>=1e3)return(n/1e3).toFixed(0)+'k';return Number(n).toLocaleString('vi-VN');}
+function fmtB(n){if(n==null||isNaN(n))return '—';if(n>=1e12)return(n/1e12).toFixed(1)+' nghìn tỷ';if(n>=1e9)return(n/1e9).toFixed(0)+' tỷ';return fmtN(n);}
+function spinner(){return '<div class="loading-box"><div class="spinner"></div><div class="loading-text">Đang tải...</div></div>';}
+function nodata(msg){return '<div class="no-data">'+(msg?'Lỗi: '+msg:'Không có dữ liệu')+'</div>';}
 </script>
 </body>
 </html>
