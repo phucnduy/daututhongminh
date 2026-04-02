@@ -439,25 +439,31 @@ img{max-width:100%;display:block;}
 </footer>
 
 <script>
-// ─────────────────────────────────────────────────────────────────────────────
-// CONFIG — thay YOUR_RAILWAY_URL bằng URL thực sau khi deploy Railway
-// ─────────────────────────────────────────────────────────────────────────────
-const API_BASE = 'https://vnstock-agent-production.up.railway.app';
-```
-// ─── STATE ───────────────────────────────────────────────────────────────────
-let currentSymbol = '';
-let currentInterval = '1D';
-let currentMonths = 6;
-let currentFinPeriod = 'quarter';
-let currentFinTab = 'ratio';
-let priceChart = null;
-let volumeChart = null;
-let finDataCache = {}; // cache tài chính để không fetch lại
-let activeTab = 'price';
+// ─── CONFIG ───────────────────────────────────────────────────────────────────
+var API_BASE = 'https://vnstock-agent-production.up.railway.app';
 
-// ─── SEARCH ──────────────────────────────────────────────────────────────────
-document.getElementById('symbolInput').addEventListener('keydown', e => {
-  if (e.key === 'Enter') doSearch();
+// ─── STATE ────────────────────────────────────────────────────────────────────
+var currentSymbol = '';
+var currentInterval = '1D';
+var currentMonths = 6;
+var currentFinPeriod = 'quarter';
+var currentFinTab = 'ratio';
+var priceChart = null;
+var volumeChart = null;
+var finDataCache = {};
+var activeTab = 'price';
+
+// ─── SEARCH ───────────────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', function() {
+  document.getElementById('symbolInput').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') doSearch();
+  });
+  var params = new URLSearchParams(window.location.search);
+  var sym = params.get('symbol') || params.get('s');
+  if (sym) {
+    document.getElementById('symbolInput').value = sym.toUpperCase();
+    setTimeout(doSearch, 200);
+  }
 });
 
 function quickSearch(sym) {
@@ -465,8 +471,8 @@ function quickSearch(sym) {
   doSearch();
 }
 
-async function doSearch() {
-  const raw = document.getElementById('symbolInput').value.trim().toUpperCase();
+function doSearch() {
+  var raw = document.getElementById('symbolInput').value.trim().toUpperCase();
   if (!raw) return;
   currentSymbol = raw;
   finDataCache = {};
@@ -481,523 +487,444 @@ async function doSearch() {
   document.getElementById('hPrice').textContent = '...';
   document.getElementById('boardInput').value = currentSymbol;
 
-  // Load tất cả data của tab hiện tại
   switchTab(activeTab, true);
-  // Load overview & header card song song
   loadOverviewCard();
-  loadIntradayDepth();
+  loadIntradayForHeader();
 }
 
-// ─── TAB SWITCHING ────────────────────────────────────────────────────────────
-function switchTab(tab, force = false) {
+// ─── TABS ─────────────────────────────────────────────────────────────────────
+function switchTab(tab, force) {
   if (!currentSymbol && !force) return;
   activeTab = tab;
-  document.querySelectorAll('.tab-btn').forEach((b, i) => {
-    const tabs = ['price', 'overview', 'finance', 'company', 'news'];
-    b.classList.toggle('active', tabs[i] === tab);
-  });
-  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
-  document.getElementById(`panel-${tab}`).classList.add('active');
+  var tabNames = ['price', 'overview', 'finance', 'company', 'news'];
+  var btns = document.querySelectorAll('.tab-btn');
+  for (var i = 0; i < btns.length; i++) {
+    btns[i].classList.toggle('active', tabNames[i] === tab);
+  }
+  var panels = document.querySelectorAll('.tab-panel');
+  for (var j = 0; j < panels.length; j++) {
+    panels[j].classList.remove('active');
+  }
+  document.getElementById('panel-' + tab).classList.add('active');
 
   if (!currentSymbol) return;
-  if (tab === 'price') { loadChart(); }
+  if (tab === 'price')    { loadChart(); loadIntradayDepthPanel(); }
   if (tab === 'overview') { loadOverview(); }
-  if (tab === 'finance') { loadFinance(currentFinPeriod, currentFinTab); }
-  if (tab === 'company') { loadCompany(); }
-  if (tab === 'news') { loadNews(); }
+  if (tab === 'finance')  { loadFinance(currentFinPeriod, currentFinTab); }
+  if (tab === 'company')  { loadCompany(); }
+  if (tab === 'news')     { loadNews(); }
 }
 
-// ─── API HELPER ───────────────────────────────────────────────────────────────
-async function apiFetch(path) {
-  const res = await fetch(API_BASE + path);
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
-  const json = await res.json();
-  if (!json.success) throw new Error(json.error || 'Lỗi API');
-  return json.data;
+// ─── API ──────────────────────────────────────────────────────────────────────
+function apiFetch(path) {
+  return fetch(API_BASE + path)
+    .then(function(res) {
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      return res.json();
+    })
+    .then(function(json) {
+      if (!json.success) throw new Error(json.error || 'Loi API');
+      return json.data;
+    });
 }
 
-// ─── HEADER CARD ─────────────────────────────────────────────────────────────
-async function loadOverviewCard() {
-  try {
-    const data = await apiFetch(`/api/stock/${currentSymbol}/overview`);
-    const d = Array.isArray(data) ? data[0] : data;
-    if (!d) return;
-
-    document.getElementById('hName').textContent = d.company_name || d.short_name || currentSymbol;
-    document.getElementById('hExchange').textContent = (d.exchange || '') + (d.industry_name ? ' · ' + d.industry_name : '');
-    document.getElementById('hUpdated').textContent = new Date().toLocaleString('vi-VN');
-
-    // Meta row
-    const metas = [
-      {label: 'Vốn hóa', value: fmtBillion(d.market_cap)},
-      {label: 'P/E', value: fmtNum(d.pe)},
-      {label: 'P/B', value: fmtNum(d.pb)},
-      {label: 'Room NN', value: d.foreign_percent != null ? fmtNum(d.foreign_percent) + '%' : '—'},
-      {label: 'Sàn', value: d.exchange || '—'},
-    ].filter(m => m.value && m.value !== '—');
-
-    document.getElementById('hMetaRow').innerHTML = metas.map(m =>
-      `<div class="meta-item"><div class="meta-label">${m.label}</div><div class="meta-value">${m.value}</div></div>`
-    ).join('');
-  } catch(e) { /* silent */ }
+// ─── HEADER CARD ──────────────────────────────────────────────────────────────
+function loadOverviewCard() {
+  apiFetch('/api/stock/' + currentSymbol + '/overview')
+    .then(function(data) {
+      var d = Array.isArray(data) ? data[0] : data;
+      if (!d) return;
+      document.getElementById('hName').textContent = d.company_name || d.short_name || currentSymbol;
+      var exch = (d.exchange || '') + (d.industry_name ? ' · ' + d.industry_name : '');
+      document.getElementById('hExchange').textContent = exch;
+      document.getElementById('hUpdated').textContent = new Date().toLocaleString('vi-VN');
+      var metas = [
+        {label: 'Von hoa', value: fmtBillion(d.market_cap)},
+        {label: 'P/E', value: fmtNum(d.pe)},
+        {label: 'P/B', value: fmtNum(d.pb)},
+        {label: 'Room NN', value: d.foreign_percent != null ? fmtNum(d.foreign_percent) + '%' : null},
+        {label: 'San', value: d.exchange || null},
+      ].filter(function(m) { return m.value && m.value !== '—'; });
+      document.getElementById('hMetaRow').innerHTML = metas.map(function(m) {
+        return '<div class="meta-item"><div class="meta-label">' + m.label + '</div><div class="meta-value">' + m.value + '</div></div>';
+      }).join('');
+    })
+    .catch(function() {});
 }
 
-async function loadIntradayDepth() {
-  // Intraday
-  try {
-    const data = await apiFetch(`/api/stock/${currentSymbol}/intraday?page_size=50`);
-    if (data && data.length) {
-      const latest = data[data.length - 1];
-      const price = latest.price || latest.close || latest.match_price;
-      const ref = data[0]?.ref || data[0]?.reference_price;
-      if (price) {
-        const pEl = document.getElementById('hPrice');
-        pEl.textContent = fmtPrice(price);
-        if (ref) {
-          const chg = price - ref;
-          const pct = ref ? (chg / ref * 100) : 0;
-          const cEl = document.getElementById('hChange');
-          const cls = chg > 0 ? 'up' : chg < 0 ? 'dn' : 'flat';
-          cEl.className = `stock-change ${cls}`;
-          cEl.textContent = `${chg > 0 ? '+' : ''}${fmtPrice(chg)} (${pct > 0 ? '+' : ''}${pct.toFixed(2)}%)`;
-        }
+function loadIntradayForHeader() {
+  apiFetch('/api/stock/' + currentSymbol + '/intraday?page_size=50')
+    .then(function(data) {
+      if (!data || !data.length) return;
+      var latest = data[data.length - 1];
+      var price = latest.price || latest.close || latest.match_price;
+      var ref = data[0].ref || data[0].reference_price;
+      if (!price) return;
+      document.getElementById('hPrice').textContent = fmtPrice(price);
+      if (ref) {
+        var chg = price - ref;
+        var pct = ref ? (chg / ref * 100) : 0;
+        var cEl = document.getElementById('hChange');
+        var cls = chg > 0 ? 'up' : chg < 0 ? 'dn' : 'flat';
+        cEl.className = 'stock-change ' + cls;
+        var sign = chg > 0 ? '+' : '';
+        cEl.textContent = sign + fmtPrice(chg) + ' (' + sign + pct.toFixed(2) + '%)';
       }
-    }
-  } catch(e) {}
+    })
+    .catch(function() {});
 }
 
-// ─── BIỂU ĐỒ GIÁ ─────────────────────────────────────────────────────────────
-async function loadChart() {
-  const end = new Date();
-  const start = new Date();
+// ─── CHART ────────────────────────────────────────────────────────────────────
+function loadChart() {
+  var end = new Date();
+  var start = new Date();
   start.setMonth(start.getMonth() - currentMonths);
-  const startStr = start.toISOString().split('T')[0];
-  const endStr = end.toISOString().split('T')[0];
+  var startStr = start.toISOString().split('T')[0];
+  var endStr = end.toISOString().split('T')[0];
 
-  document.getElementById('priceChart').innerHTML = '<div class="loading-box"><div class="spinner"></div><div class="loading-text">Đang tải biểu đồ...</div></div>';
+  document.getElementById('priceChart').innerHTML = '<div class="loading-box"><div class="spinner"></div><div class="loading-text">Dang tai bieu do...</div></div>';
   document.getElementById('volumeChart').innerHTML = '';
 
-  try {
-    const data = await apiFetch(`/api/stock/${currentSymbol}/history?start=${startStr}&end=${endStr}&interval=${currentInterval}`);
-    if (!data || !data.length) {
-      document.getElementById('priceChart').innerHTML = '<div class="no-data">Không có dữ liệu</div>';
-      return;
-    }
-    renderChart(data);
-    renderIntradayTable(null); // sau khi có chart thì load intraday
-  } catch(e) {
-    document.getElementById('priceChart').innerHTML = `<div class="no-data">Lỗi: ${e.message}</div>`;
-  }
+  apiFetch('/api/stock/' + currentSymbol + '/history?start=' + startStr + '&end=' + endStr + '&interval=' + currentInterval)
+    .then(function(data) {
+      if (!data || !data.length) {
+        document.getElementById('priceChart').innerHTML = '<div class="no-data">Khong co du lieu</div>';
+        return;
+      }
+      renderChart(data);
+    })
+    .catch(function(e) {
+      document.getElementById('priceChart').innerHTML = '<div class="no-data">Loi: ' + e.message + '</div>';
+    });
 }
 
 function renderChart(data) {
-  const ohlc = data.map(d => ({
-    x: new Date(d.time || d.date || d.tradingDate),
-    y: [
-      parseFloat(d.open || 0),
-      parseFloat(d.high || 0),
-      parseFloat(d.low || 0),
-      parseFloat(d.close || 0),
-    ]
-  }));
-  const vol = data.map(d => ({
-    x: new Date(d.time || d.date || d.tradingDate),
-    y: parseFloat(d.volume || 0),
-  }));
+  var ohlc = data.map(function(d) {
+    return {
+      x: new Date(d.time || d.date || d.tradingDate),
+      y: [parseFloat(d.open||0), parseFloat(d.high||0), parseFloat(d.low||0), parseFloat(d.close||0)]
+    };
+  });
+  var vol = data.map(function(d) {
+    return { x: new Date(d.time || d.date || d.tradingDate), y: parseFloat(d.volume||0) };
+  });
 
   if (priceChart) { priceChart.destroy(); priceChart = null; }
   if (volumeChart) { volumeChart.destroy(); volumeChart = null; }
 
-  const chartOpts = {
+  priceChart = new ApexCharts(document.getElementById('priceChart'), {
     series: [{ name: currentSymbol, data: ohlc }],
-    chart: {
-      type: 'candlestick', height: 360,
-      toolbar: { show: true, tools: { download: true, selection: true, zoom: true, zoomin: true, zoomout: true, pan: true, reset: true }},
-      id: 'priceChart',
-      animations: { enabled: false },
-      background: 'transparent',
-    },
-    xaxis: { type: 'datetime', labels: { style: { colors: '#8A94A6', fontSize: '11px' }}},
-    yaxis: {
-      tooltip: { enabled: true },
-      labels: {
-        style: { colors: '#8A94A6', fontSize: '11px' },
-        formatter: v => (v / 1000).toFixed(1) + 'k',
-      },
-      opposite: true,
-    },
-    plotOptions: {
-      candlestick: {
-        colors: { upward: '#1A7A4A', downward: '#c0392b' },
-        wick: { useFillColor: true },
-      }
-    },
-    tooltip: {
-      theme: 'dark',
-      x: { format: 'dd/MM/yyyy' },
-      y: { formatter: v => fmtPrice(v) },
-    },
+    chart: { type: 'candlestick', height: 360, id: 'candles', animations: { enabled: false },
+      toolbar: { show: true }, background: 'transparent' },
+    xaxis: { type: 'datetime', labels: { style: { colors: '#8A94A6', fontSize: '11px' } } },
+    yaxis: { opposite: true, labels: { style: { colors: '#8A94A6', fontSize: '11px' },
+      formatter: function(v) { return (v/1000).toFixed(1) + 'k'; } }, tooltip: { enabled: true } },
+    plotOptions: { candlestick: { colors: { upward: '#1A7A4A', downward: '#c0392b' }, wick: { useFillColor: true } } },
+    tooltip: { theme: 'dark', x: { format: 'dd/MM/yyyy' } },
     grid: { borderColor: '#F2F4F7' },
-    theme: { mode: 'light' },
-  };
-
-  priceChart = new ApexCharts(document.getElementById('priceChart'), chartOpts);
+  });
   priceChart.render();
 
-  const volOpts = {
-    series: [{
-      name: 'Khối lượng',
-      data: vol,
-      color: '#1B4F8A',
-    }],
-    chart: {
-      type: 'bar', height: 120,
-      brush: { enabled: true, target: 'priceChart' },
-      selection: { enabled: true },
-      animations: { enabled: false },
-      background: 'transparent',
-      toolbar: { show: false },
-    },
-    xaxis: { type: 'datetime', labels: { style: { colors: '#8A94A6', fontSize: '10px' }}},
-    yaxis: {
-      labels: {
-        style: { colors: '#8A94A6', fontSize: '10px' },
-        formatter: v => fmtVolume(v),
-      },
-      opposite: true,
-    },
+  volumeChart = new ApexCharts(document.getElementById('volumeChart'), {
+    series: [{ name: 'KL', data: vol, color: '#1B4F8A' }],
+    chart: { type: 'bar', height: 120, brush: { enabled: true, target: 'candles' },
+      selection: { enabled: true }, animations: { enabled: false }, background: 'transparent', toolbar: { show: false } },
+    xaxis: { type: 'datetime', labels: { style: { colors: '#8A94A6', fontSize: '10px' } } },
+    yaxis: { opposite: true, labels: { style: { colors: '#8A94A6', fontSize: '10px' },
+      formatter: function(v) { return fmtVolume(v); } } },
     dataLabels: { enabled: false },
-    plotOptions: { bar: { columnWidth: '80%' }},
+    plotOptions: { bar: { columnWidth: '80%' } },
     grid: { borderColor: '#F2F4F7' },
-    theme: { mode: 'light' },
-  };
-  volumeChart = new ApexCharts(document.getElementById('volumeChart'), volOpts);
+  });
   volumeChart.render();
 }
 
 function setInterval_(interval) {
   currentInterval = interval;
-  document.querySelectorAll('.interval-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.interval-btn').forEach(function(b) { b.classList.remove('active'); });
   event.target.classList.add('active');
   if (currentSymbol) loadChart();
 }
 
 function setRange(months) {
   currentMonths = months;
-  document.querySelectorAll('.period-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.period-btn').forEach(function(b) { b.classList.remove('active'); });
   event.target.classList.add('active');
   if (currentSymbol) loadChart();
 }
 
-// ─── INTRADAY & DEPTH ────────────────────────────────────────────────────────
-async function renderIntradayTable() {
-  try {
-    const data = await apiFetch(`/api/stock/${currentSymbol}/intraday?page_size=30`);
-    if (!data || !data.length) { document.getElementById('intradayContent').innerHTML = '<div class="no-data">Không có dữ liệu</div>'; return; }
-    const cols = Object.keys(data[0]);
-    document.getElementById('intradayContent').innerHTML = makeTable(data, cols, 6);
-  } catch(e) {
-    document.getElementById('intradayContent').innerHTML = `<div class="no-data">Lỗi: ${e.message}</div>`;
-  }
+// ─── INTRADAY + DEPTH ─────────────────────────────────────────────────────────
+function loadIntradayDepthPanel() {
+  var el = document.getElementById('intradayContent');
+  el.innerHTML = spinner();
+  apiFetch('/api/stock/' + currentSymbol + '/intraday?page_size=30')
+    .then(function(data) {
+      el.innerHTML = data && data.length ? makeTable(data, Object.keys(data[0]), 30) : '<div class="no-data">Khong co du lieu</div>';
+    })
+    .catch(function(e) { el.innerHTML = '<div class="no-data">Loi: ' + e.message + '</div>'; });
+
+  var el2 = document.getElementById('depthContent');
+  el2.innerHTML = spinner();
+  apiFetch('/api/stock/' + currentSymbol + '/depth')
+    .then(function(data) {
+      el2.innerHTML = data && data.length ? makeTable(data, Object.keys(data[0])) : '<div class="no-data">Khong co du lieu</div>';
+    })
+    .catch(function(e) { el2.innerHTML = '<div class="no-data">Loi: ' + e.message + '</div>'; });
 }
 
-async function loadIntradayDepthPanel() {
-  // Already called in doSearch – reload for price tab
-  renderIntradayTable();
-  try {
-    const data = await apiFetch(`/api/stock/${currentSymbol}/depth`);
-    if (!data || !data.length) { document.getElementById('depthContent').innerHTML = '<div class="no-data">Không có dữ liệu</div>'; return; }
-    const cols = Object.keys(data[0]);
-    document.getElementById('depthContent').innerHTML = makeTable(data, cols);
-  } catch(e) {
-    document.getElementById('depthContent').innerHTML = `<div class="no-data">Lỗi: ${e.message}</div>`;
-  }
-}
+// ─── OVERVIEW ─────────────────────────────────────────────────────────────────
+function loadOverview() {
+  var el = document.getElementById('overviewContent');
+  el.innerHTML = spinner();
+  apiFetch('/api/stock/' + currentSymbol + '/overview')
+    .then(function(data) {
+      var d = Array.isArray(data) ? data[0] : data;
+      el.innerHTML = d ? makeKvCards(d) : '<div class="no-data">Khong co du lieu</div>';
+    })
+    .catch(function(e) { el.innerHTML = '<div class="no-data">Loi: ' + e.message + '</div>'; });
 
-// Override loadChart to also load intraday+depth
-const _origLoadChart = loadChart;
-window.loadChart = async function() {
-  await _origLoadChart();
-  await loadIntradayDepthPanel();
-};
-
-// ─── OVERVIEW ────────────────────────────────────────────────────────────────
-async function loadOverview() {
-  // Overview card
-  try {
-    const data = await apiFetch(`/api/stock/${currentSymbol}/overview`);
-    const d = Array.isArray(data) ? data[0] : data;
-    document.getElementById('overviewContent').innerHTML = d ? makeKvCards(d) : '<div class="no-data">Không có dữ liệu</div>';
-  } catch(e) {
-    document.getElementById('overviewContent').innerHTML = `<div class="no-data">Lỗi: ${e.message}</div>`;
-  }
-  // Ratio preview
-  try {
-    const data = await apiFetch(`/api/stock/${currentSymbol}/ratio?period=quarter`);
-    if (!data || !data.length) { document.getElementById('ratioOverviewContent').innerHTML = '<div class="no-data">Không có dữ liệu</div>'; return; }
-    const cols = Object.keys(data[0]);
-    document.getElementById('ratioOverviewContent').innerHTML = makeTable(data.slice(0, 8), cols);
-  } catch(e) {
-    document.getElementById('ratioOverviewContent').innerHTML = `<div class="no-data">Lỗi: ${e.message}</div>`;
-  }
+  var el2 = document.getElementById('ratioOverviewContent');
+  el2.innerHTML = spinner();
+  apiFetch('/api/stock/' + currentSymbol + '/ratio?period=quarter')
+    .then(function(data) {
+      el2.innerHTML = data && data.length ? makeTable(data, Object.keys(data[0]), 8) : '<div class="no-data">Khong co du lieu</div>';
+    })
+    .catch(function(e) { el2.innerHTML = '<div class="no-data">Loi: ' + e.message + '</div>'; });
 }
 
 function makeKvCards(obj) {
-  const labels = {
-    company_name:'Tên công ty', short_name:'Tên viết tắt', exchange:'Sàn',
-    industry_name:'Ngành', established_year:'Năm thành lập', listing_date:'Ngày niêm yết',
-    outstanding_share:'Cổ phiếu lưu hành', issue_share:'Cổ phiếu phát hành',
+  var labels = {
+    company_name:'Ten cong ty', short_name:'Ten viet tat', exchange:'San',
+    industry_name:'Nganh', established_year:'Nam thanh lap', listing_date:'Ngay niem yet',
+    outstanding_share:'Co phieu luu hanh', issue_share:'Co phieu phat hanh',
     pe:'P/E', pb:'P/B', ps:'P/S', eps:'EPS', roe:'ROE (%)', roa:'ROA (%)',
-    market_cap:'Vốn hóa (tỷ)', foreign_percent:'Room nước ngoài (%)',
-    website:'Website', address:'Địa chỉ',
+    market_cap:'Von hoa (ty)', foreign_percent:'Room nuoc ngoai (%)',
+    website:'Website', address:'Dia chi',
   };
-  const entries = Object.entries(obj).filter(([k,v]) => v != null && v !== '' && v !== 0);
-  return `<div class="overview-grid">${entries.map(([k,v]) => `
-    <div class="ov-card">
-      <div class="ov-label">${labels[k] || k.replace(/_/g,' ')}</div>
-      <div class="ov-value">${typeof v === 'number' ? fmtNum(v) : v}</div>
-    </div>`).join('')}</div>`;
+  var html = '<div class="overview-grid">';
+  var entries = Object.entries(obj).filter(function(kv) {
+    return kv[1] != null && kv[1] !== '' && kv[1] !== 0;
+  });
+  entries.forEach(function(kv) {
+    var k = kv[0], v = kv[1];
+    var label = labels[k] || k.replace(/_/g, ' ');
+    var display = typeof v === 'number' ? fmtNum(v) : v;
+    html += '<div class="ov-card"><div class="ov-label">' + label + '</div><div class="ov-value">' + display + '</div></div>';
+  });
+  html += '</div>';
+  return html;
 }
 
 // ─── TÀI CHÍNH ────────────────────────────────────────────────────────────────
-async function loadFinance(period, tab) {
-  const cacheKey = `${period}_${tab}`;
-  if (finDataCache[cacheKey]) {
-    renderFinContent(tab, finDataCache[cacheKey]);
-    return;
-  }
-  const panelId = {ratio:'finRatioContent', income:'finIncomeContent', balance:'finBalanceContent', cashflow:'finCashflowContent'}[tab];
-  document.getElementById(panelId).innerHTML = '<div class="loading-box"><div class="spinner"></div><div class="loading-text">Đang tải...</div></div>';
-  try {
-    const endpointMap = {ratio:'ratio', income:'income', balance:'balance-sheet', cashflow:'cashflow'};
-    const data = await apiFetch(`/api/stock/${currentSymbol}/${endpointMap[tab]}?period=${period}`);
-    finDataCache[cacheKey] = data;
-    renderFinContent(tab, data);
-  } catch(e) {
-    document.getElementById(panelId).innerHTML = `<div class="no-data">Lỗi: ${e.message}</div>`;
-  }
+var FIN_ENDPOINTS = { ratio: 'ratio', income: 'income', balance: 'balance-sheet', cashflow: 'cashflow' };
+var FIN_PANELS = { ratio: 'finRatioContent', income: 'finIncomeContent', balance: 'finBalanceContent', cashflow: 'finCashflowContent' };
+
+function loadFinance(period, tab) {
+  var cacheKey = period + '_' + tab;
+  if (finDataCache[cacheKey]) { renderFinContent(tab, finDataCache[cacheKey]); return; }
+  var panelId = FIN_PANELS[tab];
+  document.getElementById(panelId).innerHTML = spinner();
+  apiFetch('/api/stock/' + currentSymbol + '/' + FIN_ENDPOINTS[tab] + '?period=' + period)
+    .then(function(data) {
+      finDataCache[cacheKey] = data;
+      renderFinContent(tab, data);
+    })
+    .catch(function(e) {
+      document.getElementById(panelId).innerHTML = '<div class="no-data">Loi: ' + e.message + '</div>';
+    });
 }
 
 function renderFinContent(tab, data) {
-  const panelId = {ratio:'finRatioContent', income:'finIncomeContent', balance:'finBalanceContent', cashflow:'finCashflowContent'}[tab];
-  if (!data || !data.length) {
-    document.getElementById(panelId).innerHTML = '<div class="no-data">Không có dữ liệu</div>';
-    return;
-  }
-  const cols = Object.keys(data[0]);
-  document.getElementById(panelId).innerHTML = makeTable(data, cols);
+  var panelId = FIN_PANELS[tab];
+  if (!data || !data.length) { document.getElementById(panelId).innerHTML = '<div class="no-data">Khong co du lieu</div>'; return; }
+  document.getElementById(panelId).innerHTML = makeTable(data, Object.keys(data[0]));
 }
 
 function setFinPeriod(period) {
   currentFinPeriod = period;
   finDataCache = {};
-  document.querySelectorAll('.period-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.period-btn').forEach(function(b) { b.classList.remove('active'); });
   event.target.classList.add('active');
   if (currentSymbol) loadFinance(period, currentFinTab);
 }
 
 function setFinTab(tab) {
   currentFinTab = tab;
-  document.querySelectorAll('.interval-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.interval-btn').forEach(function(b) { b.classList.remove('active'); });
   event.target.classList.add('active');
-  const allPanels = ['finRatioContent','finIncomeContent','finBalanceContent','finCashflowContent'];
-  allPanels.forEach(p => { document.getElementById(p).style.display = 'none'; });
-  const panelId = {ratio:'finRatioContent', income:'finIncomeContent', balance:'finBalanceContent', cashflow:'finCashflowContent'}[tab];
-  document.getElementById(panelId).style.display = 'block';
+  Object.values(FIN_PANELS).forEach(function(pid) {
+    document.getElementById(pid).style.display = 'none';
+  });
+  document.getElementById(FIN_PANELS[tab]).style.display = 'block';
   if (currentSymbol) loadFinance(currentFinPeriod, tab);
 }
 
-// ─── CỔ ĐÔNG & BAN LÃNH ĐẠO ──────────────────────────────────────────────────
-async function loadCompany() {
-  // Shareholders
-  try {
-    const data = await apiFetch(`/api/stock/${currentSymbol}/shareholders`);
-    if (!data || !data.length) { document.getElementById('shareholdersContent').innerHTML = '<div class="no-data">Không có dữ liệu</div>'; }
-    else document.getElementById('shareholdersContent').innerHTML = makeTable(data, Object.keys(data[0]));
-  } catch(e) { document.getElementById('shareholdersContent').innerHTML = `<div class="no-data">Lỗi: ${e.message}</div>`; }
-  // Officers
-  try {
-    const data = await apiFetch(`/api/stock/${currentSymbol}/officers`);
-    if (!data || !data.length) { document.getElementById('officersContent').innerHTML = '<div class="no-data">Không có dữ liệu</div>'; }
-    else document.getElementById('officersContent').innerHTML = makeTable(data, Object.keys(data[0]));
-  } catch(e) { document.getElementById('officersContent').innerHTML = `<div class="no-data">Lỗi: ${e.message}</div>`; }
+// ─── CÔNG TY ──────────────────────────────────────────────────────────────────
+function loadCompany() {
+  var els = { shareholders: 'shareholdersContent', officers: 'officersContent' };
+  Object.entries(els).forEach(function(kv) {
+    var ep = kv[0], elId = kv[1];
+    document.getElementById(elId).innerHTML = spinner();
+    apiFetch('/api/stock/' + currentSymbol + '/' + ep)
+      .then(function(data) {
+        document.getElementById(elId).innerHTML = data && data.length ? makeTable(data, Object.keys(data[0])) : '<div class="no-data">Khong co du lieu</div>';
+      })
+      .catch(function(e) { document.getElementById(elId).innerHTML = '<div class="no-data">Loi: ' + e.message + '</div>'; });
+  });
 }
 
-// ─── TIN TỨC & SỰ KIỆN ───────────────────────────────────────────────────────
-async function loadNews() {
-  // News
-  try {
-    const data = await apiFetch(`/api/stock/${currentSymbol}/news`);
-    if (!data || !data.length) { document.getElementById('newsContent').innerHTML = '<div class="no-data">Không có dữ liệu</div>'; }
-    else {
-      document.getElementById('newsContent').innerHTML = `<div class="news-list">${data.slice(0, 20).map(n => `
-        <div class="news-item">
-          <div class="news-title">${n.url ? `<a href="${n.url}" target="_blank" rel="noopener">${n.title || n.headline || '—'}</a>` : (n.title || n.headline || '—')}</div>
-          <div class="news-meta">${n.published_date || n.date || ''} ${n.source ? '· ' + n.source : ''}</div>
-        </div>`).join('')}</div>`;
-    }
-  } catch(e) { document.getElementById('newsContent').innerHTML = `<div class="no-data">Lỗi: ${e.message}</div>`; }
-  // Events
-  try {
-    const data = await apiFetch(`/api/stock/${currentSymbol}/events`);
-    if (!data || !data.length) { document.getElementById('eventsContent').innerHTML = '<div class="no-data">Không có dữ liệu</div>'; }
-    else document.getElementById('eventsContent').innerHTML = makeTable(data, Object.keys(data[0]));
-  } catch(e) { document.getElementById('eventsContent').innerHTML = `<div class="no-data">Lỗi: ${e.message}</div>`; }
+// ─── TIN TỨC ──────────────────────────────────────────────────────────────────
+function loadNews() {
+  var el = document.getElementById('newsContent');
+  el.innerHTML = spinner();
+  apiFetch('/api/stock/' + currentSymbol + '/news')
+    .then(function(data) {
+      if (!data || !data.length) { el.innerHTML = '<div class="no-data">Khong co du lieu</div>'; return; }
+      var html = '<div class="news-list">';
+      data.slice(0, 20).forEach(function(n) {
+        var title = n.title || n.headline || '—';
+        var linked = n.url ? '<a href="' + n.url + '" target="_blank" rel="noopener">' + title + '</a>' : title;
+        var meta = (n.published_date || n.date || '') + (n.source ? ' · ' + n.source : '');
+        html += '<div class="news-item"><div class="news-title">' + linked + '</div><div class="news-meta">' + meta + '</div></div>';
+      });
+      html += '</div>';
+      el.innerHTML = html;
+    })
+    .catch(function(e) { el.innerHTML = '<div class="no-data">Loi: ' + e.message + '</div>'; });
+
+  var el2 = document.getElementById('eventsContent');
+  el2.innerHTML = spinner();
+  apiFetch('/api/stock/' + currentSymbol + '/events')
+    .then(function(data) {
+      el2.innerHTML = data && data.length ? makeTable(data, Object.keys(data[0])) : '<div class="no-data">Khong co du lieu</div>';
+    })
+    .catch(function(e) { el2.innerHTML = '<div class="no-data">Loi: ' + e.message + '</div>'; });
 }
 
-// ─── BẢNG GIÁ NHANH ──────────────────────────────────────────────────────────
-async function fetchBoard() {
-  const symbols = document.getElementById('boardInput').value.trim();
+// ─── BẢNG GIÁ ─────────────────────────────────────────────────────────────────
+function fetchBoard() {
+  var symbols = document.getElementById('boardInput').value.trim();
   if (!symbols) return;
-  document.getElementById('boardContent').innerHTML = '<div class="loading-box"><div class="spinner"></div></div>';
-  try {
-    const data = await apiFetch(`/api/board?symbols=${encodeURIComponent(symbols)}`);
-    if (!data || !data.length) { document.getElementById('boardContent').innerHTML = '<div class="no-data">Không có dữ liệu</div>'; return; }
-    document.getElementById('boardContent').innerHTML = makeTable(data, Object.keys(data[0]));
-  } catch(e) { document.getElementById('boardContent').innerHTML = `<div class="no-data">Lỗi: ${e.message}</div>`; }
+  document.getElementById('boardContent').innerHTML = spinner();
+  apiFetch('/api/board?symbols=' + encodeURIComponent(symbols))
+    .then(function(data) {
+      document.getElementById('boardContent').innerHTML = data && data.length ? makeTable(data, Object.keys(data[0])) : '<div class="no-data">Khong co du lieu</div>';
+    })
+    .catch(function(e) { document.getElementById('boardContent').innerHTML = '<div class="no-data">Loi: ' + e.message + '</div>'; });
 }
 
-// ─── THỊ TRƯỜNG QUỐC TẾ ──────────────────────────────────────────────────────
-async function fetchFx() {
-  const sym = document.getElementById('fxInput').value.trim().toUpperCase();
-  document.getElementById('fxResult').innerHTML = '<div class="spinner" style="width:18px;height:18px;border-width:2px;"></div>';
-  try {
-    const end = new Date().toISOString().split('T')[0];
-    const start = new Date(Date.now() - 30 * 86400000).toISOString().split('T')[0];
-    const data = await apiFetch(`/api/fx/${sym}/history?start=${start}&end=${end}`);
-    if (!data || !data.length) { document.getElementById('fxResult').textContent = 'Không có dữ liệu'; return; }
-    const last = data[data.length - 1];
-    document.getElementById('fxResult').innerHTML = makeMarketMini(sym, last, data);
-  } catch(e) { document.getElementById('fxResult').textContent = 'Lỗi: ' + e.message; }
+// ─── THỊ TRƯỜNG QUỐC TẾ ───────────────────────────────────────────────────────
+function fetchFx() { fetchMarket('fx', document.getElementById('fxInput').value.trim().toUpperCase(), 'fxResult'); }
+function fetchCrypto() { fetchMarket('crypto', document.getElementById('cryptoInput').value.trim().toUpperCase(), 'cryptoResult'); }
+function fetchWorldIndex() { fetchMarket('world-index', document.getElementById('indexInput').value.trim().toUpperCase(), 'indexResult'); }
+
+function fetchMarket(type, sym, resultId) {
+  document.getElementById(resultId).innerHTML = '<div class="spinner" style="width:18px;height:18px;border-width:2px;"></div>';
+  var end = new Date().toISOString().split('T')[0];
+  var s = new Date(Date.now() - 30 * 86400000).toISOString().split('T')[0];
+  apiFetch('/api/' + type + '/' + sym + '/history?start=' + s + '&end=' + end)
+    .then(function(data) {
+      if (!data || !data.length) { document.getElementById(resultId).textContent = 'Khong co du lieu'; return; }
+      var last = data[data.length - 1];
+      var prev = data.length > 1 ? (data[data.length - 2].close || 0) : 0;
+      var close = last.close || last.price || 0;
+      var chg = prev ? ((close - prev) / prev * 100) : 0;
+      var color = chg > 0 ? '#2ECC71' : chg < 0 ? '#E74C3C' : 'rgba(255,255,255,.5)';
+      var sign = chg >= 0 ? '+' : '';
+      var date = last.time || last.date || '';
+      document.getElementById(resultId).innerHTML =
+        '<div style="color:var(--white)">' +
+        '<span style="font-size:18px;font-weight:700;">' + fmtNum(close) + '</span>' +
+        '<span style="color:' + color + ';font-size:13px;margin-left:8px;">' + sign + chg.toFixed(2) + '%</span><br>' +
+        '<span style="font-size:11px;color:rgba(255,255,255,.35);">' + sym + ' · ' + date + '</span>' +
+        '</div>';
+    })
+    .catch(function(e) { document.getElementById(resultId).textContent = 'Loi: ' + e.message; });
 }
 
-async function fetchCrypto() {
-  const sym = document.getElementById('cryptoInput').value.trim().toUpperCase();
-  document.getElementById('cryptoResult').innerHTML = '<div class="spinner" style="width:18px;height:18px;border-width:2px;"></div>';
-  try {
-    const end = new Date().toISOString().split('T')[0];
-    const start = new Date(Date.now() - 30 * 86400000).toISOString().split('T')[0];
-    const data = await apiFetch(`/api/crypto/${sym}/history?start=${start}&end=${end}`);
-    if (!data || !data.length) { document.getElementById('cryptoResult').textContent = 'Không có dữ liệu'; return; }
-    const last = data[data.length - 1];
-    document.getElementById('cryptoResult').innerHTML = makeMarketMini(sym, last, data);
-  } catch(e) { document.getElementById('cryptoResult').textContent = 'Lỗi: ' + e.message; }
-}
-
-async function fetchWorldIndex() {
-  const sym = document.getElementById('indexInput').value.trim().toUpperCase();
-  document.getElementById('indexResult').innerHTML = '<div class="spinner" style="width:18px;height:18px;border-width:2px;"></div>';
-  try {
-    const end = new Date().toISOString().split('T')[0];
-    const start = new Date(Date.now() - 30 * 86400000).toISOString().split('T')[0];
-    const data = await apiFetch(`/api/world-index/${sym}/history?start=${start}&end=${end}`);
-    if (!data || !data.length) { document.getElementById('indexResult').textContent = 'Không có dữ liệu'; return; }
-    const last = data[data.length - 1];
-    document.getElementById('indexResult').innerHTML = makeMarketMini(sym, last, data);
-  } catch(e) { document.getElementById('indexResult').textContent = 'Lỗi: ' + e.message; }
-}
-
-function makeMarketMini(sym, last, allData) {
-  const close = last.close || last.price || 0;
-  const prev = allData.length > 1 ? (allData[allData.length - 2].close || 0) : 0;
-  const chg = prev ? ((close - prev) / prev * 100) : 0;
-  const color = chg > 0 ? '#2ECC71' : chg < 0 ? '#E74C3C' : 'rgba(255,255,255,.5)';
-  const date = last.time || last.date || '';
-  return `<div style="color:var(--white)">
-    <span style="font-size:18px;font-weight:700;">${fmtNum(close)}</span>
-    <span style="color:${color};font-size:13px;margin-left:8px;">${chg >= 0 ? '+' : ''}${chg.toFixed(2)}%</span><br>
-    <span style="font-size:11px;color:rgba(255,255,255,.35);">${sym} · ${date}</span>
-  </div>`;
-}
-
-// ─── RENDER TABLE ─────────────────────────────────────────────────────────────
-const COL_LABELS = {
-  symbol:'Mã', open:'Mở cửa', high:'Cao nhất', low:'Thấp nhất', close:'Đóng cửa',
-  volume:'KL', time:'Thời gian', date:'Ngày', price:'Giá',
-  company_name:'Tên công ty', exchange:'Sàn', industry_name:'Ngành',
+// ─── TABLE BUILDER ────────────────────────────────────────────────────────────
+var COL_LABELS = {
+  symbol:'Ma', open:'Mo cua', high:'Cao nhat', low:'Thap nhat', close:'Dong cua',
+  volume:'KL', time:'Thoi gian', date:'Ngay', price:'Gia',
+  company_name:'Ten cong ty', exchange:'San', industry_name:'Nganh',
   pe:'P/E', pb:'P/B', roe:'ROE', roa:'ROA', eps:'EPS',
-  market_cap:'Vốn hóa', outstanding_share:'CP lưu hành',
-  owner_percent:'Tỷ lệ sở hữu', quantity:'Số lượng',
-  full_name:'Họ tên', position:'Chức vụ',
-  title:'Tiêu đề', published_date:'Ngày đăng', source:'Nguồn',
-  event_name:'Sự kiện', event_date:'Ngày', exercise_date:'Ngày thực hiện',
-  match_price:'Giá khớp', match_vol:'KL khớp', ref:'Tham chiếu',
-  ceil:'Trần', floor:'Sàn GD', foreign_buy:'NN mua', foreign_sell:'NN bán',
-  net_change:'Thay đổi', percent_change:'% Thay đổi',
+  market_cap:'Von hoa', outstanding_share:'CP luu hanh',
+  owner_percent:'Ty le so huu', quantity:'So luong',
+  full_name:'Ho ten', position:'Chuc vu',
+  title:'Tieu de', published_date:'Ngay dang', source:'Nguon',
+  event_name:'Su kien', event_date:'Ngay', exercise_date:'Ngay TH',
+  match_price:'Gia khop', match_vol:'KL khop', ref:'Tham chieu',
+  ceil:'Tran', floor:'San', foreign_buy:'NN mua', foreign_sell:'NN ban',
+  net_change:'Thay doi', percent_change:'% Thay doi',
 };
 
-const NUM_FIELDS = new Set(['open','high','low','close','price','match_price','ref','ceil','floor',
+var NUM_FIELDS = ['open','high','low','close','price','match_price','ref','ceil','floor',
   'pe','pb','ps','roe','roa','eps','market_cap','net_asset','book_value',
   'volume','match_vol','quantity','outstanding_share','issue_share',
   'foreign_buy','foreign_sell','percent_change','net_change',
   'owner_percent','foreign_percent','revenue','profit','equity',
-  'total_asset','total_debt','gross_profit','operating_profit','net_profit',
-]);
+  'total_asset','total_debt','gross_profit','operating_profit','net_profit'];
 
-function makeTable(data, cols, maxRows = 50) {
-  const rows = data.slice(0, maxRows);
-  const th = cols.map(c => '<th>' + (COL_LABELS[c] || c.replace(/_/g,' ')) + '</th>').join('');
-  const tbody = rows.map(function(row) {
-    const tds = cols.map(function(c) {
-      let v = row[c];
-      const isNum = NUM_FIELDS.has(c) || typeof v === 'number';
+var PCT_FIELDS = ['percent_change','roe','roa','owner_percent','foreign_percent'];
+var VOL_FIELDS = ['volume','match_vol','quantity','outstanding_share','issue_share','market_cap'];
+var PRC_FIELDS = ['open','high','low','close','price','match_price','ref','ceil','floor','net_change'];
+
+function makeTable(data, cols, maxRows) {
+  if (!maxRows) maxRows = 50;
+  var rows = data.slice(0, maxRows);
+  var th = cols.map(function(c) {
+    return '<th>' + (COL_LABELS[c] || c.replace(/_/g, ' ')) + '</th>';
+  }).join('');
+
+  var tbody = rows.map(function(row) {
+    var tds = cols.map(function(c) {
+      var v = row[c];
+      var isNum = NUM_FIELDS.indexOf(c) >= 0 || typeof v === 'number';
       if (v == null || v === '') {
         v = '—';
       } else if (typeof v === 'number') {
-        if (['percent_change','roe','roa','owner_percent','foreign_percent'].includes(c)) {
-          v = fmtNum(v) + '%';
-        } else if (['volume','match_vol','quantity','outstanding_share','issue_share','market_cap'].includes(c)) {
-          v = fmtVolume(v);
-        } else if (['open','high','low','close','price','match_price','ref','ceil','floor','net_change'].includes(c)) {
-          v = fmtPrice(v);
-        } else {
-          v = fmtNum(v);
-        }
+        if (PCT_FIELDS.indexOf(c) >= 0) v = fmtNum(v) + '%';
+        else if (VOL_FIELDS.indexOf(c) >= 0) v = fmtVolume(v);
+        else if (PRC_FIELDS.indexOf(c) >= 0) v = fmtPrice(v);
+        else v = fmtNum(v);
       }
-      let cls = isNum ? 'num' : '';
-      if (['percent_change','net_change'].includes(c) && typeof row[c] === 'number') {
-        if (row[c] > 0) cls += ' up';
-        else if (row[c] < 0) cls += ' dn';
+      var cls = isNum ? 'num' : '';
+      if (['percent_change','net_change'].indexOf(c) >= 0 && typeof row[c] === 'number') {
+        cls += row[c] > 0 ? ' up' : row[c] < 0 ? ' dn' : '';
       }
       return '<td class="' + cls + '">' + v + '</td>';
     }).join('');
     return '<tr>' + tds + '</tr>';
   }).join('');
+
   return '<div class="data-table-wrap"><table class="data-table"><thead><tr>' + th + '</tr></thead><tbody>' + tbody + '</tbody></table></div>';
 }
 
-// ─── FORMAT HELPERS ───────────────────────────────────────────────────────────
+// ─── FORMAT ───────────────────────────────────────────────────────────────────
 function fmtNum(n) {
   if (n == null || isNaN(n)) return '—';
-  return Number(n).toLocaleString('vi-VN', {maximumFractionDigits: 2});
+  return Number(n).toLocaleString('vi-VN', { maximumFractionDigits: 2 });
 }
 function fmtPrice(n) {
   if (n == null || isNaN(n)) return '—';
-  return Number(n).toLocaleString('vi-VN', {maximumFractionDigits: 0});
+  return Number(n).toLocaleString('vi-VN', { maximumFractionDigits: 0 });
 }
 function fmtVolume(n) {
   if (n == null || isNaN(n)) return '—';
-  if (n >= 1e9) return (n / 1e9).toFixed(1) + ' tỷ';
+  if (n >= 1e9) return (n / 1e9).toFixed(1) + ' ty';
   if (n >= 1e6) return (n / 1e6).toFixed(1) + ' tr';
   if (n >= 1e3) return (n / 1e3).toFixed(0) + 'k';
   return Number(n).toLocaleString('vi-VN');
 }
 function fmtBillion(n) {
   if (n == null || isNaN(n)) return '—';
-  if (n >= 1e12) return (n / 1e12).toFixed(1) + ' nghìn tỷ';
-  if (n >= 1e9) return (n / 1e9).toFixed(0) + ' tỷ';
+  if (n >= 1e12) return (n / 1e12).toFixed(1) + ' nghin ty';
+  if (n >= 1e9) return (n / 1e9).toFixed(0) + ' ty';
   return fmtNum(n);
 }
-
-// ─── CHECK URL PARAM ─────────────────────────────────────────────────────────
-(function() {
-  const params = new URLSearchParams(window.location.search);
-  const sym = params.get('symbol') || params.get('s');
-  if (sym) {
-    document.getElementById('symbolInput').value = sym.toUpperCase();
-    setTimeout(doSearch, 100);
-  }
-})();
+function spinner() {
+  return '<div class="loading-box"><div class="spinner"></div><div class="loading-text">Dang tai...</div></div>';
+}
 </script>
 </body>
 </html>
