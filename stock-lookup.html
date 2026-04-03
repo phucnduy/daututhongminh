@@ -699,13 +699,13 @@ function loadIntradayForHeader() {
       if (!data||!data.length) return;
       var last = data[data.length-1];
       var price = last.price||last.close||last.match_price; if (!price) return;
-      document.getElementById('hPrice').textContent = fmtP(price);
+      document.getElementById('hPrice').textContent = fmtPVND(price) + ' đ';
       var ref = data[0].ref||data[0].reference_price;
       if (ref) {
         var chg = price-ref; var pct = ref?(chg/ref*100):0;
         var el = document.getElementById('hChange');
         el.className = 'stock-change '+(chg>0?'up':chg<0?'dn':'flat');
-        el.textContent = (chg>0?'+':'')+fmtP(chg)+' ('+(pct>0?'+':'')+pct.toFixed(2)+'%)';
+        el.textContent = (chg>0?'+':'')+fmtPVND(chg)+' đ ('+(pct>0?'+':'')+pct.toFixed(2)+'%)';
       }
     }).catch(function(){});
 }
@@ -1065,7 +1065,7 @@ function mkSimpleTable(data, maxR) {
         var cls='num'; var display;
         if(PCT_F.indexOf(c)>=0) display=fmtN(v)+'%';
         else if(VOL_F.indexOf(c)>=0) display=fmtV(v);
-        else if(PRC_F.indexOf(c)>=0) display=fmtP(v);
+        else if(PRC_F.indexOf(c)>=0) display=fmtPVND(v)+' đ';
         else display=fmtN(v);
         if(['percent_change','net_change'].indexOf(c)>=0) cls+=v>0?' up':v<0?' dn':'';
         return '<td class="'+cls+'">'+display+'</td>';
@@ -1080,6 +1080,7 @@ function mkSimpleTable(data, maxR) {
 // ─── FORMAT ───────────────────────────────────────────────────────────────────
 function fmtN(n){if(n==null||isNaN(n))return '—';return Number(n).toLocaleString('vi-VN',{maximumFractionDigits:2});}
 function fmtP(n){if(n==null||isNaN(n))return '—';return Number(n).toLocaleString('vi-VN',{maximumFractionDigits:0});}
+function fmtPVND(n){if(n==null||isNaN(n))return '—';return Number(n*1000).toLocaleString('vi-VN',{maximumFractionDigits:0});}
 function fmtV(n){if(n==null||isNaN(n))return '—';if(n>=1e9)return(n/1e9).toFixed(2)+' tỷ';if(n>=1e6)return(n/1e6).toFixed(1)+' tr';if(n>=1e3)return(n/1e3).toFixed(0)+'k';return Number(n).toLocaleString('vi-VN');}
 function fmtB(n){if(n==null||isNaN(n))return '—';if(n>=1e12)return(n/1e12).toFixed(1)+' nghìn tỷ';if(n>=1e9)return(n/1e9).toFixed(0)+' tỷ';return fmtN(n);}
 function spinner(){return '<div class="loading-box"><div class="spinner"></div><div class="loading-text">Đang tải...</div></div>';}
@@ -1186,7 +1187,7 @@ async function runGeminiAnalysis() {
     var ctx = buildContext(sym, ov, latestP, priceChg1m, priceChg6m, ma20, ma50, ma200, maxH6m, minL6m, avgVol20, rsi14, r0, r1, i0, i1, b0, c0, topSH);
 
     // Goi Gemini API
-    var SYS = 'Ban la chuyen gia phan tich chung khoan Viet Nam 20 nam kinh nghiem. Phan tich toan dien, thuc chat, bang tieng Viet.';
+    var SYS = 'Ban la chuyen gia phan tich chung khoan Viet Nam. Viet bao cao HOAN CHINH, KHONG DUOC DUNG GIUA CHUNG. Neu sap het token thi viet ngan hon nhung PHAI HOAN CHINH 7 MUC. Dung tieng Viet. Gia co phieu tinh bang nghin dong (VD: 27.8 = 27,800 dong).';
     var REQ = [
       'Viet BAO CAO PHAN TICH CO PHIEU DAY DU, khong duoc cat ngan. Gom du 7 muc sau:',
       '',
@@ -1232,7 +1233,7 @@ async function runGeminiAnalysis() {
       headers: {'Content-Type':'application/json'},
       body: JSON.stringify({
         contents: [{parts:[{text: prompt}]}],
-        generationConfig: {maxOutputTokens: 8000, temperature: 0.2}
+        generationConfig: {maxOutputTokens: 16000, temperature: 0.15, topP: 0.95}
       })
     });
 
@@ -1242,8 +1243,30 @@ async function runGeminiAnalysis() {
     }
 
     var gemJson = await gemResp.json();
-    var aiText = gemJson.candidates && gemJson.candidates[0] && gemJson.candidates[0].content && gemJson.candidates[0].content.parts
-      ? gemJson.candidates[0].content.parts[0].text : 'Không có kết quả';
+    var candidate = gemJson.candidates && gemJson.candidates[0];
+    var aiText = candidate && candidate.content && candidate.content.parts
+      ? candidate.content.parts[0].text : 'Không có kết quả';
+    var finishReason = candidate ? candidate.finishReason : '';
+    // Neu bi cat do MAX_TOKENS, tu dong goi tiep lan 2 voi phan con lai
+    if (finishReason === 'MAX_TOKENS' && aiText.length > 100) {
+      var continueResp = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key='+key, {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({
+          contents: [
+            {role:'user', parts:[{text: SYS + '\n\nDATA:\n' + ctx + '\n\nYEU CAU:\n' + REQ}]},
+            {role:'model', parts:[{text: aiText}]},
+            {role:'user', parts:[{text: 'Tiep tuc viet phan con lai cua bao cao, bat dau tu dung ban vua viet cuoi cung. Khong lap lai phan da viet.'}]}
+          ],
+          generationConfig: {maxOutputTokens: 8000, temperature: 0.15}
+        })
+      });
+      if (continueResp.ok) {
+        var continueJson = await continueResp.json();
+        var cont = continueJson.candidates && continueJson.candidates[0] && continueJson.candidates[0].content;
+        if (cont && cont.parts) aiText += cont.parts[0].text;
+      }
+    }
 
     var result = {sym:sym, ov:ov, latestP:latestP, priceChg1m:priceChg1m, priceChg6m:priceChg6m,
       ma20:ma20, ma50:ma50, ma200:ma200, maxH6m:maxH6m, minL6m:minL6m,
@@ -1266,10 +1289,10 @@ function buildContext(sym, ov, price, chg1m, chg6m, ma20, ma50, ma200, hi, lo, v
   lines.push('Von hoa: '+fmtB(ov.market_cap)+' | Room NN: '+g(ov,'foreign_percent')+'%');
   lines.push('Co dong lon: '+topSH);
   lines.push('=== GIA & KY THUAT ===');
-  lines.push('Gia hien tai: '+fmtP(price)+' d | Thay doi 1T: '+chg1m.toFixed(1)+'% | 6T: '+chg6m.toFixed(1)+'%');
-  lines.push('MA20: '+fmtP(ma20)+' | MA50: '+fmtP(ma50)+' | MA200: '+fmtP(ma200));
+  lines.push('Gia hien tai: '+fmtPVND(price)+' dong | Thay doi 1T: '+chg1m.toFixed(1)+'% | 6T: '+chg6m.toFixed(1)+'%');
+  lines.push('MA20: '+fmtPVND(ma20)+' dong | MA50: '+fmtPVND(ma50)+' dong | MA200: '+fmtPVND(ma200)+' dong');
   lines.push('Gia vs MA20: '+(price>ma20?'Tren':'Duoi')+' | vs MA50: '+(price>ma50?'Tren':'Duoi')+' | vs MA200: '+(price>ma200?'Tren':'Duoi'));
-  lines.push('Dinh 6T: '+fmtP(hi)+' | Day 6T: '+fmtP(lo)+' | Khoang cach dinh: '+((hi>0?((price-hi)/hi*100):0).toFixed(1))+'%');
+  lines.push('Dinh 6T: '+fmtPVND(hi)+' dong | Day 6T: '+fmtPVND(lo)+' dong | Khoang cach dinh: '+((hi>0?((price-hi)/hi*100):0).toFixed(1))+'%');
   lines.push('RSI(14): '+fmtN(rsi,1)+' ('+(rsi>70?'Qua mua':rsi<30?'Qua ban':'Trung tinh')+')');
   lines.push('Volume TB 20 phien: '+fmtV(vol));
   lines.push('=== DINH GIA ===');
@@ -1302,12 +1325,12 @@ function renderAnalysis(r) {
 
   // KPI bar
   var kpis = [
-    {l:'Giá', v: fmtP(r.latestP)+'đ', c:''},
+    {l:'Giá', v: fmtPVND(r.latestP)+' đ', c:''},
     {l:'1 tháng', v: (r.priceChg1m>0?'+':'')+r.priceChg1m.toFixed(1)+'%', c: r.priceChg1m>0?'up':'dn'},
     {l:'6 tháng', v: (r.priceChg6m>0?'+':'')+r.priceChg6m.toFixed(1)+'%', c: r.priceChg6m>0?'up':'dn'},
     {l:'RSI(14)', v: fmtN(r.rsi14,1), c: r.rsi14>70?'dn':r.rsi14<30?'up':''},
-    {l:'MA20', v: fmtP(r.ma20)+'đ', c: r.latestP>r.ma20?'up':'dn'},
-    {l:'MA50', v: fmtP(r.ma50)+'đ', c: r.latestP>r.ma50?'up':'dn'},
+    {l:'MA20', v: fmtPVND(r.ma20)+' đ', c: r.latestP>r.ma20?'up':'dn'},
+    {l:'MA50', v: fmtPVND(r.ma50)+' đ', c: r.latestP>r.ma50?'up':'dn'},
     {l:'P/E', v: fmtN(r.ov.pe), c:''},
     {l:'P/B', v: fmtN(r.ov.pb), c:''},
   ];
@@ -1325,8 +1348,8 @@ function renderAnalysis(r) {
 
   var techBar = '<div style="background:var(--white);border:1px solid var(--g2);border-radius:8px;padding:14px 18px;margin-bottom:20px;display:flex;align-items:center;gap:24px;flex-wrap:wrap;">' +
     '<div><span style="font-size:11px;color:var(--g3);display:block;">XU HƯỚNG</span><span style="font-weight:700;color:'+trendColor+'">'+trend+'</span></div>' +
-    '<div><span style="font-size:11px;color:var(--g3);display:block;">HỖ TRỢ</span><span style="font-weight:600;color:var(--navy);">'+fmtP(r.minL6m)+' đ</span></div>' +
-    '<div><span style="font-size:11px;color:var(--g3);display:block;">KHÁNG CỰ</span><span style="font-weight:600;color:var(--navy);">'+fmtP(r.maxH6m)+' đ</span></div>' +
+    '<div><span style="font-size:11px;color:var(--g3);display:block;">HỖ TRỢ</span><span style="font-weight:600;color:var(--navy);">'+fmtPVND(r.minL6m)+' đ</span></div>' +
+    '<div><span style="font-size:11px;color:var(--g3);display:block;">KHÁNG CỰ</span><span style="font-weight:600;color:var(--navy);">'+fmtPVND(r.maxH6m)+' đ</span></div>' +
     '<div><span style="font-size:11px;color:var(--g3);display:block;">RSI(14)</span><span style="font-weight:600;color:'+(r.rsi14>70?'#c0392b':r.rsi14<30?'#1A7A4A':'var(--navy)')+'">'+fmtN(r.rsi14,0)+(r.rsi14>70?' - Quá mua':r.rsi14<30?' - Quá bán':' - Trung tính')+'</span></div>' +
     '<div style="margin-left:auto;font-size:11px;color:var(--g3);">Cập nhật: '+r.ts.toLocaleTimeString('vi-VN')+'</div>' +
     '</div>';
