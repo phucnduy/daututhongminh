@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Phân tích ngành – Đầu Tư Thông Minh</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --navy:#08192E;--navy2:#0D2B52;--navy3:#1B4F8A;
+  --gold:#C9A84C;--gold2:#E8C86A;
+  --green:#1A7A4A;--red:#c0392b;--amber:#e67e22;
+  --cream:#F8F5EE;--g1:#F2F4F7;--g2:#D4D8E1;--g3:#8A94A6;
+  --text:#1A2438;--white:#fff;
+}
+body{font-family:'Inter',system-ui,sans-serif;background:var(--cream);color:var(--text);font-size:14px;}
+/* ─── HEADER ─── */
+.hdr{background:var(--navy);padding:0 32px;height:56px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(201,168,76,.2);}
+.logo{color:var(--white);font-size:15px;font-weight:700;display:flex;align-items:center;gap:10px;}
+.logo-dot{width:8px;height:8px;border-radius:50%;background:var(--gold);}
+.hdr-right{font-size:11px;color:rgba(255,255,255,.4);}
+/* ─── TOOLBAR ─── */
+.toolbar{background:var(--white);border-bottom:1px solid var(--g2);padding:12px 32px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;position:sticky;top:0;z-index:100;}
+.toolbar-label{font-size:12px;font-weight:600;color:var(--g3);text-transform:uppercase;letter-spacing:.06em;}
+select{padding:7px 12px;font-size:13px;border:1.5px solid var(--g2);border-radius:7px;background:var(--white);color:var(--text);outline:none;cursor:pointer;min-width:260px;}
+select:focus{border-color:var(--navy3);}
+.load-btn{background:var(--navy3);color:var(--white);border:none;border-radius:7px;padding:8px 22px;font-size:13px;font-weight:700;cursor:pointer;}
+.load-btn:hover{background:var(--navy2);}
+.load-btn:disabled{opacity:.5;cursor:not-allowed;}
+.export-btn{background:var(--gold);color:var(--navy2);border:none;border-radius:7px;padding:8px 16px;font-size:13px;font-weight:700;cursor:pointer;display:none;}
+.export-btn:hover{opacity:.85;}
+.status-chip{font-size:12px;color:var(--g3);margin-left:4px;}
+/* ─── PROGRESS ─── */
+.prog-wrap{height:3px;background:var(--g2);display:none;}
+.prog-bar{height:100%;background:var(--navy3);transition:width .2s;width:0%;}
+/* ─── MAIN ─── */
+.main{max-width:1360px;margin:0 auto;padding:24px 24px 60px;}
+/* ─── SECTION TITLES ─── */
+.sec-hdr{display:flex;align-items:center;gap:10px;margin:28px 0 14px;}
+.sec-hdr-line{flex:1;height:1px;background:var(--g2);}
+.sec-title{font-size:13px;font-weight:700;color:var(--g3);text-transform:uppercase;letter-spacing:.08em;white-space:nowrap;}
+/* ─── KPI ROW ─── */
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin-bottom:8px;}
+.kpi{background:var(--white);border:1px solid var(--g2);border-radius:9px;padding:14px 16px;}
+.kpi-l{font-size:10.5px;color:var(--g3);font-weight:600;text-transform:uppercase;letter-spacing:.07em;margin-bottom:5px;}
+.kpi-v{font-size:20px;font-weight:700;color:var(--navy);}
+.kpi-sub{font-size:11px;color:var(--g3);margin-top:3px;}
+.kpi-v.up{color:var(--green);}
+.kpi-v.dn{color:var(--red);}
+.kpi-v.gold{color:#7a5200;}
+/* ─── CHARTS GRID ─── */
+.charts-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(460px,1fr));gap:16px;margin-bottom:8px;}
+.chart-card{background:var(--white);border:1px solid var(--g2);border-radius:10px;padding:18px 18px 14px;}
+.chart-card-title{font-size:12.5px;font-weight:700;color:var(--navy);margin-bottom:14px;}
+.chart-wrap{position:relative;}
+/* ─── TABLE ─── */
+.tbl-card{background:var(--white);border:1px solid var(--g2);border-radius:10px;overflow:hidden;margin-bottom:8px;}
+.tbl-toolbar{padding:12px 16px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--g1);flex-wrap:wrap;}
+.tbl-title{font-size:13px;font-weight:700;color:var(--navy);}
+.search-box{padding:6px 12px;font-size:12px;border:1px solid var(--g2);border-radius:6px;outline:none;flex:1;max-width:200px;}
+.sort-hint{font-size:11px;color:var(--g3);margin-left:auto;}
+.tbl-scroll{overflow-x:auto;}
+table{width:100%;border-collapse:collapse;font-size:12.5px;white-space:nowrap;}
+thead th{background:var(--navy);color:rgba(255,255,255,.85);font-weight:600;font-size:11px;padding:9px 11px;text-align:left;cursor:pointer;user-select:none;letter-spacing:.03em;}
+thead th:hover{background:var(--navy2);}
+thead th.r{text-align:right;}
+thead th .sort-icon{opacity:.4;margin-left:4px;}
+thead th.sorted .sort-icon{opacity:1;color:var(--gold2);}
+td{padding:8px 11px;border-bottom:1px solid var(--g1);color:var(--text);}
+tr:last-child td{border-bottom:none;}
+tr:hover td{background:#f7f9fc;}
+td.r{text-align:right;font-variant-numeric:tabular-nums;}
+td.bold{font-weight:700;}
+td.up{color:var(--green);font-weight:600;}
+td.dn{color:var(--red);font-weight:600;}
+td.best{color:var(--green);font-weight:700;}
+td.worst{color:var(--red);}
+.bar-mini{display:inline-block;height:6px;border-radius:3px;vertical-align:middle;margin-right:6px;}
+/* ─── BADGES ─── */
+.badge{display:inline-block;padding:2px 7px;border-radius:4px;font-size:10.5px;font-weight:700;}
+.b-hi{background:#FCEBEB;color:#791F1F;}
+.b-md{background:#FAEEDA;color:#633806;}
+.b-lo{background:#EAF3DE;color:#27500A;}
+/* ─── EMPTY ─── */
+.empty{text-align:center;padding:60px 20px;color:var(--g3);}
+.empty-icon{font-size:40px;margin-bottom:12px;}
+/* ─── TAB SWITCHER ─── */
+.tabs{display:flex;gap:2px;margin-bottom:16px;background:var(--white);border:1px solid var(--g2);border-radius:8px;padding:4px;width:fit-content;}
+.tab-btn{padding:6px 16px;font-size:12.5px;font-weight:600;border:none;background:none;border-radius:6px;cursor:pointer;color:var(--g3);}
+.tab-btn.active{background:var(--navy3);color:var(--white);}
+/* ─── TOOLTIP ─── */
+.tooltip{position:relative;}
+.tooltip:hover::after{content:attr(data-tip);position:absolute;bottom:120%;left:50%;transform:translateX(-50%);background:var(--navy);color:#fff;font-size:11px;padding:4px 8px;border-radius:5px;white-space:nowrap;z-index:99;pointer-events:none;}
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <div class="logo"><div class="logo-dot"></div>Đầu Tư Thông Minh · Phân tích ngành</div>
+  <div class="hdr-right">api.daututhongminh.net · vnstock</div>
+</div>
+
+<div class="toolbar">
+  <span class="toolbar-label">Ngành:</span>
+  <select id="industrySel" onchange="onIndustryChange()">
+    <option value="">— Chọn ngành —</option>
+    <optgroup label="Tài chính">
+      <option value="__CK__">Chứng khoán</option>
+      <option value="Ngân hàng">Ngân hàng</option>
+      <option value="Bảo hiểm phi nhân thọ">Bảo hiểm phi nhân thọ</option>
+      <option value="Bảo hiểm nhân thọ">Bảo hiểm nhân thọ</option>
+      <option value="Bất động sản">Bất động sản</option>
+    </optgroup>
+    <optgroup label="Công nghệ">
+      <option value="Phần mềm &amp; Dịch vụ Máy tính">Phần mềm & CNTT</option>
+      <option value="Thiết bị và Phần cứng">Thiết bị & Phần cứng</option>
+    </optgroup>
+    <optgroup label="Hàng tiêu dùng">
+      <option value="Sản xuất thực phẩm">Thực phẩm</option>
+      <option value="Bia và đồ uống">Bia & đồ uống</option>
+      <option value="Bán lẻ">Bán lẻ</option>
+      <option value="Hàng gia dụng">Hàng gia dụng</option>
+      <option value="Dược phẩm">Dược phẩm</option>
+    </optgroup>
+    <optgroup label="Công nghiệp & Nguyên liệu">
+      <option value="Kim loại">Kim loại & Thép</option>
+      <option value="Xây dựng và Vật liệu">Xây dựng & Vật liệu</option>
+      <option value="Hóa chất">Hóa chất</option>
+      <option value="Vận tải">Vận tải</option>
+      <option value="Khai khoáng">Khai khoáng</option>
+    </optgroup>
+    <optgroup label="Năng lượng & Tiện ích">
+      <option value="Sản xuất &amp; Phân phối Điện">Điện</option>
+      <option value="Sản xuất Dầu khí">Dầu khí</option>
+      <option value="Nước &amp; Khí đốt">Nước & Khí đốt</option>
+    </optgroup>
+  </select>
+  <select id="periodSel">
+    <option value="quarter">Quý gần nhất</option>
+    <option value="annual">Năm gần nhất</option>
+  </select>
+  <button class="load-btn" id="loadBtn" onclick="loadIndustry()">Phân tích</button>
+  <button class="export-btn" id="exportBtn" onclick="exportCSV()">↓ Xuất CSV</button>
+  <span class="status-chip" id="statusChip"></span>
+</div>
+<div class="prog-wrap" id="progWrap"><div class="prog-bar" id="progBar"></div></div>
+
+<div class="main" id="main">
+  <div class="empty"><div class="empty-icon">📊</div><div style="font-size:15px;font-weight:600;color:var(--navy);margin-bottom:6px;">Chọn ngành để bắt đầu</div><div style="font-size:13px;">Dữ liệu được lấy trực tiếp từ api.daututhongminh.net</div></div>
+</div>
+
+<script>
+var API = 'https://api.daututhongminh.net';
+var allData = [];
+var sortCol = 'marketCap';
+var sortAsc = false;
+var activeFin = 'ratio';
+
+// ─── DANH SÁCH MÃ THEO NGÀNH ─────────────────────────────────────────────────
+var INDUSTRY_TICKERS = {
+  '__CK__': ['SSI','VND','HCM','MBS','VCI','CTS','AGR','FTS','SHS','BSI','VIX','APG','ORS','BVS','PSI','TVS','VDS','TCI','PHS','SBS','WSS'],
+  'Ngân hàng': ['VCB','BID','CTG','ACB','MBB','TCB','VPB','STB','HDB','LPB','SHB','EIB','NAB','TPB','MSB','BAB','OCB','VIB','ABB','SSB','BVB','KLB'],
+  'Bảo hiểm phi nhân thọ': ['BVH','PVI','PTI','BMI','MIG','VNR','BIC','PRE','PGI','ABI'],
+  'Bảo hiểm nhân thọ': ['BVH'],
+  'Bất động sản': ['VHM','VIC','NVL','KDH','PDR','DXG','BCM','CEO','DIG','HDG','ITC','KBC','LDG','Nam Long','NLG','PHR','QCG','SCR','TDC','TCH'],
+  'Phần mềm & Dịch vụ Máy tính': ['FPT','CMG','ELC','VGI','ITD','ONE','SAM'],
+  'Thiết bị và Phần cứng': ['VGI','ELC','VEC'],
+  'Sản xuất thực phẩm': ['VNM','MSN','SAB','MCH','HHC','ANV','IDI','MPC','VHC','ACL','ABT','CAN'],
+  'Bia và đồ uống': ['SAB','BHN'],
+  'Bán lẻ': ['MWG','PNJ','FRT','DGW','VRE'],
+  'Hàng gia dụng': ['REE','PLC','BMP','NTP','DHC'],
+  'Dược phẩm': ['DHG','IMP','DMC','TRA','PME','DVN','OPC','SPM'],
+  'Kim loại': ['HPG','HSG','NKG','TIS','TVN','VGS','VIS','SMC','POM','TLH'],
+  'Xây dựng và Vật liệu': ['VCS','PC1','FCN','HBC','CII','CTD','BCG','TV2','HHV','LCG','PHC','RCC'],
+  'Hóa chất': ['DGC','CSV','DCM','DPM','DDV','SFG','BFC','LAS'],
+  'Vận tải': ['VTP','GMD','HAH','TMS','PVT','SCS','ACV','VNA','SGN','NCT'],
+  'Khai khoáng': ['MSR','KSB','BMC','DHA','VQC'],
+  'Sản xuất & Phân phối Điện': ['POW','NT2','PPC','QTP','VSH','DNH','TMP','SHP','CHP','HND','GEG','REE','EVN','BSR','PVS'],
+  'Sản xuất Dầu khí': ['PVD','PVS','PVC','PVG','PXS','CNG'],
+  'Nước & Khí đốt': ['GAS','PGS','PGC','BSR'],
+};
+
+function onIndustryChange() {
+  var v = document.getElementById('industrySel').value;
+  if(v) {
+    document.getElementById('loadBtn').disabled = false;
+  }
+}
+
+// ─── FETCH ────────────────────────────────────────────────────────────────────
+async function apiFetch(path) {
+  var r = await fetch(API+path);
+  if(!r.ok) throw new Error('HTTP '+r.status);
+  var j = await r.json();
+  if(!j.success) throw new Error(j.error||'API error');
+  return j.data||[];
+}
+
+function gv(obj,k,mul){
+  if(!obj||obj[k]==null) return null;
+  var v=parseFloat(obj[k]);
+  return isNaN(v)?null:(mul?v*mul:v);
+}
+
+async function loadIndustry() {
+  var ind = document.getElementById('industrySel').value;
+  if(!ind) return;
+  var period = document.getElementById('periodSel').value;
+  var tickers = INDUSTRY_TICKERS[ind]||[];
+  if(!tickers.length){alert('Chưa có danh sách mã cho ngành này.');return;}
+
+  var btn = document.getElementById('loadBtn');
+  btn.disabled = true;
+  allData = [];
+  document.getElementById('progWrap').style.display='block';
+  document.getElementById('exportBtn').style.display='none';
+  document.getElementById('main').innerHTML='';
+
+  for(var i=0;i<tickers.length;i++){
+    var sym=tickers[i];
+    document.getElementById('statusChip').textContent='Đang tải '+sym+' ('+(i+1)+'/'+tickers.length+')...';
+    document.getElementById('progBar').style.width=Math.round((i+1)/tickers.length*100)+'%';
+    try {
+      var [ov,rat,inc,bal] = await Promise.all([
+        apiFetch('/api/stock/'+sym+'/overview'),
+        apiFetch('/api/stock/'+sym+'/ratio?period='+period).catch(()=>[]),
+        apiFetch('/api/stock/'+sym+'/income?period='+period).catch(()=>[]),
+        apiFetch('/api/stock/'+sym+'/balance-sheet?period='+period).catch(()=>[]),
+      ]);
+      var o=ov&&ov.length?ov[0]:{};
+      var r0=rat&&rat.length?rat[0]:{};
+      var i0=inc&&inc.length?inc[0]:{};
+      var b0=bal&&bal.length?bal[0]:{};
+      var yr=r0.Meta_yearReport||b0.yearReport||'';
+      var qr=r0.Meta_lengthReport||b0.lengthReport||'';
+      allData.push({
+        sym,
+        name: o.company_name||o.short_name||sym,
+        exchange: o.exchange||'',
+        industry: o.icb_name3||o.icb_name2||'',
+        // Dinh gia
+        marketCap: gv(r0,'Chỉ tiêu định giá_Market Capital (Bn. VND)'),
+        pe:        gv(r0,'Chỉ tiêu định giá_P/E'),
+        pb:        gv(r0,'Chỉ tiêu định giá_P/B'),
+        ps:        gv(r0,'Chỉ tiêu định giá_P/S'),
+        eps:       gv(r0,'Chỉ tiêu định giá_EPS (VND)'),
+        bvps:      gv(r0,'Chỉ tiêu định giá_BVPS (VND)'),
+        evEbitda:  gv(r0,'Chỉ tiêu định giá_EV/EBITDA'),
+        // Sinh loi
+        roe:       gv(r0,'Chỉ tiêu khả năng sinh lợi_ROE (%)',100),
+        roa:       gv(r0,'Chỉ tiêu khả năng sinh lợi_ROA (%)',100),
+        roic:      gv(r0,'Chỉ tiêu khả năng sinh lợi_ROIC (%)',100),
+        grossMgn:  gv(r0,'Chỉ tiêu khả năng sinh lợi_Gross Profit Margin (%)',100),
+        netMgn:    gv(r0,'Chỉ tiêu khả năng sinh lợi_Net Profit Margin (%)',100),
+        ebitMgn:   gv(r0,'Chỉ tiêu khả năng sinh lợi_EBIT Margin (%)',100),
+        divYield:  gv(r0,'Chỉ tiêu khả năng sinh lợi_Dividend yield (%)',100),
+        // Co cau von
+        de:        gv(r0,'Chỉ tiêu cơ cấu nguồn vốn_Debt/Equity'),
+        leverage:  gv(r0,'Chỉ tiêu thanh khoản_Financial Leverage'),
+        // Thanh khoan
+        currentR:  gv(r0,'Chỉ tiêu thanh khoản_Current Ratio'),
+        quickR:    gv(r0,'Chỉ tiêu thanh khoản_Quick Ratio'),
+        cashR:     gv(r0,'Chỉ tiêu thanh khoản_Cash Ratio'),
+        // Hieu qua
+        assetTO:   gv(r0,'Chỉ tiêu hiệu quả hoạt động_Asset Turnover'),
+        invTO:     gv(r0,'Chỉ tiêu hiệu quả hoạt động_Inventory Turnover'),
+        dso:       gv(r0,'Chỉ tiêu hiệu quả hoạt động_Days Sales Outstanding'),
+        // KQKD
+        revenue:   gv(i0,'Revenue (Bn. VND)'),
+        revGrowth: gv(i0,'Revenue YoY (%)',100),
+        grossProfit:gv(i0,'Gross Profit'),
+        ebit:      gv(i0,'Operating Profit/Loss'),
+        netProfit: gv(i0,'Net Profit For the Year')||gv(i0,'Attribute to parent company (Bn. VND)'),
+        netGrowth: gv(i0,'Attribute to parent company YoY (%)',100),
+        // CDKT
+        totalAsset:gv(b0,'TOTAL ASSETS (Bn. VND)'),
+        equity:    gv(b0,"OWNER'S EQUITY(Bn.VND)"),
+        stDebt:    gv(b0,'Short-term borrowings (Bn. VND)'),
+        ltDebt:    gv(b0,'Long-term borrowings (Bn. VND)'),
+        cash:      gv(b0,'Cash and cash equivalents (Bn. VND)'),
+        period: qr?'Q'+qr+'/'+yr:String(yr),
+        err: null,
+      });
+    } catch(e) {
+      allData.push({sym,name:sym,err:e.message,marketCap:null});
+    }
+  }
+
+  document.getElementById('statusChip').textContent=
+    allData.filter(d=>!d.err).length+'/'+tickers.length+' mã · '+new Date().toLocaleString('vi-VN');
+  document.getElementById('exportBtn').style.display='inline-block';
+  render();
+  btn.disabled=false;
+}
+
+// ─── RENDER ───────────────────────────────────────────────────────────────────
+function render(){
+  var valid=allData.filter(d=>!d.err);
+  var m=document.getElementById('main');
+  m.innerHTML='';
+
+  // KPIs
+  renderKPI(m,valid);
+  // Charts
+  renderCharts(m,valid);
+  // Table
+  renderTable(m);
+}
+
+function fN(v,d=2){if(v==null)return '—';return v.toLocaleString('vi-VN',{maximumFractionDigits:d});}
+function fB(v){if(v==null)return '—';var b=v/1e9;if(Math.abs(b)>=1000)return fN(b/1000,1)+' nghìn tỷ';return fN(b,0)+' tỷ';}
+function fP(v){if(v==null)return '—';return (v*1000).toLocaleString('vi-VN',{maximumFractionDigits:0});}
+function avg(arr){var v=arr.filter(x=>x!=null);return v.length?v.reduce((s,x)=>s+x,0)/v.length:null;}
+function mmax(arr){var v=arr.filter(x=>x!=null);return v.length?Math.max(...v):null;}
+function mmin(arr){var v=arr.filter(x=>x!=null);return v.length?Math.min(...v):null;}
+
+function renderKPI(m,valid){
+  var pe=avg(valid.map(d=>d.pe));
+  var pb=avg(valid.map(d=>d.pb));
+  var roe=avg(valid.map(d=>d.roe));
+  var roa=avg(valid.map(d=>d.roa));
+  var netMgn=avg(valid.map(d=>d.netMgn));
+  var de=avg(valid.map(d=>d.de));
+  var totCap=valid.reduce((s,d)=>s+(d.marketCap||0),0);
+  var sec=document.createElement('div');
+  sec.innerHTML='<div class="sec-hdr"><span class="sec-title">Tổng quan ngành</span><div class="sec-hdr-line"></div></div>';
+  var kpiDiv=document.createElement('div');kpiDiv.className='kpi-grid';
+  kpiDiv.innerHTML=[
+    kpiH('Tổng vốn hóa',fB(totCap*1e9),'','Tổng market cap các mã'),
+    kpiH('Số mã',valid.length+' / '+allData.length,'','Mã có dữ liệu / tổng mã'),
+    kpiH('P/E bình quân',pe?fN(pe,1)+'x':'—','gold',''),
+    kpiH('P/B bình quân',pb?fN(pb,1)+'x':'—','gold',''),
+    kpiH('ROE bình quân',roe?fN(roe,1)+'%':'—',roe&&roe>15?'up':'',''),
+    kpiH('ROA bình quân',roa?fN(roa,1)+'%':'—',roa&&roa>8?'up':'',''),
+    kpiH('Biên LN ròng TB',netMgn?fN(netMgn,1)+'%':'—',netMgn&&netMgn>10?'up':netMgn&&netMgn<0?'dn':'',''),
+    kpiH('D/E bình quân',de?fN(de,2)+'x':'—',de&&de>3?'dn':'',''),
+  ].join('');
+  sec.appendChild(kpiDiv);
+  m.appendChild(sec);
+}
+function kpiH(l,v,c,tip){
+  return '<div class="kpi tooltip" data-tip="'+tip+'"><div class="kpi-l">'+l+'</div><div class="kpi-v '+c+'">'+v+'</div></div>';
+}
+
+function renderCharts(m,valid){
+  var sec=document.createElement('div');
+  sec.innerHTML='<div class="sec-hdr"><span class="sec-title">Biểu đồ so sánh</span><div class="sec-hdr-line"></div></div>';
+  var grid=document.createElement('div');grid.className='charts-grid';
+
+  // Chart 1: ROE vs ROA
+  grid.appendChild(makeBarChart('So sánh ROE & ROA (%)',
+    valid.map(d=>d.sym),
+    [
+      {label:'ROE',data:valid.map(d=>d.roe!=null?+d.roe.toFixed(2):null),color:'#1B4F8A'},
+      {label:'ROA',data:valid.map(d=>d.roa!=null?+d.roa.toFixed(2):null),color:'#C9A84C'},
+    ],240,'%'));
+
+  // Chart 2: P/E vs P/B
+  grid.appendChild(makeBarChart('Định giá P/E & P/B',
+    valid.map(d=>d.sym),
+    [
+      {label:'P/E',data:valid.map(d=>d.pe!=null?+d.pe.toFixed(1):null),color:'#1B4F8A'},
+      {label:'P/B',data:valid.map(d=>d.pb!=null?+d.pb.toFixed(2):null),color:'#E24B4A'},
+    ],240,'x'));
+
+  // Chart 3: Bien LN
+  grid.appendChild(makeBarChart('Biên lợi nhuận (%)',
+    valid.map(d=>d.sym),
+    [
+      {label:'Biên LN gộp',data:valid.map(d=>d.grossMgn!=null?+d.grossMgn.toFixed(1):null),color:'#1D9E75'},
+      {label:'Biên LN ròng',data:valid.map(d=>d.netMgn!=null?+d.netMgn.toFixed(1):null),color:'#1B4F8A'},
+    ],240,'%'));
+
+  // Chart 4: Doanh thu (bar horizontal by market cap)
+  var sortedCap=valid.filter(d=>d.marketCap!=null).sort((a,b)=>b.marketCap-a.marketCap);
+  grid.appendChild(makeHBarChart('Vốn hóa thị trường (tỷ đồng)',
+    sortedCap.map(d=>d.sym),
+    sortedCap.map(d=>d.marketCap!=null?+(d.marketCap/1e9).toFixed(0):null),
+    '#1B4F8A',Math.min(280,sortedCap.length*22+60)));
+
+  // Chart 5: D/E
+  var sortedDE=valid.filter(d=>d.de!=null).sort((a,b)=>b.de-a.de);
+  grid.appendChild(makeHBarChart('Đòn bẩy D/E (tổng nợ / VCSH)',
+    sortedDE.map(d=>d.sym),
+    sortedDE.map(d=>d.de!=null?+d.de.toFixed(2):null),
+    null,Math.min(280,sortedDE.length*22+60),'de'));
+
+  // Chart 6: Doanh thu YoY
+  var sortedGr=valid.filter(d=>d.revGrowth!=null).sort((a,b)=>b.revGrowth-a.revGrowth);
+  grid.appendChild(makeHBarChart('Tăng trưởng doanh thu YoY (%)',
+    sortedGr.map(d=>d.sym),
+    sortedGr.map(d=>d.revGrowth!=null?+d.revGrowth.toFixed(1):null),
+    null,Math.min(280,sortedGr.length*22+60),'growth'));
+
+  sec.appendChild(grid);
+  m.appendChild(sec);
+}
+
+function makeBarChart(title,labels,datasets,height,unit){
+  var card=document.createElement('div');card.className='chart-card';
+  card.innerHTML='<div class="chart-card-title">'+title+'</div>';
+  var wrap=document.createElement('div');wrap.className='chart-wrap';wrap.style.height=(height||220)+'px';
+  var canvas=document.createElement('canvas');
+  wrap.appendChild(canvas);card.appendChild(wrap);
+  var colors=datasets.map(ds=>({...ds,backgroundColor:ds.color+'cc',borderColor:ds.color,borderWidth:1,borderRadius:3,borderSkipped:false}));
+  setTimeout(()=>new Chart(canvas,{
+    type:'bar',
+    data:{labels,datasets:colors},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{position:'top',labels:{boxWidth:10,font:{size:11}}},
+        tooltip:{callbacks:{label:c=>c.dataset.label+': '+(c.parsed.y!=null?c.parsed.y.toFixed(2):'—')+unit}}},
+      scales:{x:{ticks:{font:{size:10}},grid:{display:false}},
+              y:{ticks:{callback:v=>v+unit,font:{size:10}},grid:{color:'rgba(0,0,0,.05)'}}}}}),50);
+  return card;
+}
+
+function makeHBarChart(title,labels,values,color,height,mode){
+  var card=document.createElement('div');card.className='chart-card';
+  card.innerHTML='<div class="chart-card-title">'+title+'</div>';
+  var wrap=document.createElement('div');wrap.className='chart-wrap';wrap.style.height=(height||260)+'px';
+  var canvas=document.createElement('canvas');
+  wrap.appendChild(canvas);card.appendChild(wrap);
+  var colors=values.map(v=>{
+    if(mode==='de') return v>3?'#E24B4A':v>1.5?'#EF9F27':'#639922';
+    if(mode==='growth') return v>=0?'#1D9E75':'#E24B4A';
+    return color||'#1B4F8A';
+  });
+  setTimeout(()=>new Chart(canvas,{
+    type:'bar',
+    data:{labels,datasets:[{data:values,backgroundColor:colors,borderRadius:3,borderSkipped:false}]},
+    options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},
+        tooltip:{callbacks:{label:c=>c.parsed.x!=null?c.parsed.x.toFixed(2)+(mode==='growth'?'%':''):''}}},
+      scales:{x:{ticks:{font:{size:10}},grid:{color:'rgba(0,0,0,.05)'}},
+              y:{ticks:{font:{size:10}},grid:{display:false}}}}}),50);
+  return card;
+}
+
+// ─── BẢNG TỔNG HỢP ───────────────────────────────────────────────────────────
+function renderTable(m){
+  var sec=document.createElement('div');
+  sec.innerHTML='<div class="sec-hdr"><span class="sec-title">Bảng so sánh chi tiết</span><div class="sec-hdr-line"></div></div>';
+
+  // Tab switcher
+  var tabs=document.createElement('div');tabs.className='tabs';
+  [['ratio','Định giá & Sinh lời'],['leverage','Đòn bẩy & Thanh khoản'],['income','Kết quả KD'],['balance','Bảng CĐKT']].forEach(([k,l])=>{
+    var b=document.createElement('button');b.className='tab-btn'+(k===activeFin?' active':'');
+    b.textContent=l;b.onclick=()=>{activeFin=k;document.querySelectorAll('.tab-btn').forEach(x=>x.classList.remove('active'));b.classList.add('active');renderTableContent();};
+    tabs.appendChild(b);
+  });
+  sec.appendChild(tabs);
+
+  var tblCard=document.createElement('div');tblCard.className='tbl-card';tblCard.id='tblCard';
+  var tToolbar=document.createElement('div');tToolbar.className='tbl-toolbar';
+  tToolbar.innerHTML='<span class="tbl-title" id="tblTitle"></span><input class="search-box" placeholder="Tìm mã..." oninput="filterTable(this.value)" /><span class="sort-hint">Click tiêu đề cột để sắp xếp</span>';
+  tblCard.appendChild(tToolbar);
+  var scroll=document.createElement('div');scroll.className='tbl-scroll';scroll.id='tblScroll';
+  tblCard.appendChild(scroll);
+  sec.appendChild(tblCard);
+  m.appendChild(sec);
+  renderTableContent();
+}
+
+function filterTable(q){
+  var rows=document.querySelectorAll('#tblBody tr');
+  rows.forEach(r=>{r.style.display=r.textContent.toLowerCase().includes(q.toLowerCase())?'':'none';});
+}
+
+var COLS = {
+  ratio:[
+    {k:'sym',l:'Mã',w:60,fmt:v=>'<b>'+v+'</b>'},
+    {k:'name',l:'Tên công ty',w:180,fmt:v=>'<span style="font-size:11px">'+v+'</span>'},
+    {k:'marketCap',l:'Vốn hóa',w:100,r:true,fmt:v=>fB(v!=null?v*1e9:null),sort:'marketCap'},
+    {k:'pe',l:'P/E',w:70,r:true,fmt:v=>fN(v,1),sort:'pe',hilite:true},
+    {k:'pb',l:'P/B',w:70,r:true,fmt:v=>fN(v,2),sort:'pb',hilite:true},
+    {k:'ps',l:'P/S',w:70,r:true,fmt:v=>fN(v,2),sort:'ps'},
+    {k:'evEbitda',l:'EV/EBITDA',w:90,r:true,fmt:v=>fN(v,1),sort:'evEbitda'},
+    {k:'eps',l:'EPS (đ)',w:90,r:true,fmt:v=>v!=null?fN(v,0):'—',sort:'eps'},
+    {k:'bvps',l:'BVPS (đ)',w:90,r:true,fmt:v=>v!=null?fN(v,0):'—',sort:'bvps'},
+    {k:'roe',l:'ROE (%)',w:80,r:true,fmt:v=>fN(v,1),sort:'roe',hilite:true,up:true},
+    {k:'roa',l:'ROA (%)',w:80,r:true,fmt:v=>fN(v,1),sort:'roa',hilite:true,up:true},
+    {k:'grossMgn',l:'Biên gộp%',w:90,r:true,fmt:v=>fN(v,1),sort:'grossMgn',up:true},
+    {k:'netMgn',l:'Biên ròng%',w:90,r:true,fmt:v=>fN(v,1),sort:'netMgn',up:true},
+    {k:'divYield',l:'Cổ tức%',w:80,r:true,fmt:v=>fN(v,2),sort:'divYield'},
+    {k:'period',l:'Kỳ',w:70,fmt:v=>v},
+  ],
+  leverage:[
+    {k:'sym',l:'Mã',w:60,fmt:v=>'<b>'+v+'</b>'},
+    {k:'name',l:'Tên công ty',w:180,fmt:v=>'<span style="font-size:11px">'+v+'</span>'},
+    {k:'de',l:'D/E',w:75,r:true,fmt:v=>fN(v,2),sort:'de'},
+    {k:'leverage',l:'Đòn bẩy TC',w:90,r:true,fmt:v=>fN(v,2),sort:'leverage'},
+    {k:'stDebt',l:'Vay NH (tỷ)',w:100,r:true,fmt:v=>fB(v),sort:'stDebt'},
+    {k:'ltDebt',l:'Vay DH (tỷ)',w:100,r:true,fmt:v=>fB(v),sort:'ltDebt'},
+    {k:'equity',l:'VCSH (tỷ)',w:100,r:true,fmt:v=>fB(v),sort:'equity'},
+    {k:'cash',l:'Tiền mặt (tỷ)',w:110,r:true,fmt:v=>fB(v),sort:'cash'},
+    {k:'currentR',l:'Thanh toán HH',w:110,r:true,fmt:v=>fN(v,2),sort:'currentR',up:true},
+    {k:'quickR',l:'Thanh toán nhanh',w:130,r:true,fmt:v=>fN(v,2),sort:'quickR',up:true},
+    {k:'cashR',l:'Tỷ lệ tiền',w:90,r:true,fmt:v=>fN(v,2),sort:'cashR'},
+    {k:'period',l:'Kỳ',w:70,fmt:v=>v},
+  ],
+  income:[
+    {k:'sym',l:'Mã',w:60,fmt:v=>'<b>'+v+'</b>'},
+    {k:'name',l:'Tên công ty',w:180,fmt:v=>'<span style="font-size:11px">'+v+'</span>'},
+    {k:'revenue',l:'Doanh thu (tỷ)',w:130,r:true,fmt:v=>fB(v),sort:'revenue'},
+    {k:'revGrowth',l:'Tăng trưởng DT',w:130,r:true,fmt:v=>v!=null?fN(v,1)+'%':'—',sort:'revGrowth',pct:true},
+    {k:'grossProfit',l:'LN gộp (tỷ)',w:110,r:true,fmt:v=>fB(v),sort:'grossProfit'},
+    {k:'grossMgn',l:'Biên gộp%',w:90,r:true,fmt:v=>fN(v,1),sort:'grossMgn',up:true},
+    {k:'ebit',l:'EBIT (tỷ)',w:100,r:true,fmt:v=>fB(v),sort:'ebit'},
+    {k:'ebitMgn',l:'Biên EBIT%',w:90,r:true,fmt:v=>fN(v,1),sort:'ebitMgn'},
+    {k:'netProfit',l:'LNST (tỷ)',w:100,r:true,fmt:v=>fB(v),sort:'netProfit'},
+    {k:'netMgn',l:'Biên ròng%',w:90,r:true,fmt:v=>fN(v,1),sort:'netMgn',up:true},
+    {k:'netGrowth',l:'Tăng trưởng LN',w:130,r:true,fmt:v=>v!=null?fN(v,1)+'%':'—',sort:'netGrowth',pct:true},
+    {k:'period',l:'Kỳ',w:70,fmt:v=>v},
+  ],
+  balance:[
+    {k:'sym',l:'Mã',w:60,fmt:v=>'<b>'+v+'</b>'},
+    {k:'name',l:'Tên công ty',w:180,fmt:v=>'<span style="font-size:11px">'+v+'</span>'},
+    {k:'totalAsset',l:'Tổng TS (tỷ)',w:120,r:true,fmt:v=>fB(v),sort:'totalAsset'},
+    {k:'equity',l:'VCSH (tỷ)',w:100,r:true,fmt:v=>fB(v),sort:'equity'},
+    {k:'cash',l:'Tiền mặt (tỷ)',w:110,r:true,fmt:v=>fB(v),sort:'cash'},
+    {k:'stDebt',l:'Vay NH (tỷ)',w:100,r:true,fmt:v=>fB(v),sort:'stDebt'},
+    {k:'ltDebt',l:'Vay DH (tỷ)',w:100,r:true,fmt:v=>fB(v),sort:'ltDebt'},
+    {k:'roic',l:'ROIC (%)',w:80,r:true,fmt:v=>fN(v,1),sort:'roic',up:true},
+    {k:'assetTO',l:'Vòng quay TS',w:110,r:true,fmt:v=>fN(v,2),sort:'assetTO'},
+    {k:'marketCap',l:'Vốn hóa (tỷ)',w:110,r:true,fmt:v=>fB(v!=null?v*1e9:null),sort:'marketCap'},
+    {k:'period',l:'Kỳ',w:70,fmt:v=>v},
+  ],
+};
+
+function renderTableContent(){
+  var cols=COLS[activeFin]||COLS.ratio;
+  var titles={ratio:'Định giá & Chỉ số sinh lời',leverage:'Đòn bẩy & Thanh khoản',income:'Kết quả kinh doanh',balance:'Bảng cân đối kế toán'};
+  var el=document.getElementById('tblTitle');
+  if(el) el.textContent=titles[activeFin]||'';
+
+  // Tim best/worst cho cac col so sanh
+  var bestWorst={};
+  cols.filter(c=>c.sort&&c.hilite).forEach(c=>{
+    var vals=allData.filter(d=>!d.err&&d[c.k]!=null).map(d=>d[c.k]);
+    if(!vals.length) return;
+    bestWorst[c.k]={best:c.up?Math.max(...vals):Math.min(...vals),worst:c.up?Math.min(...vals):Math.max(...vals)};
+  });
+
+  var sorted=allData.slice().sort((a,b)=>{
+    if(a.err&&!b.err) return 1; if(!a.err&&b.err) return -1;
+    var av=a[sortCol],bv=b[sortCol];
+    if(av==null&&bv==null)return 0;if(av==null)return 1;if(bv==null)return -1;
+    if(typeof av==='string') return sortAsc?av.localeCompare(bv,'vi'):bv.localeCompare(av,'vi');
+    return sortAsc?av-bv:bv-av;
+  });
+
+  var th=cols.map(c=>{
+    var isSorted=sortCol===c.k;
+    var icon=isSorted?(sortAsc?'↑':'↓'):'↕';
+    return '<th '+(c.r?'class="r"':'')+' style="width:'+c.w+'px;" '+(c.sort?'onclick="doSort(\''+c.sort+'\')"':'')+(isSorted?' class="r sorted"':'')+'>'+c.l+' <span class="sort-icon">'+icon+'</span></th>';
+  }).join('');
+
+  var tb=sorted.map((d,i)=>{
+    if(d.err) return '<tr><td><b>'+d.sym+'</b></td><td colspan="'+(cols.length-1)+'" style="color:#999;font-size:11px;">'+d.err+'</td></tr>';
+    var tds=cols.map(c=>{
+      var v=d[c.k];
+      var html=c.fmt?c.fmt(v):(v!=null?String(v):'—');
+      var cls=c.r?'r':'';
+      // Highlight best/worst
+      if(c.hilite&&bestWorst[c.k]&&v!=null){
+        if(v===bestWorst[c.k].best) cls+=' best';
+        else if(v===bestWorst[c.k].worst) cls+=' worst';
+      }
+      // Mau cho tang truong
+      if(c.pct&&v!=null) cls+=v>=0?' up':' dn';
+      return '<td class="'+cls+'">'+html+'</td>';
+    }).join('');
+    return '<tr>'+tds+'</tr>';
+  }).join('');
+
+  var scroll=document.getElementById('tblScroll');
+  if(scroll) scroll.innerHTML='<table><thead><tr>'+th+'</tr></thead><tbody id="tblBody">'+tb+'</tbody></table>';
+}
+
+function doSort(col){
+  if(sortCol===col) sortAsc=!sortAsc;
+  else {sortCol=col;sortAsc=false;}
+  renderTableContent();
+}
+
+// ─── EXPORT CSV ──────────────────────────────────────────────────────────────
+function exportCSV(){
+  var headers=['Mã','Tên','Vốn hóa (VND)','P/E','P/B','P/S','EV/EBITDA','EPS','BVPS','ROE%','ROA%','ROIC%','Biên gộp%','Biên ròng%','D/E','Thanh toán HH','Doanh thu (VND)','Tăng trưởng DT%','LNST (VND)','Tăng trưởng LN%','Tổng TS (VND)','VCSH (VND)','Tiền mặt','Vay NH (VND)','Kỳ'];
+  var rows=allData.filter(d=>!d.err).map(d=>[
+    d.sym,d.name,
+    d.marketCap!=null?d.marketCap*1e9:'',
+    d.pe!=null?d.pe.toFixed(2):'',d.pb!=null?d.pb.toFixed(2):'',
+    d.ps!=null?d.ps.toFixed(2):'',d.evEbitda!=null?d.evEbitda.toFixed(2):'',
+    d.eps!=null?d.eps.toFixed(0):'',d.bvps!=null?d.bvps.toFixed(0):'',
+    d.roe!=null?d.roe.toFixed(2):'',d.roa!=null?d.roa.toFixed(2):'',d.roic!=null?d.roic.toFixed(2):'',
+    d.grossMgn!=null?d.grossMgn.toFixed(2):'',d.netMgn!=null?d.netMgn.toFixed(2):'',
+    d.de!=null?d.de.toFixed(2):'',d.currentR!=null?d.currentR.toFixed(2):'',
+    d.revenue!=null?d.revenue:'',d.revGrowth!=null?d.revGrowth.toFixed(2):'',
+    d.netProfit!=null?d.netProfit:'',d.netGrowth!=null?d.netGrowth.toFixed(2):'',
+    d.totalAsset!=null?d.totalAsset:'',d.equity!=null?d.equity:'',
+    d.cash!=null?d.cash:'',d.stDebt!=null?d.stDebt:'',d.period
+  ]);
+  var csv=[headers,...rows].map(r=>r.map(c=>'"'+(c+'').replace(/"/g,'""')+'"').join(',')).join('\n');
+  var blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8;'});
+  var a=document.createElement('a');a.href=URL.createObjectURL(blob);
+  a.download='phan_tich_nganh_'+new Date().toISOString().slice(0,10)+'.csv';
+  a.click();
+}
+</script>
+</body>
+</html>
