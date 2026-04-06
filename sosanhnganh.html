@@ -138,7 +138,7 @@ td.worst{color:var(--red);}
   </select>
   <select id="periodSel">
     <option value="quarter">Quý gần nhất</option>
-    <option value="year">Năm gần nhất</option>
+    <option value="annual">Năm gần nhất</option>
   </select>
   <button class="load-btn" id="loadBtn" onclick="loadIndustry()">Phân tích</button>
   <button class="export-btn" id="exportBtn" onclick="exportCSV()">↓ Xuất CSV</button>
@@ -189,12 +189,36 @@ function onIndustryChange() {
 }
 
 // ─── FETCH ────────────────────────────────────────────────────────────────────
-async function apiFetch(path) {
-  var r = await fetch(API+path);
-  if(!r.ok) throw new Error('HTTP '+r.status);
-  var j = await r.json();
-  if(!j.success) throw new Error(j.error||'API error');
-  return j.data||[];
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+async function apiFetch(path, retries) {
+  if(retries === undefined) retries = 3;
+  for(var attempt = 0; attempt <= retries; attempt++) {
+    try {
+      var r = await fetch(API+path);
+      if(r.status === 429) {
+        var wait = 3000 * (attempt + 1);
+        document.getElementById('statusChip').textContent += ' (rate limit, chờ ' + (wait/1000) + 's...)';
+        await sleep(wait);
+        continue;
+      }
+      if(!r.ok) throw new Error('HTTP '+r.status);
+      var j = await r.json();
+      if(!j.success) {
+        if(j.detail && j.detail.error && j.detail.error.includes('429')) {
+          var wait = 3000 * (attempt + 1);
+          await sleep(wait);
+          continue;
+        }
+        throw new Error((j.error || (j.detail && j.detail.error) || 'API error'));
+      }
+      return j.data||[];
+    } catch(e) {
+      if(attempt === retries) throw e;
+      await sleep(2000);
+    }
+  }
+  return [];
 }
 
 function gv(obj,k,mul){
@@ -222,12 +246,16 @@ async function loadIndustry() {
     document.getElementById('statusChip').textContent='Đang tải '+sym+' ('+(i+1)+'/'+tickers.length+')...';
     document.getElementById('progBar').style.width=Math.round((i+1)/tickers.length*100)+'%';
     try {
-      var [ov,rat,inc,bal] = await Promise.all([
-        apiFetch('/api/stock/'+sym+'/overview'),
-        apiFetch('/api/stock/'+sym+'/ratio?period='+period).catch(()=>[]),
-        apiFetch('/api/stock/'+sym+'/income?period='+period).catch(()=>[]),
-        apiFetch('/api/stock/'+sym+'/balance-sheet?period='+period).catch(()=>[]),
-      ]);
+      // Sequential voi delay de tranh rate limit (4 calls/cong ty)
+      var ov  = await apiFetch('/api/stock/'+sym+'/overview').catch(()=>[]);
+      await sleep(600);
+      var rat = await apiFetch('/api/stock/'+sym+'/ratio?period='+period).catch(()=>[]);
+      await sleep(600);
+      var inc = await apiFetch('/api/stock/'+sym+'/income?period='+period).catch(()=>[]);
+      await sleep(600);
+      var bal = await apiFetch('/api/stock/'+sym+'/balance-sheet?period='+period).catch(()=>[]);
+      // Delay giua cac cong ty
+      if(i < tickers.length - 1) await sleep(800);
       var o=ov&&ov.length?ov[0]:{};
       var r0=rat&&rat.length?rat[0]:{};
       var i0=inc&&inc.length?inc[0]:{};
