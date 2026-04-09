@@ -137,8 +137,8 @@ td.worst{color:var(--red);}
     </optgroup>
   </select>
   <select id="periodSel">
-    <option value="quarter">Quý gần nhất</option>
-    <option value="annual">Năm gần nhất</option>
+    <option value="quarter">Quý gần nhất (Q4/2025)</option>
+    <option value="annual4">4 quý lũy kế (tổng hợp năm)</option>
   </select>
   <button class="load-btn" id="loadBtn" onclick="loadIndustry()">Phân tích</button>
   <button class="export-btn" id="exportBtn" onclick="exportCSV()">↓ Xuất CSV</button>
@@ -227,12 +227,51 @@ function gv(obj,k,mul){
   return isNaN(v)?null:(mul?v*mul:v);
 }
 
+// Cong cac chi tieu KQKD cua 4 quy
+function sumQuarters(quarters) {
+  if(!quarters||!quarters.length) return {};
+  var result = Object.assign({}, quarters[0]);
+  // Cac truong can cong lai (KQKD: doanh thu, loi nhuan...)
+  var SUM_FIELDS = [
+    'Revenue (Bn. VND)','Attribute to parent company (Bn. VND)',
+    'Financial Income','Interest Expenses','Sales','Sales deductions',
+    'Net Sales','Cost of Sales','Gross Profit','Financial Expenses',
+    'Selling Expenses','General & Admin Expenses','Operating Profit/Loss',
+    'Other income','Net other income/expenses','Profit before tax',
+    'Business income tax - current','Business income tax - deferred',
+    'Net Profit For the Year','Minority Interest','Attributable to parent company',
+    // Ngan hang
+    'Interest and Similar Income','Interest and Similar Expenses',
+    'Net Interest Income','Fees and Comission Income','Net Fee and Commission Income',
+    'Net gain (loss) from foreign currency and gold dealings',
+    // CF
+    'Net cash inflows/outflows from operating activities',
+    'Net Cash Flows from Investing Activities','Cash flows from financial activities',
+  ];
+  for(var i=1;i<quarters.length;i++){
+    SUM_FIELDS.forEach(function(f){
+      if(quarters[i][f]!=null && result[f]!=null) {
+        result[f] = (parseFloat(result[f])||0) + (parseFloat(quarters[i][f])||0);
+      }
+    });
+  }
+  // YoY growth: lay tu Q4 (bao cao ca nam)
+  var q4 = quarters.find(function(r){return r.lengthReport==4;}) || quarters[0];
+  result['Revenue YoY (%)'] = q4['Revenue YoY (%)'];
+  result['Attribute to parent company YoY (%)'] = q4['Attribute to parent company YoY (%)'];
+  result['yearReport'] = q4['yearReport'];
+  result['lengthReport'] = 0; // 0 = nam
+  return result;
+}
+
 async function loadIndustry() {
   var ind = document.getElementById('industrySel').value;
   if(!ind) return;
   var period = document.getElementById('periodSel').value;
+  var isAnnual = (period === 'annual4');
+  var apiPeriod = 'quarter'; // VCI chi co quarter
   var tickers = INDUSTRY_TICKERS[ind]||[];
-  if(!tickers.length){alert('Chưa có danh sách mã cho ngành này.');return;}
+  if(!tickers.length){alert('Chua co danh sach ma cho nganh nay.');return;}
 
   var btn = document.getElementById('loadBtn');
   btn.disabled = true;
@@ -243,25 +282,43 @@ async function loadIndustry() {
 
   for(var i=0;i<tickers.length;i++){
     var sym=tickers[i];
-    document.getElementById('statusChip').textContent='Đang tải '+sym+' ('+(i+1)+'/'+tickers.length+')...';
+    document.getElementById('statusChip').textContent='Dang tai '+sym+' ('+(i+1)+'/'+tickers.length+')...';
     document.getElementById('progBar').style.width=Math.round((i+1)/tickers.length*100)+'%';
     try {
-      // Sequential voi delay de tranh rate limit (4 calls/cong ty)
+      // Sequential voi delay de tranh rate limit
       var ov  = await apiFetch('/api/stock/'+sym+'/overview').catch(()=>[]);
       await sleep(600);
-      var rat = await apiFetch('/api/stock/'+sym+'/ratio?period='+period).catch(()=>[]);
+      var rat = await apiFetch('/api/stock/'+sym+'/ratio?period='+apiPeriod).catch(()=>[]);
       await sleep(600);
-      var inc = await apiFetch('/api/stock/'+sym+'/income?period='+period).catch(()=>[]);
+      var inc = await apiFetch('/api/stock/'+sym+'/income?period='+apiPeriod).catch(()=>[]);
       await sleep(600);
-      var bal = await apiFetch('/api/stock/'+sym+'/balance-sheet?period='+period).catch(()=>[]);
-      // Delay giua cac cong ty
+      var bal = await apiFetch('/api/stock/'+sym+'/balance-sheet?period='+apiPeriod).catch(()=>[]);
       if(i < tickers.length - 1) await sleep(800);
+
       var o=ov&&ov.length?ov[0]:{};
-      var r0=rat&&rat.length?rat[0]:{};
-      var i0=inc&&inc.length?inc[0]:{};
-      var b0=bal&&bal.length?bal[0]:{};
-      var yr=r0.Meta_yearReport||b0.yearReport||'';
-      var qr=r0.Meta_lengthReport||b0.lengthReport||'';
+
+      // Neu annual4: lay Q4 cho CDKT/Ratio, cong 4 quy cho KQKD
+      var r0, i0, b0, yr, qr, periodLabel;
+      if(isAnnual) {
+        // Ratio: lay Q4 (snapshot dinh gia cuoi nam)
+        var q4rat = (rat||[]).find(function(r){return r.Meta_lengthReport==4;}) || (rat&&rat.length?rat[0]:{});
+        r0 = q4rat;
+        yr = r0.Meta_yearReport||'';
+        periodLabel = 'Nam '+yr;
+        // CDKT: lay Q4 (so du cuoi nam)
+        var q4bal = (bal||[]).find(function(r){return r.lengthReport==4;}) || (bal&&bal.length?bal[0]:{});
+        b0 = q4bal;
+        // KQKD: cong 4 quy cung nam
+        var sameYrInc = (inc||[]).filter(function(r){return r.yearReport==yr;});
+        i0 = sumQuarters(sameYrInc);
+      } else {
+        r0=rat&&rat.length?rat[0]:{};
+        i0=inc&&inc.length?inc[0]:{};
+        b0=bal&&bal.length?bal[0]:{};
+        yr=r0.Meta_yearReport||b0.yearReport||'';
+        qr=r0.Meta_lengthReport||b0.lengthReport||'';
+        periodLabel = qr?'Q'+qr+'/'+yr:String(yr);
+      }
       allData.push({
         sym,
         name: o.company_name||o.short_name||sym,
@@ -307,7 +364,7 @@ async function loadIndustry() {
         stDebt:    gv(b0,'Short-term borrowings (Bn. VND)'),
         ltDebt:    gv(b0,'Long-term borrowings (Bn. VND)'),
         cash:      gv(b0,'Cash and cash equivalents (Bn. VND)'),
-        period: qr?'Q'+qr+'/'+yr:String(yr),
+        period: periodLabel||'',
         err: null,
       });
     } catch(e) {
